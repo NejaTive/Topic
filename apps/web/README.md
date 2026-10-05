@@ -4,11 +4,14 @@ Vue 3 SPA (Vite + TypeScript + Vue Router + Tailwind v4).
 
 - `src/pages/` — страницы маршрутов (PascalCase, суффикс `Page`)
 - `src/router/` — Vue Router (`createWebHistory`)
+- `src/components/ui/` — UI-Kit контролы (`AppButton`, `AppInput`; реэкспорт из `index.ts`)
 - `src/styles/` — `main.css` (Tailwind + шрифты) и `tokens.css` (`@theme` из `docs/design/tokens.json`)
 - `src/composables/` — composables (в т.ч. `useAppUpdate` для обновления SW)
 - `src/App.vue` — только `RouterView`
 - `src/main.ts` — точка входа (Vue Query + Pinia)
 - `public/icons/` — иконки PWA
+
+**UI-Kit:** `AppButton` (primary / secondary / ghost / danger-ghost; размеры `md` 44 и `sm` 32; `loading` блокирует клик) и `AppInput` (label, `v-model`, text/password/email, error снизу). Стили только через токены Tailwind (`tokens.css`); focus — `outline-focus-ring` (2px / offset 2px). Импорт: `import { AppButton, AppInput } from '@/components/ui'`. Временная витрина: `/dev/ui-kit`.
 
 **Данные:** server state — TanStack Vue Query (`src/query/client.ts`); клиентская сессия — Pinia `useSessionStore` (`src/stores/session.ts`, без персиста). Фабрики ключей запросов — `src/query/keys.ts` (пока только `health`).
 

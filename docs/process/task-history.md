@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Собрать UI-Kit: Button и Input
+
+- **YouGile:** FRO-6
+- **Итог:** `AppButton` (primary/secondary/ghost/danger-ghost; md 44 / sm 32; hover/focus/disabled; `loading` блокирует клик) и `AppInput` (label, `v-model`, text/password/email, error снизу); стили на Tailwind-токенах + `outline-focus-ring`; экспорт `@/components/ui`; витрина `/dev/ui-kit`; кратко в README.
+- **Репо:** `feat/FRO-6` / [PR #15](https://github.com/NejaTive/Topic/pull/15) / (merge в develop)
+- **Длительность:** реализация ~3 мин · ревью ~4 мин · всего ~7 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build`; HTTP `/dev/ui-kit` 200 + Vite-модули; CSS с `--color-focus-ring`/`--size-control-*`; browser MCP недоступен; Textarea/Chip/Storybook — out of scope.
+
 ### 06.10.2026 — Реализовать Auth API и cookie-сессию
 
 - **YouGile:** BAC-8
