@@ -14,6 +14,11 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
   const config = new DocumentBuilder()
     .setTitle('Topic API')
     .setVersion(apiPackageVersion())
+    .addCookieAuth('topic_session', {
+      type: 'apiKey',
+      in: 'cookie',
+      name: 'topic_session',
+    })
     .build();
 
   return SwaggerModule.createDocument(app, config);
