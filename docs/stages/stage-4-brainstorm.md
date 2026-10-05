@@ -101,6 +101,7 @@ Scaffold mono-repo (pnpm workspaces, `docker compose`) — тоже задачи
 
 - База фич: **`develop`** (владелец создаёт вручную).
 - Ветка: `feat/<ID>` от `develop` → commit/push → **PR → `develop`**.
+- Коммиты по задаче: `тип(ID): краткая суть`. В описании PR: ссылка на YouGile + краткий summary.
 - Ревьюер при OK: `task-history.md` → **commit** на feat → **merge** PR → **удалить** ветку → «Готово».
 - В `main` агенты не пушат.
 
