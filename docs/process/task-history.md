@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Подключить TanStack Vue Query и Pinia
+
+- **YouGile:** FRO-3
+- **Итог:** `@tanstack/vue-query` + `pinia` в `main.ts`; `QueryClient` (`retry: 1`, `refetchOnWindowFocus: false`) в `src/query/client.ts`; фабрики `queryKeys` (пока `health`); setup-стор `useSessionStore` (`user`/`status`/`setUser`/`clear`, без API и localStorage); README про разделение Query/Pinia/ключи.
+- **Репо:** `feat/FRO-3` / [PR #10](https://github.com/NejaTive/Topic/pull/10) / (merge в develop)
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+- **Заметки:** чеклист ревью в карточке YouGile; UI browser MCP не использовался — `typecheck`/`build`, HTTP `/` на Vite, проверка исходников AC/границ.
+
 ### 06.10.2026 — Подключить Tailwind v4, дизайн-токены и шрифты
 
 - **YouGile:** FRO-2
