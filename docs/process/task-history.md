@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Настроить ESLint и Prettier для монорепо
+
+- **YouGile:** BAC-6
+- **Итог:** Корневой ESLint 9+/10 flat config (`eslint.config.js`: `@eslint/js`, typescript-eslint recommended, eslint-plugin-vue, globals node/browser, `eslint-config-prettier` последним); Prettier отдельно (`.prettierrc.json` / `.prettierignore`); скрипты `lint`/`lint:fix`/`format`/`format:check`; `"type":"module"`; README «Линтинг и форматирование»; разовый format по коду.
+- **Репо:** `feat/BAC-6` / [PR #8](https://github.com/NejaTive/Topic/pull/8) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~3 мин · всего ~7 мин
+- **Заметки:** чеклист ревью в карточке YouGile; husky/CI/type-checked/tailwind-plugin — out of scope; комментарии в чат YouGile через MCP недоступны.
+
 ### 06.10.2026 — Создать Vue 3 SPA в apps/web
 
 - **YouGile:** FRO-1
