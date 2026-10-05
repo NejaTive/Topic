@@ -7,3 +7,25 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+/// Пользователь. `nick` хранится в lowercase — unique = case-insensitive.
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  nick         String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+}
+
+/// Opaque-сессия (tokenHash в БД; cookie с токеном — на уровне app).
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
