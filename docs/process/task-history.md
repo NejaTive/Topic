@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Подключить Tailwind v4, дизайн-токены и шрифты
+
+- **YouGile:** FRO-2
+- **Итог:** Tailwind v4 (`@tailwindcss/vite`) + `src/styles/main.css`/`tokens.css` (`@theme static` 1:1 из `docs/design/tokens.json`, сброс дефолтных `--color-*`/`--radius-*`); `--color-focus-ring` из stage-2; типографика `text-*` + `@utility text-overline`; self-host Onest Variable + JetBrains Mono 500; placeholder `/` для визуальной проверки токенов.
+- **Репо:** `feat/FRO-2` / [PR #9](https://github.com/NejaTive/Topic/pull/9) / (merge в develop)
+- **Длительность:** реализация ~3 мин · ревью ~6 мин · всего ~9 мин
+- **Заметки:** чеклист ревью в карточке YouGile; UI browser MCP недоступен — проверка через `typecheck`/`build`, HTTP `/`, собранный CSS (`--color-accent: #0f6b5c`, без CDN/googleapis, без `bg-red-500`/`rounded-full`); focus-ring отмечен в claim.
+
 ### 06.10.2026 — Настроить ESLint и Prettier для монорепо
 
 - **YouGile:** BAC-6
