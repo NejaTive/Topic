@@ -13,9 +13,11 @@ Vue 3 SPA (Vite + TypeScript + Vue Router + Tailwind v4).
 
 **UI-Kit:** `AppButton` (primary / secondary / ghost / danger-ghost; размеры `md` 44 и `sm` 32; `loading` блокирует клик) и `AppInput` (label, `v-model`, text/password/email, error снизу). Стили только через токены Tailwind (`tokens.css`); focus — `outline-focus-ring` (2px / offset 2px). Импорт: `import { AppButton, AppInput } from '@/components/ui'`. Временная витрина: `/dev/ui-kit`.
 
-**Данные:** server state — TanStack Vue Query (`src/query/client.ts`); клиентская сессия — Pinia `useSessionStore` (`src/stores/session.ts`, без персиста). Фабрики ключей запросов — `src/query/keys.ts` (пока только `health`).
+**Данные:** server state — TanStack Vue Query (`src/query/client.ts`); клиентская сессия — Pinia `useSessionStore` (`src/stores/session.ts`, без персиста): `unknown` → `guest` | `authed` через `GET /api/auth/me` при старте. Фабрики ключей — `src/query/keys.ts` (`health`, `auth.me`). Auth mutations: `useRegisterMutation` / `useLoginMutation` / `useLogoutMutation`; query — `useMeQuery`.
 
-**API-клиент:** `openapi-fetch` + типы из `src/api/schema.d.ts` (`src/api/client.ts`, `credentials: 'include'`). После изменений контракта Nest: в корне `pnpm gen:api` и закоммитить обновлённый `schema.d.ts` (файл generated, не править вручную). Локально: `pnpm --filter web gen:api` (нужен свежий `apps/api/openapi.json`).
+**Router:** `guestOnly` (`/login`, `/register`) — authed → `/app/topics`; `requiresAuth` (`/app/*`) — guest → `/login?returnUrl=…`. `/app` → `/app/topics` (stub без nav dock).
+
+**API-клиент:** `openapi-fetch` + типы из `src/api/schema.d.ts` (`src/api/client.ts`, `credentials: 'include'`). Typed auth helpers — `src/api/auth.ts`. Базовый 401 → guest. После изменений контракта Nest: в корне `pnpm gen:api` и закоммитить обновлённый `schema.d.ts` (файл generated, не править вручную). Локально: `pnpm --filter web gen:api` (нужен свежий `apps/api/openapi.json`).
 
 **PWA:** `vite-plugin-pwa` — manifest + precache app-shell; API не кешируется (`navigateFallbackDenylist: [/^\/api\//]`, без `runtimeCaching`). Обновление SW — `registerType: 'prompt'` через `useAppUpdate()` (UI обновления пока нет). В `dev` SW выключен.
 
