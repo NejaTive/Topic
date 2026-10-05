@@ -19,6 +19,9 @@ coverage/
 # Generated API contract (intermediate)
 apps/api/openapi.json
 
+# Generated Prisma Client
+apps/api/src/generated/
+
 # Logs / OS / IDE
 *.log
 npm-debug.log*
