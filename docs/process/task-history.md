@@ -27,6 +27,13 @@
 
 ## Записи
 
+### 06.10.2026 — Поднять Postgres и MinIO через docker compose
+
+- **YouGile:** BAC-5
+- **Итог:** Корневой `compose.yaml` (Postgres 17 + MinIO + one-shot `minio-init` → бакет `topic-covers`), порты на `127.0.0.1`, дефолты `${VAR:-default}`; `.env.example`; скрипты `infra:up`/`down`/`reset`; раздел «Инфраструктура» в README. Образы `coollabsio/minio` + `pgsty/mc` вместо официальных `minio/*` (анонимный pull недоступен с осени 2026) — зафиксировано в compose/README.
+- **Репо:** `feat/BAC-5` / [PR #3](https://github.com/NejaTive/Topic/pull/3) / `484a634`
+- **Заметки:** api/Dockerfile/S3/политика бакета — out of scope; `.env` не создавался; комментарии в чат YouGile через MCP недоступны, чеклист ревью в карточке.
+
 ### 05.10.2026 — Создать Nest-приложение apps/api
 
 - **YouGile:** BAC-4
