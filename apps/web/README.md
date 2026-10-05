@@ -15,7 +15,7 @@ Vue 3 SPA (Vite + TypeScript + Vue Router + Tailwind v4).
 
 **Данные:** server state — TanStack Vue Query (`src/query/client.ts`); клиентская сессия — Pinia `useSessionStore` (`src/stores/session.ts`, без персиста): `unknown` → `guest` | `authed` через `GET /api/auth/me` при старте. Фабрики ключей — `src/query/keys.ts` (`health`, `auth.me`). Auth mutations: `useRegisterMutation` / `useLoginMutation` / `useLogoutMutation`; query — `useMeQuery`.
 
-**Router:** `guestOnly` (`/login`, `/register`) — authed → `/app/topics`; `requiresAuth` (`/app/*`) — guest → `/login?returnUrl=…`. `/app` → `/app/topics` (stub без nav dock).
+**Router:** `guestOnly` (`/`, `/login`, `/register`) — authed → `/app/topics`; `requiresAuth` (`/app/*`) — guest → `/login?returnUrl=…`. `/` — лендинг S00; `/app` → `/app/topics` (stub без nav dock).
 
 **API-клиент:** `openapi-fetch` + типы из `src/api/schema.d.ts` (`src/api/client.ts`, `credentials: 'include'`). Typed auth helpers — `src/api/auth.ts`. Базовый 401 → guest. После изменений контракта Nest: в корне `pnpm gen:api` и закоммитить обновлённый `schema.d.ts` (файл generated, не править вручную). Локально: `pnpm --filter web gen:api` (нужен свежий `apps/api/openapi.json`).
 

@@ -14,6 +14,7 @@ export const router = createRouter({
       path: '/',
       name: 'home',
       component: HomePage,
+      meta: { guestOnly: true },
     },
     {
       path: '/login',
