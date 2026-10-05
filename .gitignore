@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Build / cache
+dist/
+build/
+.turbo/
+.vite/
+*.tsbuildinfo
+coverage/
+.nyc_output/
+
+# Logs / OS / IDE
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Docker / local data
+*.pem
+docker-data/
+.minio/
+
+# Misc
+*.local
+.cache/
+
+# IDE
+.cursor/
