@@ -1,0 +1,16 @@
+{
+  "name": "topic",
+  "private": true,
+  "packageManager": "pnpm@9.14.2",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter \"./apps/*\" --if-present run dev",
+    "build": "pnpm -r --if-present run build",
+    "typecheck": "pnpm -r --if-present run typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
