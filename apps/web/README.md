@@ -12,6 +12,8 @@ Vue 3 SPA (Vite + TypeScript + Vue Router + Tailwind v4).
 
 **Данные:** server state — TanStack Vue Query (`src/query/client.ts`); клиентская сессия — Pinia `useSessionStore` (`src/stores/session.ts`, без персиста). Фабрики ключей запросов — `src/query/keys.ts` (пока только `health`).
 
+**API-клиент:** `openapi-fetch` + типы из `src/api/schema.d.ts` (`src/api/client.ts`, `credentials: 'include'`). После изменений контракта Nest: в корне `pnpm gen:api` и закоммитить обновлённый `schema.d.ts` (файл generated, не править вручную). Локально: `pnpm --filter web gen:api` (нужен свежий `apps/api/openapi.json`).
+
 **PWA:** `vite-plugin-pwa` — manifest + precache app-shell; API не кешируется (`navigateFallbackDenylist: [/^\/api\//]`, без `runtimeCaching`). Обновление SW — `registerType: 'prompt'` через `useAppUpdate()` (UI обновления пока нет). В `dev` SW выключен.
 
 **Иконки:** в `public/icons/` сейчас placeholder (плашка `#0F6B5C` + белая «T»: 192, 512, maskable 512). Финальный арт — позже.

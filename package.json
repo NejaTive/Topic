@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "infra:up": "docker compose up -d --wait postgres minio && docker compose up -d minio-init",
     "infra:down": "docker compose down",
-    "infra:reset": "docker compose down -v"
+    "infra:reset": "docker compose down -v",
+    "gen:api": "pnpm --filter api openapi:export && pnpm --filter web gen:api"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

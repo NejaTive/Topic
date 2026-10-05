@@ -34,6 +34,7 @@ pnpm --filter web dev  # после FRO-1: SPA на :5173
 | `pnpm infra:up`     | Поднять Postgres + MinIO (`--wait` для них, затем `minio-init`) |
 | `pnpm infra:down`   | Остановить контейнеры                                           |
 | `pnpm infra:reset`  | Остановить и удалить volumes                                    |
+| `pnpm gen:api`      | Экспорт OpenAPI → `apps/web/src/api/schema.d.ts` (закоммитить)  |
 
 ## Линтинг и форматирование
 
@@ -81,7 +82,8 @@ OpenAPI-спека генерируется из кода Nest (`@nestjs/swagger
 
 Образец описания эндпоинта — `GET /api/health` (DTO + `@ApiOkResponse` / `@ApiServiceUnavailableResponse`).
 
-Карточки Backend, которые меняют API: после правок контроллеров/DTO прогнать `pnpm gen:api` (команда появится в FRO-5) и закоммитить обновлённый `schema.d.ts` на фронте.
+**Изменили API → `pnpm gen:api` → закоммитить `apps/web/src/api/schema.d.ts`.**  
+Команда гоняет `openapi:export` в api, затем `openapi-typescript` во web. Сам `apps/api/openapi.json` в git не кладём.
 
 ## Структура
 
