@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Добавить модели User и Session в Prisma
+
+- **YouGile:** BAC-7
+- **Итог:** Prisma-модели `User` (uuid, email/nick unique, passwordHash, createdAt) и `Session` (tokenHash, expiresAt, FK userId Cascade + индекс); nick в lowercase для case-insensitive unique; миграция `add_user_session`; seed не добавлялся; кратко в `apps/api/README.md`.
+- **Репо:** `feat/BAC-7` / [PR #13](https://github.com/NejaTive/Topic/pull/13) / (merge в develop)
+- **Длительность:** реализация ~3 мин · ревью ~5 мин · всего ~8 мин
+- **Заметки:** чеклист ревью в карточке YouGile; clean migrate после DROP таблиц; `build` + `\d User/Session` (Cascade, unique nick/email).
+
 ### 06.10.2026 — Сгенерировать типизированный API-клиент и проверить связку web ↔ api
 
 - **YouGile:** FRO-5
