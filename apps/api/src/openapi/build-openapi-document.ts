@@ -1,11 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { type INestApplication } from '@nestjs/common';
-import {
-  DocumentBuilder,
-  type OpenAPIObject,
-  SwaggerModule,
-} from '@nestjs/swagger';
+import { DocumentBuilder, type OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 
 function apiPackageVersion(): string {
   const pkgPath = join(__dirname, '..', '..', 'package.json');

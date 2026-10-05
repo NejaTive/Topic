@@ -21,26 +21,41 @@ pnpm --filter web dev  # после FRO-1: SPA на :5173
 
 ## Скрипты (корень)
 
-| Команда | Назначение |
-|---------|------------|
-| `pnpm install` | Установить зависимости workspace |
-| `pnpm dev` | Параллельный `dev` в `apps/*` |
-| `pnpm build` | Сборка всех пакетов |
-| `pnpm typecheck` | Typecheck всех пакетов |
-| `pnpm infra:up` | Поднять Postgres + MinIO (`--wait` для них, затем `minio-init`) |
-| `pnpm infra:down` | Остановить контейнеры |
-| `pnpm infra:reset` | Остановить и удалить volumes |
+| Команда             | Назначение                                                      |
+| ------------------- | --------------------------------------------------------------- |
+| `pnpm install`      | Установить зависимости workspace                                |
+| `pnpm dev`          | Параллельный `dev` в `apps/*`                                   |
+| `pnpm build`        | Сборка всех пакетов                                             |
+| `pnpm typecheck`    | Typecheck всех пакетов                                          |
+| `pnpm lint`         | ESLint по монорепо                                              |
+| `pnpm lint:fix`     | ESLint с автофиксом                                             |
+| `pnpm format`       | Prettier — записать                                             |
+| `pnpm format:check` | Prettier — только проверка                                      |
+| `pnpm infra:up`     | Поднять Postgres + MinIO (`--wait` для них, затем `minio-init`) |
+| `pnpm infra:down`   | Остановить контейнеры                                           |
+| `pnpm infra:reset`  | Остановить и удалить volumes                                    |
+
+## Линтинг и форматирование
+
+Единый ESLint 9+ (flat config) и Prettier в корне покрывают `apps/api` и `apps/web`.
+
+```bash
+pnpm lint            # проверка
+pnpm lint:fix       # автофикс ESLint
+pnpm format          # Prettier write
+pnpm format:check    # Prettier check
+```
 
 ## Инфраструктура
 
 Локальный стек: Postgres 17 и MinIO (S3-совместимое хранилище обложек). Значения по умолчанию зашиты в `compose.yaml` (`${VAR:-default}`) — стек поднимается без `.env`. Переменные задокументированы в `.env.example`.
 
-| Сервис | Порт (localhost) | Креды (dev-only) |
-|--------|------------------|------------------|
-| Postgres | `5432` | user/password/db: `topic` / `topic` / `topic` |
-| MinIO API | `9000` | root: `minioadmin` / `minioadmin` |
-| MinIO Console | [http://127.0.0.1:9001](http://127.0.0.1:9001) | те же root-креды |
-| Бакет | — | `topic-covers` (создаёт `minio-init`) |
+| Сервис        | Порт (localhost)                               | Креды (dev-only)                              |
+| ------------- | ---------------------------------------------- | --------------------------------------------- |
+| Postgres      | `5432`                                         | user/password/db: `topic` / `topic` / `topic` |
+| MinIO API     | `9000`                                         | root: `minioadmin` / `minioadmin`             |
+| MinIO Console | [http://127.0.0.1:9001](http://127.0.0.1:9001) | те же root-креды                              |
+| Бакет         | —                                              | `topic-covers` (создаёт `minio-init`)         |
 
 ```bash
 pnpm infra:up
@@ -58,11 +73,11 @@ pnpm infra:reset   # остановить и сбросить данные
 
 OpenAPI-спека генерируется из кода Nest (`@nestjs/swagger`), без ручного дублирования схемы.
 
-| Что | Как |
-|-----|-----|
-| Swagger UI | `pnpm --filter api dev` → [http://localhost:3001/api/docs](http://localhost:3001/api/docs) |
-| JSON в рантайме | [http://localhost:3001/api/openapi.json](http://localhost:3001/api/openapi.json) |
-| Экспорт файла | `pnpm --filter api openapi:export` → `apps/api/openapi.json` (артефакт в `.gitignore`, БД и HTTP-сервер не нужны) |
+| Что             | Как                                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Swagger UI      | `pnpm --filter api dev` → [http://localhost:3001/api/docs](http://localhost:3001/api/docs)                        |
+| JSON в рантайме | [http://localhost:3001/api/openapi.json](http://localhost:3001/api/openapi.json)                                  |
+| Экспорт файла   | `pnpm --filter api openapi:export` → `apps/api/openapi.json` (артефакт в `.gitignore`, БД и HTTP-сервер не нужны) |
 
 Образец описания эндпоинта — `GET /api/health` (DTO + `@ApiOkResponse` / `@ApiServiceUnavailableResponse`).
 

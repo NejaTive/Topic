@@ -1,6 +1,7 @@
 {
   "name": "topic",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@9.14.2",
   "engines": {
     "node": ">=20"
@@ -9,11 +10,22 @@
     "dev": "pnpm -r --parallel --filter \"./apps/*\" --if-present run dev",
     "build": "pnpm -r --if-present run build",
     "typecheck": "pnpm -r --if-present run typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "infra:up": "docker compose up -d --wait postgres minio && docker compose up -d minio-init",
     "infra:down": "docker compose down",
     "infra:reset": "docker compose down -v"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.1"
   }
 }
