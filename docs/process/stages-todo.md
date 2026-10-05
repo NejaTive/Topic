@@ -32,7 +32,7 @@
 
 
 
-- **В работе:** 🗺️ **Этап 4** — YouGile + MCP + нарезка задач + agent-workflow ([`stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md); фаза **4d** — нарезка MVP)
+- **В работе:** 🗺️ **Этап 4** — YouGile + agent-workflow ([`stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md); **4e** ✅; дальше **4f** — реализация; нужен `develop`)
 
 - **Закрыто:** Этап 3 — стек (05.10.2026); Этап 2 — дизайн
 
@@ -84,7 +84,7 @@
 
 - 📄 [`../stages/stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md)
 
-- 4a docs ✅ · 4b MCP ✅ · 4c ✅ · 4d нарезка ⬜ · 4e rules/skill ⬜
+- 4a docs ✅ · 4b MCP ✅ · 4c ✅ · 4d нарезка ✅ · 4e rules/skill ✅ · 4f реализация ⬜
 
 
 

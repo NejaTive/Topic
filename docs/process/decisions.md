@@ -270,10 +270,10 @@
 Документ: [`stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md).
 
 - **Разделение SoT:** продукт и устойчивые решения — `docs/`; **задачи, статусы, AC исполнения** — **YouGile** (полный бэклог в markdown **не** зеркалим).
-- **История выполнения** задач с доски — текстовый лог [`docs/process/task-history.md`](task-history.md) (дописывать при «Готово» / согласованном «На проверке»).
+- **История выполнения** задач с доски — текстовый лог [`docs/process/task-history.md`](task-history.md) (пишет ревьюер при OK, до merge; см. 4e ниже).
 - **Структура репо (корень):** `docs/`, `apps/web/`, `apps/api/`; опционально `apps/web/docs`, `apps/api/docs`. Внутренняя архитектура приложений — через карточки YouGile, не заранее в stage-доках.
 - **YouGile:** компания создана; колонки/задачи — через **MCP** в отдельном чате. MCP: `https://yougile.com/data/ai/mcp`, `Authorization: Bearer …` — как на соседнем проекте; ключ **только локально**, не в репо.
-- **Agent-workflow** (детали rule/skill — фаза 4e): реализацию ведут **ИИ-агенты**. Поток: создание в **«Бэклог»** (вручную или агентом) → готовность → **«К работе»** → агент → **«В разработке»** → сдача → **«На проверке»** → проверка владельцем **или** агентом-ревьюером → **«Готово»**.
+- **Agent-workflow** — зафиксирован в фазе **4e** (см. ниже); канон в [`stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md).
 - Фаза **4a** (docs этапа 3/4 + task-history) — выполнена 05.10.2026; дальше **4b** — подключение MCP.
 
 ### YouGile — структура досок (4b–4c, старт)
@@ -302,8 +302,9 @@
 - Локальный `git` + remote — для push; MCP — issues/PR/repos из чата.
 - Remote: **https://github.com/NejaTive/Topic** (private); локальный `origin` — **SSH** (`git@github.com:NejaTive/Topic.git`).
 - Каталог **`.cursor/` целиком** — не в git (секреты MCP, локальные settings/rules для Cursor).
-- Сообщения **git commit** — на **русском**, формат `тип: суть` (`feat` / `fix` / `docs` / …); ветки — пока только **`main`**.
-- Правило агента: `.cursor/rules/collaboration/git.mdc` (always-apply); в `working-style.mdc` — ссылка + секрет-спросить.
+- Сообщения **git commit** — на **русском**, формат `тип: суть` (`feat` / `fix` / `docs` / …).
+- ~~Ветки — пока только `main`.~~ — **отменено 05.10.2026 (4e):** база фич — `develop`; см. блок «Этап 4e» ниже.
+- Правило агента: `.cursor/rules/collaboration/git.mdc` (always-apply); в `working-style.mdc` — ссылка + политика `.env`.
 
 ### Share — продуктовые уточнения (нарезка 4d)
 
@@ -318,4 +319,21 @@
 - S11 subtitle: **«Ссылка недоступна»** (title «Нет доступа»).
 - S12: «Не найдено» / «Битая ссылка или топик удалён».
 - GuestNav error-mode: Primary «На главную» → `/`; catch-all неизвестных URL → S12; Share 403→S11, 404→S12.
-- **Нарезка MVP-среза hi-fi (Scaffold → Auth → Topics → Share → Page Error) в YouGile — завершена** (фаза 4d). Дальше — 4e (rule/skill agent-workflow).
+- **Нарезка MVP-среза hi-fi (Scaffold → Auth → Topics → Share → Page Error) в YouGile — завершена** (фаза 4d).
+
+### Этап 4e — agent-workflow (✅ 05.10.2026)
+
+Канон: [`stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md) §Agent-workflow.  
+Артефакты: `.cursor/rules/collaboration/yougile-agent-workflow.mdc`; skills `yougile-planner` / `yougile-executor` / `yougile-reviewer`; обновлены `git.mdc`, `working-style.mdc`, `tech-stack.mdc`, `task-history.md`.
+
+- **Колонки:** Бэклог → К работе → В разработке → На проверке → Готово.
+- **Планировщик:** Бэклог → К работе только если зависимости в Готово и контракт готов.
+- **Исполнитель (оркестратор):** берёт только из «К работе»; claim → В разработке; один чат = одна задача; обе доски.
+- **Команда владельца:** «сделай задачу …» / «прогони пайплайн» → оркестратор доводит до Готово (или стопа).
+- **Ревью:** subagent с пустым контекстом (handoff-пакет); чеклист в YouGile + ручной прогон; стек поднимать если есть; автотесты в репо пока нет.
+- **Возврат:** На проверке → В разработке тому же оркестратору; цикл **макс. 3**.
+- **Git (пересмотр):** ~~commit/push только по запросу~~ и ~~только main~~ отменены для исполнения карточек. База — **`develop`** (владелец создаёт вручную); ветка `feat/<ID>`; PR → `develop`; ревьюер мержит и **удаляет** ветку; в `main` агенты не пушат.
+- **task-history:** пишет ревьюер при OK: запись → commit на feat → merge PR → Готово.
+- **`.env`:** локальные дефолты из `.env.example` без спроса; прод-секреты и коммит `.env` — спросить.
+- **Баги (`Errors=Bug`):** тот же флоу; отдельный приоритет не фиксируем (стикер на будущее).
+- **Отложено:** ревьюер пишет автотесты — [`docs/backlog/ideas.md`](../backlog/ideas.md).
