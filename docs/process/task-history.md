@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Подключить auth на фронте (клиент, store, guards)
+
+- **YouGile:** FRO-7
+- **Итог:** Typed auth helpers (`register`/`login`/`logout`/`me`) через `openapi-fetch` + `credentials: include`; `useMeQuery` → Pinia `unknown`→`guest`/`authed`; mutations; router `guestOnly`/`requiresAuth` + `returnUrl`; stub `/app/topics` («Мои топики», logout); базовый 401→guest.
+- **Репо:** `feat/FRO-7` / [PR #16](https://github.com/NejaTive/Topic/pull/16) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~8 мин · всего ~12 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`; smoke register/login/me/logout через Vite proxy; UI browser MCP недоступен — guards/stub по исходникам; schema после BAC-8 без diff.
+
 ### 06.10.2026 — Собрать UI-Kit: Button и Input
 
 - **YouGile:** FRO-6
