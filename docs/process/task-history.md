@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Создать Vue 3 SPA в apps/web
+
+- **YouGile:** FRO-1
+- **Итог:** Workspace-пакет `apps/web` (Vite + Vue 3 script setup + TS strict, tsconfig extends base + node-конфиг): Router `/` → HomePage «Topic», App только RouterView; alias `@→src`, proxy `/api→:3001`; скрипты `dev`/`build`(+typecheck)/`preview`/`typecheck`; `index.html` lang=ru; README с конвенциями; без boilerplate create-vue.
+- **Репо:** `feat/FRO-1` / [PR #7](https://github.com/NejaTive/Topic/pull/7) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~3 мин · всего ~7 мин
+- **Заметки:** чеклист ревью в карточке YouGile; Tailwind/Query/Pinia/PWA/API-клиент — FRO-2…5; UI browser MCP недоступен — Topic проверен через Vite-модуль HomePage + HTTP.
+
 ### 06.10.2026 — Подключить OpenAPI и экспорт спецификации
 
 - **YouGile:** BAC-2
