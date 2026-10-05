@@ -54,6 +54,20 @@ pnpm infra:reset   # остановить и сбросить данные
 
 Образы: `postgres:17-alpine`, `coollabsio/minio` и `pgsty/mc` (community-сборки MinIO CE — официальные `minio/minio` / `minio/mc` с осени 2026 не публикуются анонимно).
 
+## Контракт API
+
+OpenAPI-спека генерируется из кода Nest (`@nestjs/swagger`), без ручного дублирования схемы.
+
+| Что | Как |
+|-----|-----|
+| Swagger UI | `pnpm --filter api dev` → [http://localhost:3001/api/docs](http://localhost:3001/api/docs) |
+| JSON в рантайме | [http://localhost:3001/api/openapi.json](http://localhost:3001/api/openapi.json) |
+| Экспорт файла | `pnpm --filter api openapi:export` → `apps/api/openapi.json` (артефакт в `.gitignore`, БД и HTTP-сервер не нужны) |
+
+Образец описания эндпоинта — `GET /api/health` (DTO + `@ApiOkResponse` / `@ApiServiceUnavailableResponse`).
+
+Карточки Backend, которые меняют API: после правок контроллеров/DTO прогнать `pnpm gen:api` (команда появится в FRO-5) и закоммитить обновлённый `schema.d.ts` на фронте.
+
 ## Структура
 
 ```text
