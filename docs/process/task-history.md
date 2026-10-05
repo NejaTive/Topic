@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Подключить Prisma и эндпоинт GET /api/health
+
+- **YouGile:** BAC-3
+- **Итог:** Prisma 7.10 + `@prisma/adapter-pg` + dotenv: пустая schema без моделей, `prisma.config.ts`, глобальные PrismaModule/Service (lazy connect, `$disconnect` на shutdown), скрипты `db:generate`/`db:migrate`/`db:studio`, `prebuild` → generate; `GET /api/health` → 200 `{status:ok,db:up}` / 503 `{status:error,db:down}`; `DATABASE_URL` обязателен, в `.env.example` как дефолты compose BAC-5 (`topic`/`topic`).
+- **Репо:** `feat/BAC-3` / [PR #4](https://github.com/NejaTive/Topic/pull/4) / `53dedc0`
+- **Длительность:** реализация ~5 мин · ревью ~5 мин · всего ~10 мин
+- **Заметки:** пароль в AC-тексте (`topic_dev_password`) устарел — взяты дефолты compose BAC-5; моделей нет (по scope); комментарии в чат YouGile через MCP недоступны, чеклист ревью в карточке.
+
 ### 06.10.2026 — Поднять Postgres и MinIO через docker compose
 
 - **YouGile:** BAC-5
