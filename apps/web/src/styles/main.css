@@ -1,0 +1,10 @@
+@import '@fontsource-variable/onest/wght.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import 'tailwindcss';
+@import './tokens.css';
+
+@layer base {
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+  }
+}

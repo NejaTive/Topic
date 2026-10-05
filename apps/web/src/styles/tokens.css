@@ -1,0 +1,134 @@
+/*
+  Topic design tokens → Tailwind v4 @theme.
+  Источник значений: docs/design/tokens.json (вручную; генератор не нужен).
+  Имя --color-*: путь токена, ключ default опускается.
+*/
+
+/* static — все токены всегда в CSS (не tree-shake неиспользованных) */
+@theme static {
+  /* Сброс дефолтных палитры и радиусов Tailwind — в UI только токены Topic */
+  --color-*: initial;
+  --radius-*: initial;
+
+  /* color/* */
+  --color-bg: #f6f7f5;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #edf0ed;
+  --color-ink: #16201e;
+  --color-muted: #5b6865;
+  --color-subtle: #8a9693;
+  --color-line: #dde3e0;
+  --color-line-strong: #c3ccc8;
+  --color-accent: #0f6b5c;
+  --color-accent-hover: #0b574b;
+  --color-accent-soft: #e2f0ec;
+  --color-accent-soft-hover: #cfe6df;
+  --color-accent-on: #ffffff;
+  --color-danger: #b3342b;
+  --color-danger-soft: #fbeae8;
+  --color-warning: #8a5a00;
+  --color-warning-soft: #fbf1dc;
+  --color-warning-hover: #f0e0b8;
+  --color-info: #2f4a68;
+  --color-info-soft: #e8eef5;
+  --color-info-hover: #d4e0ef;
+  --color-rank: #16201e;
+  --color-rank-top: #0f6b5c;
+  /*
+    --color-focus-ring: нет в tokens.json.
+    Дефолт агента из docs/stages/stage-2-brainstorm.md (§ Colors Light): #0F6B5C, ring 2px, зазор 2px.
+  */
+  --color-focus-ring: #0f6b5c;
+
+  /* radius/* — sm/md/lg = 4/8/12px; pill не используем */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* shadow/float — единственная тень */
+  --shadow-float: 0px 4px 16px 0px #16201e14;
+
+  /* size/* — CSS-переменные контролов */
+  --size-control-md: 44px;
+  --size-control-sm: 32px;
+
+  /* font/family + системный fallback */
+  --font-sans: 'Onest Variable', 'Onest', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+
+  /* typography/* → утилиты text-* */
+  --text-display: 40px;
+  --text-display--line-height: 48px;
+  --text-display--letter-spacing: -0.8px;
+  --text-display--font-weight: 700;
+
+  --text-h1: 32px;
+  --text-h1--line-height: 40px;
+  --text-h1--letter-spacing: -0.5px;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 24px;
+  --text-h2--line-height: 32px;
+  --text-h2--letter-spacing: -0.3px;
+  --text-h2--font-weight: 600;
+
+  --text-h3: 20px;
+  --text-h3--line-height: 28px;
+  --text-h3--letter-spacing: 0px;
+  --text-h3--font-weight: 600;
+
+  --text-title: 17px;
+  --text-title--line-height: 24px;
+  --text-title--letter-spacing: 0px;
+  --text-title--font-weight: 600;
+
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-body--letter-spacing: 0px;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--letter-spacing: 0px;
+  --text-body-sm--font-weight: 400;
+
+  --text-label: 15px;
+  --text-label--line-height: 20px;
+  --text-label--letter-spacing: 0px;
+  --text-label--font-weight: 600;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--letter-spacing: 0px;
+  --text-caption--font-weight: 500;
+
+  --text-overline: 11px;
+  --text-overline--line-height: 16px;
+  --text-overline--letter-spacing: 0.66px;
+  --text-overline--font-weight: 600;
+
+  --text-rank-l: 28px;
+  --text-rank-l--line-height: 32px;
+  --text-rank-l--letter-spacing: 0px;
+  --text-rank-l--font-weight: 500;
+
+  --text-rank-m: 20px;
+  --text-rank-m--line-height: 24px;
+  --text-rank-m--letter-spacing: 0px;
+  --text-rank-m--font-weight: 500;
+
+  --text-rank-s: 14px;
+  --text-rank-s--line-height: 20px;
+  --text-rank-s--letter-spacing: 0px;
+  --text-rank-s--font-weight: 500;
+}
+
+/* overline: uppercase поверх theme text-overline */
+@utility text-overline {
+  font-size: var(--text-overline);
+  line-height: var(--text-overline--line-height);
+  letter-spacing: var(--text-overline--letter-spacing);
+  font-weight: var(--text-overline--font-weight);
+  text-transform: uppercase;
+}
