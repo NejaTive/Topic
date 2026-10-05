@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S00 — лендинг
+
+- **YouGile:** FRO-8
+- **Итог:** Лендинг S00 на `/` (M+D copy/layout): бренд Topic, value, CTA «Войти»/`AppButton` primary → `/login`, «Регистрация» secondary → `/register`; `guestOnly` → authed redirect `/app/topics`; TEMP health smoke с `/` убран.
+- **Репо:** `feat/FRO-8` / [PR #17](https://github.com/NejaTive/Topic/pull/17) / (merge в develop)
+- **Длительность:** реализация ~3 мин · ревью ~6 мин · всего ~9 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build`; HTTP `/` + login/register; auth register/me cookie; UI browser MCP / Figma channel недоступны — M+D и guards по исходникам; без app-nav.
+
 ### 06.10.2026 — Подключить auth на фронте (клиент, store, guards)
 
 - **YouGile:** FRO-7
