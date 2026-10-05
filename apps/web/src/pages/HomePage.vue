@@ -1,11 +1,20 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useHealthQuery } from '@/composables/useHealthQuery';
+
+const healthQuery = useHealthQuery();
+
+const apiStatusLabel = computed(() => {
+  if (healthQuery.isPending.value) return 'API: проверка…';
+  if (healthQuery.isSuccess.value) return 'API: ok';
+  return 'API: недоступен';
+});
+</script>
 
 <template>
   <main class="min-h-dvh p-8">
     <h1 class="text-display">Topic</h1>
-    <div class="mt-6 rounded-lg border border-line bg-surface p-4">
-      <p class="inline-block rounded-md bg-accent px-3 py-2 text-accent-on">accent</p>
-      <p class="mt-3 font-mono text-rank-m text-rank">01</p>
-    </div>
+    <!-- TEMP: заменит лендинг S00 -->
+    <p class="mt-4 font-mono text-rank-m text-rank">{{ apiStatusLabel }}</p>
   </main>
 </template>

@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сгенерировать типизированный API-клиент и проверить связку web ↔ api
+
+- **YouGile:** FRO-5
+- **Итог:** `openapi-typescript` + `openapi-fetch` в `apps/web`; корневой `pnpm gen:api` (export → `schema.d.ts`); закоммичен `apps/web/src/api/schema.d.ts` с баннером generated; `apiClient` (`credentials: include`, `baseUrl: ''`); `useHealthQuery` + TEMP-статус на `/`; README правило «изменили API → gen:api → коммит schema».
+- **Репо:** `feat/FRO-5` / [PR #12](https://github.com/NejaTive/Topic/pull/12) / (merge в develop)
+- **Длительность:** реализация ~6 мин · ревью ~6 мин · всего ~12 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build`; `gen:api` без diff schema; smoke `GET /api/health` напрямую и через Vite proxy; при API down proxy 500 (UI → «недоступен»); UI browser MCP недоступен.
+
 ### 06.10.2026 — Подключить PWA через vite-plugin-pwa
 
 - **YouGile:** FRO-4
