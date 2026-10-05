@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Подключить OpenAPI и экспорт спецификации
+
+- **YouGile:** BAC-2
+- **Итог:** `@nestjs/swagger`: Swagger UI `/api/docs`, JSON `/api/openapi.json` (title «Topic API», version из `apps/api/package.json`); Health DTO + `@ApiOkResponse`/`@ApiServiceUnavailableResponse`; общая `buildOpenApiDocument`/`setupOpenApi`; `openapi:export` без listen/БД; `openapi.json` в `.gitignore`; раздел «Контракт API» в README.
+- **Репо:** `feat/BAC-2` / [PR #6](https://github.com/NejaTive/Topic/pull/6) / (merge в develop)
+- **Длительность:** реализация ~3 мин · ревью ~5 мин · всего ~8 мин
+- **Заметки:** комментарии в чат YouGile через MCP недоступны (чеклист ревью в карточке); FRO-5 (`gen:api`) и security/cookie-auth — out of scope.
+
 ### 06.10.2026 — Подключить Prisma и эндпоинт GET /api/health
 
 - **YouGile:** BAC-3
