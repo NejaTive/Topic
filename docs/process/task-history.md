@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Реализовать Auth API и cookie-сессию
+
+- **YouGile:** BAC-8
+- **Итог:** REST Auth (`register`/`login`/`logout`/`me`): argon2, opaque cookie `topic_session` (httpOnly, SameSite=Lax, Path=/, Max-Age 30д), в БД SHA-256 hash токена; DTO + class-validator; 409 email/nick; AuthGuard + `@CurrentUser()`; OpenAPI cookie auth + `gen:api` → `schema.d.ts`.
+- **Репо:** `feat/BAC-8` / [PR #14](https://github.com/NejaTive/Topic/pull/14) / (merge в develop)
+- **Длительность:** реализация ~6 мин · ревью ~7 мин · всего ~13 мин
+- **Заметки:** чеклист ревью в карточке YouGile; typecheck + gen:api без diff; smoke curl/IWR; lint script в api нет.
+
 ### 06.10.2026 — Добавить модели User и Session в Prisma
 
 - **YouGile:** BAC-7
