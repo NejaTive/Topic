@@ -302,4 +302,20 @@
 - Локальный `git` + remote — для push; MCP — issues/PR/repos из чата.
 - Remote: **https://github.com/NejaTive/Topic** (private); локальный `origin` — **SSH** (`git@github.com:NejaTive/Topic.git`).
 - Каталог **`.cursor/` целиком** — не в git (секреты MCP, локальные settings/rules для Cursor).
-- Сообщения **git commit** — на **русском**.
+- Сообщения **git commit** — на **русском**, формат `тип: суть` (`feat` / `fix` / `docs` / …); ветки — пока только **`main`**.
+- Правило агента: `.cursor/rules/collaboration/git.mdc` (always-apply); в `working-style.mdc` — ссылка + секрет-спросить.
+
+### Share — продуктовые уточнения (нарезка 4d)
+
+- Guest chrome на S09: Primary **«Войти»** → `/login`; Ghost **«Присоединиться»** → `/` (орфография с «и»; в Figma опечатка «Присоедениться»).
+- Владелец на своём unlisted/public `/t/:shareId` остаётся на **S09** (preview как у гостя), без redirect на S05; CTA «Редактировать» на S09 не делаем в этом эпике.
+- Share API: **403** (private / недоступен) отдельно от **404** (нет / удалён) — под экраны S11 / S12.
+- Карточки YouGile: **BAC-13**, **FRO-18**, **FRO-19** (эпик Share); S11–S12 — эпик Page Error.
+
+### Page Error — нарезка 4d
+
+- Одна карточка **FRO-20** (S11 + S12); стикер **Page Error**.
+- S11 subtitle: **«Ссылка недоступна»** (title «Нет доступа»).
+- S12: «Не найдено» / «Битая ссылка или топик удалён».
+- GuestNav error-mode: Primary «На главную» → `/`; catch-all неизвестных URL → S12; Share 403→S11, 404→S12.
+- **Нарезка MVP-среза hi-fi (Scaffold → Auth → Topics → Share → Page Error) в YouGile — завершена** (фаза 4d). Дальше — 4e (rule/skill agent-workflow).
