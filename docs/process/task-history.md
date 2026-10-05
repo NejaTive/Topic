@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Подключить PWA через vite-plugin-pwa
+
+- **YouGile:** FRO-4
+- **Итог:** `vite-plugin-pwa` в `apps/web`: manifest Topic (lang ru, standalone, theme `#0F6B5C`, bg `#F6F7F5`); placeholder-иконки 192/512/maskable в `public/icons/`; Workbox precache app-shell, `navigateFallback: /index.html`, denylist `/^\/api\//`, без `runtimeCaching`; `registerType: prompt` + `useAppUpdate()`; SW в dev выключен; `theme-color` в `index.html`.
+- **Репо:** `feat/FRO-4` / [PR #11](https://github.com/NejaTive/Topic/pull/11) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~3 мин · всего ~7 мин
+- **Заметки:** чеклист ревью в карточке YouGile; проверка `typecheck`/`build`/`preview` (HTTP manifest/sw/icons); иконки `#0F6B5C` + «T»; UI browser MCP / Lighthouse Installable не гонялись — SW denylist и отсутствие runtimeCaching по сгенерированному `dist/sw.js`.
+
 ### 06.10.2026 — Подключить TanStack Vue Query и Pinia
 
 - **YouGile:** FRO-3
