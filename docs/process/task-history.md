@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Собрать GuestNav (M+D)
+
+- **YouGile:** FRO-18
+- **Итог:** `GuestNav`: floating dock (M bottom / D top / auto), бренд Topic→`/`, Primary «Войти»→`/login`, ghost «Присоединиться»→`/`; `ctaMode=error` и props override для S11/S12; экспорт из `@/components/ui`, витрина `/dev/ui-kit`, README.
+- **Репо:** `feat/FRO-18` / [PR #32](https://github.com/NejaTive/Topic/pull/32) / (merge в develop)
+- **Длительность:** реализация ~12 мин · ревью ~6 мин · всего ~18 мин
+- **Заметки:** чеклист ревью в task-history (чат YouGile MCP недоступен); smoke ui-kit: клики Войти/Присоединиться/На главную, `pnpm --filter web build`; M — 2 CTA по decisions (не 1 CTA Figma); wire S09/S11/S12 — out of scope.
+
 ### 06.10.2026 — Реализовать публичный Share API
 
 - **YouGile:** BAC-13
