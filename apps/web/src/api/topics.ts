@@ -87,3 +87,63 @@ export async function createTopic(body: {
 
   return data;
 }
+
+/** GET /api/topics/:id — деталь топика владельца (BAC-10). */
+export async function fetchTopic(id: string): Promise<TopicDetail> {
+  const { data, error, response } = await apiClient.GET('/api/topics/{id}', {
+    params: { path: { id } },
+  });
+  if (response.status === 401) {
+    throw new TopicsApiError('Требуется вход', 401);
+  }
+  if (response.status === 404) {
+    throw new TopicsApiError('Топик не найден', 404);
+  }
+  if (error || !data) {
+    throw new TopicsApiError('Не удалось загрузить топик', response.status);
+  }
+  return data;
+}
+
+/** PATCH /api/topics/:id — privacy / title (BAC-10). */
+export async function updateTopic(
+  id: string,
+  body: components['schemas']['UpdateTopicDto'],
+): Promise<TopicDetail> {
+  const { data, error, response } = await apiClient.PATCH('/api/topics/{id}', {
+    params: { path: { id } },
+    body,
+  });
+  if (response.status === 401) {
+    throw new TopicsApiError('Требуется вход', 401);
+  }
+  if (response.status === 404) {
+    throw new TopicsApiError('Топик не найден', 404);
+  }
+  if (response.status === 400 || response.status === 422) {
+    const messages = validationMessages(error);
+    const fields = mapCreateValidationFields(messages);
+    const fallback = messages[0] ?? 'Проверьте данные';
+    throw new TopicsApiError(fallback, response.status, undefined, fields);
+  }
+  if (error || !data) {
+    throw new TopicsApiError('Не удалось обновить топик', response.status);
+  }
+  return data;
+}
+
+/** DELETE /api/topics/:id → 204 (BAC-10). */
+export async function deleteTopic(id: string): Promise<void> {
+  const { error, response } = await apiClient.DELETE('/api/topics/{id}', {
+    params: { path: { id } },
+  });
+  if (response.status === 401) {
+    throw new TopicsApiError('Требуется вход', 401);
+  }
+  if (response.status === 404) {
+    throw new TopicsApiError('Топик не найден', 404);
+  }
+  if (response.status !== 204 && error) {
+    throw new TopicsApiError('Не удалось удалить топик', response.status);
+  }
+}
