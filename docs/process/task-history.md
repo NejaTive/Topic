@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S05 — редактор топика (без DnD)
+
+- **YouGile:** FRO-12
+- **Итог:** `/app/topics/:id` (S05) вместо stub: AppNav, back «← Мои топики», title, meta (PrivacyChip picker → PATCH; Unlisted M icon / D ghost copy `/t/:shareId`; Danger «Удалить топик» → DELETE → S03); inbox|ranked на RankRow (D 2 колонки); «В рейтинг» → POST rank end; CTA → stub S06; empty copy stage-1.
+- **Репо:** `feat/FRO-12` / [PR #28](https://github.com/NejaTive/Topic/pull/28) / (merge в develop)
+- **Длительность:** реализация ~5 мин · ревью ~16 мин · всего ~21 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build` web ок; smoke: login→S05 M+D, privacy PATCH, Unlisted copy UI (clipboard в MCP-браузере без permission — не баг продукта), rank end, empty/inbox-only copy, add→stub, 404, delete→S03; DnD — FRO-13; полный S06 — FRO-14.
+
 ### 06.10.2026 — Сверстать S04 — создание топика
 
 - **YouGile:** FRO-11
