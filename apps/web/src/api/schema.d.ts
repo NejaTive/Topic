@@ -117,6 +117,22 @@ export interface paths {
         patch: operations["TopicsController_update"];
         trace?: never;
     };
+    "/api/t/{shareId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ShareController_getByShareId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics/{topicId}/items": {
         parameters: {
             query?: never;
@@ -337,6 +353,41 @@ export interface components {
             title?: string;
             /** @enum {string} */
             privacy?: "private" | "unlisted" | "public";
+        };
+        ShareItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Dune 2 */
+            title: string;
+            /**
+             * @description Плотный 1…N по rankPosition
+             * @example 1
+             */
+            rankPosition: number;
+            /**
+             * @description Публичный URL обложки или null
+             * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
+             */
+            coverUrl?: string | null;
+        };
+        ShareTopicDto: {
+            /** @example Фильмы 2026 */
+            title: string;
+            /**
+             * @description unlisted | public (private → 403, в тело не попадает)
+             * @enum {string}
+             */
+            privacy: "private" | "unlisted" | "public";
+            /** @example alice */
+            ownerNick: string;
+            /** @description Только placement=ranked, порядок по rankPosition; inbox отсутствует */
+            items: components["schemas"]["ShareItemDto"][];
+        };
+        ForbiddenShareResponseDto: {
+            /** @example Топик недоступен */
+            message: string;
+            /** @example 403 */
+            statusCode: number;
         };
         ItemDto: {
             /** Format: uuid */
@@ -691,6 +742,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    ShareController_getByShareId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shareId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareTopicDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForbiddenShareResponseDto"];
                 };
             };
             404: {

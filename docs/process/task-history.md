@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Реализовать публичный Share API
+
+- **YouGile:** BAC-13
+- **Итог:** `GET /api/t/:shareId` без AuthGuard: `{ title, privacy, ownerNick, items }` только ranked по `rankPosition` (id, title, rankPosition, coverUrl); private → 403 (в т.ч. владелец); нет топика → 404; OpenAPI + `schema.d.ts` + README.
+- **Репо:** `feat/BAC-13` / [PR #31](https://github.com/NejaTive/Topic/pull/31) / (merge в develop)
+- **Длительность:** реализация ~5 мин · ревью ~6 мин · всего ~11 мин
+- **Заметки:** чеклист ревью в карточке YouGile; smoke: unlisted/public 200 без cookie без inbox, private 403 (noauth+owner), missing 404, `pnpm gen:api` без drift; OG/S10/S13/signed URL — out of scope.
+
 ### 06.10.2026 — Сверстать S06 и S07 — элемент
 
 - **YouGile:** FRO-14

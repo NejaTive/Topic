@@ -10,6 +10,8 @@ NestJS REST API (Prisma + Postgres).
 
 **Topics HTTP (владелец, cookie session):** `GET/POST /api/topics`, `GET/PATCH/DELETE /api/topics/:id`. Privacy default `unlisted`; `shareId` opaque unique, не меняется при PATCH privacy. Список: `id`, `title`, `privacy`, `updatedAt`, `previewCovers` (coverKey топ-3 ranked или `[]`).
 
+**Share HTTP (публичный, без cookie):** `GET /api/t/:shareId` → `{ title, privacy, ownerNick, items }` — только `placement=ranked` по `rankPosition`; у item: `id`, `title`, `rankPosition`, `coverUrl` nullable. Inbox не отдаём. `privacy=private` → **403** (в т.ч. для владельца по этому маршруту); нет / удалён → **404**. OG / signed URL — out of scope.
+
 **Items HTTP (владелец, cookie session):** под `/api/topics/:topicId/items`:
 - `GET` — `{ inbox, ranked }` (секции по placement);
 - `POST` — create → `unranked`;
