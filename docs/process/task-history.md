@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Реализовать Topics API
+
+- **YouGile:** BAC-10
+- **Итог:** REST CRUD `/api/topics` с AuthGuard: list (previewCovers топ-3 ranked), create (privacy default unlisted, opaque unique shareId), get/patch/delete только owner; PATCH title/privacy без смены shareId; DELETE Cascade items + порядок cover cleanup для BAC-11 (no-op); OpenAPI + `schema.d.ts`.
+- **Репо:** `feat/BAC-10` / [PR #21](https://github.com/NejaTive/Topic/pull/21) / (merge в develop)
+- **Длительность:** реализация ~3 мин · ревью ~5 мин · всего ~8 мин
+- **Заметки:** чеклист ревью в карточке YouGile; smoke cookie CRUD + 401/404/validation; cascade Item→Topic; previewCovers; без Items endpoints / public share / Follow.
+
 ### 06.10.2026 — Добавить модели Topic и Item в Prisma
 
 - **YouGile:** BAC-9
