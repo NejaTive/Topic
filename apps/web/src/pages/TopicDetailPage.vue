@@ -314,6 +314,13 @@ function goAddItem() {
   });
 }
 
+function goItem(itemId: string) {
+  void router.push({
+    name: 'app-topic-item-detail',
+    params: { id: topicId.value, itemId },
+  });
+}
+
 async function onLogout() {
   await logout.mutateAsync();
   await router.replace('/login');
@@ -517,6 +524,7 @@ function onRetry() {
                   :dragging="draggingId === item.id"
                   :title="item.title"
                   :cover-url="item.coverUrl ?? undefined"
+                  @click="goItem(item.id)"
                   @to-rank="onToRank(item.id)"
                   @drag-start="onInboxDragStart($event, item.id)"
                   @drag-end="onRowDragEnd"
@@ -575,6 +583,7 @@ function onRetry() {
                   :rank="item.rankPosition ?? undefined"
                   :title="item.title"
                   :cover-url="item.coverUrl ?? undefined"
+                  @click="goItem(item.id)"
                   @drag-start="onRankedDragStart($event, item.id)"
                   @drag-end="onRowDragEnd"
                 />

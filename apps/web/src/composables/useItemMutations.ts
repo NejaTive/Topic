@@ -1,0 +1,117 @@
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import {
+  createItem,
+  deleteItem,
+  deleteItemCover,
+  rankItem,
+  unrankItem,
+  updateItem,
+  uploadItemCover,
+  type CreateItemBody,
+  type ItemDto,
+  type UpdateItemBody,
+} from '@/api/items';
+import { queryKeys } from '@/query/keys';
+
+function invalidateTopicLists(queryClient: ReturnType<typeof useQueryClient>, topicId: string) {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.topics.items(topicId) });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.topics.list() });
+}
+
+/** POST create item → invalidate items + list. */
+export function useCreateItemMutation(topicId: () => string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: CreateItemBody) => createItem(topicId(), body),
+    onSuccess: (item: ItemDto) => {
+      const id = topicId();
+      queryClient.setQueryData(queryKeys.topics.item(id, item.id), item);
+      invalidateTopicLists(queryClient, id);
+    },
+  });
+}
+
+/** PATCH title. */
+export function useUpdateItemMutation(topicId: () => string, itemId: () => string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: UpdateItemBody) => updateItem(topicId(), itemId(), body),
+    onSuccess: (item: ItemDto) => {
+      const tid = topicId();
+      queryClient.setQueryData(queryKeys.topics.item(tid, item.id), item);
+      invalidateTopicLists(queryClient, tid);
+    },
+  });
+}
+
+/** DELETE item → back to S05. */
+export function useDeleteItemMutation(topicId: () => string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (itemId: string) => deleteItem(topicId(), itemId),
+    onSuccess: (_void, itemId) => {
+      const tid = topicId();
+      queryClient.removeQueries({ queryKey: queryKeys.topics.item(tid, itemId) });
+      invalidateTopicLists(queryClient, tid);
+    },
+  });
+}
+
+/** POST cover multipart. */
+export function useUploadItemCoverMutation(topicId: () => string, itemId: () => string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => uploadItemCover(topicId(), itemId(), file),
+    onSuccess: (item: ItemDto) => {
+      const tid = topicId();
+      queryClient.setQueryData(queryKeys.topics.item(tid, item.id), item);
+      invalidateTopicLists(queryClient, tid);
+    },
+  });
+}
+
+/** DELETE cover. */
+export function useDeleteItemCoverMutation(topicId: () => string, itemId: () => string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteItemCover(topicId(), itemId()),
+    onSuccess: (item: ItemDto) => {
+      const tid = topicId();
+      queryClient.setQueryData(queryKeys.topics.item(tid, item.id), item);
+      invalidateTopicLists(queryClient, tid);
+    },
+  });
+}
+
+/** POST rank — inbox → конец ranked (S07 / S05). */
+export function useRankItemOnDetailMutation(topicId: () => string, itemId: () => string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => rankItem(topicId(), itemId()),
+    onSuccess: (item: ItemDto) => {
+      const tid = topicId();
+      queryClient.setQueryData(queryKeys.topics.item(tid, item.id), item);
+      invalidateTopicLists(queryClient, tid);
+    },
+  });
+}
+
+/** POST unrank — ranked → inbox (S07). */
+export function useUnrankItemMutation(topicId: () => string, itemId: () => string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => unrankItem(topicId(), itemId()),
+    onSuccess: (item: ItemDto) => {
+      const tid = topicId();
+      queryClient.setQueryData(queryKeys.topics.item(tid, item.id), item);
+      invalidateTopicLists(queryClient, tid);
+    },
+  });
+}
