@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Добавить модели Topic и Item в Prisma
+
+- **YouGile:** BAC-9
+- **Итог:** Prisma-модели `Topic` (`shareId` unique, `ownerId`→User Cascade, `privacy` private|unlisted|public default unlisted) и `Item` (`topicId`→Topic Cascade, `coverKey` nullable, `placement` unranked|ranked, `rankPosition`); индексы `ownerId` и `(topicId, placement, rankPosition)`; миграция `add_topic_item`; README про placement и плотный rankPosition.
+- **Репо:** `feat/BAC-9` / [PR #20](https://github.com/NejaTive/Topic/pull/20) / (merge в develop)
+- **Длительность:** реализация ~3 мин · ревью ~5 мин · всего ~8 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `db:migrate` sync; `pnpm --filter api build`; таблицы/индексы/enums/FK CASCADE в Postgres; smoke cascade User→Topic→Item; без HTTP/MinIO/Follow/seed.
+
 ### 06.10.2026 — Сверстать S02 — регистрация
 
 - **YouGile:** FRO-10
