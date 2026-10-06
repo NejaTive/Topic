@@ -10,4 +10,7 @@ export const queryKeys = {
     item: (topicId: string, itemId: string) =>
       ['topics', 'item', topicId, itemId] as const,
   },
+  share: {
+    detail: (shareId: string) => ['share', 'detail', shareId] as const,
+  },
 };
