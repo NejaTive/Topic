@@ -133,6 +133,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/topics/{topicId}/items/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ItemsController_reorder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics/{topicId}/items/{itemId}": {
         parameters: {
             query?: never;
@@ -348,6 +364,16 @@ export interface components {
         CreateItemDto: {
             /** @example Dune 2 */
             title: string;
+        };
+        ReorderItemsDto: {
+            /**
+             * @description Полная перестановка id всех ranked-элементов топика (новый порядок = rankPosition 1…N). Inbox не участвует.
+             * @example [
+             *       "11111111-1111-4111-8111-111111111111",
+             *       "22222222-2222-4222-8222-222222222222"
+             *     ]
+             */
+            orderedItemIds: string[];
         };
         ItemNotFoundResponseDto: {
             /** @example Элемент не найден */
@@ -752,6 +778,54 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["NotFoundResponseDto"];
                 };
+            };
+        };
+    };
+    ItemsController_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderItemsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemListDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+            /** @description orderedItemIds не является полной перестановкой ranked id топика */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
