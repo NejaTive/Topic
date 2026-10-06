@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Собрать UI-Kit: Nav, Topic row, Privacy chip
+
+- **YouGile:** FRO-15
+- **Итог:** `AppNav` (floating dock bottom M / top D / auto, soft-well active, «Мои топики» + профиль/logout placeholder), `TopicRow` (title/meta/privacy, optional covers, hover), `PrivacyChip` (private|unlisted|public + `compact`); экспорт `@/components/ui`; витрина `/dev/ui-kit`; без баннера «Топик изменился».
+- **Репо:** `feat/FRO-15` / [PR #24](https://github.com/NejaTive/Topic/pull/24) / (merge в develop)
+- **Длительность:** реализация ~2 мин · ревью ~5 мин · всего ~7 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build`; smoke `/dev/ui-kit` (chips, TopicRow D/M, AppNav auto+inline); без Rank/Cover (FRO-16) и S03 (FRO-17).
+
 ### 06.10.2026 — Переупорядочить ranked одной транзакцией
 
 - **YouGile:** BAC-12
