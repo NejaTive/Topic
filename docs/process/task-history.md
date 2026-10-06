@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S11 и S12 — ошибки доступа/404
+
+- **YouGile:** FRO-20
+- **Итог:** Общий `ErrorStateView` + GuestNav `ctaMode=error`: S11 «Нет доступа» / S12 «Не найдено»; Share 403→`/share/no-access`, 404→`/share/not-found`; catch-all неизвестных URL → S12; stubs FRO-19 удалены.
+- **Репо:** `feat/FRO-20` / [PR #34](https://github.com/NejaTive/Topic/pull/34) / (merge в develop)
+- **Длительность:** реализация ~2 мин · ревью ~14 мин · всего ~16 мин
+- **Заметки:** чеклист ревью в карточке YouGile; smoke: private→S11, missing→S12, `/foo-bar-xyz`→S12, guest «На главную»→`/`, `/dev/ui-kit` ок; `pnpm --filter web build`; toast/global boundary/Flow E и Figma subtitle vs AC — out of scope.
+
 ### 06.10.2026 — Сверстать S09 — share-view
 
 - **YouGile:** FRO-19
