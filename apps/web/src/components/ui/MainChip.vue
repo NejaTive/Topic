@@ -9,9 +9,11 @@ withDefaults(
   defineProps<{
     label: string;
     selected?: boolean;
+    disabled?: boolean;
   }>(),
   {
     selected: false,
+    disabled: false,
   },
 );
 
@@ -23,13 +25,14 @@ const emit = defineEmits<{
 <template>
   <button
     type="button"
-    class="inline-flex h-8 items-center justify-center rounded-sm px-3 text-caption font-medium transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+    class="inline-flex h-8 items-center justify-center rounded-sm px-3 text-caption font-medium transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50"
     :class="
       selected
         ? 'bg-warning-hover text-warning'
-        : 'bg-warning-soft text-warning hover:bg-warning-hover'
+        : 'bg-warning-soft text-warning hover:enabled:bg-warning-hover'
     "
     :aria-pressed="selected"
+    :disabled="disabled"
     @click="emit('select', label)"
   >
     {{ label }}

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/pages/HomePage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
 import RegisterPage from '@/pages/RegisterPage.vue';
-import TopicCreateStubPage from '@/pages/TopicCreateStubPage.vue';
+import TopicCreatePage from '@/pages/TopicCreatePage.vue';
 import TopicDetailStubPage from '@/pages/TopicDetailStubPage.vue';
 import TopicsPage from '@/pages/TopicsPage.vue';
 import UiKitPage from '@/pages/UiKitPage.vue';
@@ -41,10 +41,9 @@ export const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      // TEMP until FRO-11 (S04)
       path: '/app/topics/new',
       name: 'app-topic-create',
-      component: TopicCreateStubPage,
+      component: TopicCreatePage,
       meta: { requiresAuth: true },
     },
     {
