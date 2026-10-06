@@ -4,6 +4,7 @@ import {
   AppButton,
   AppInput,
   AppNav,
+  GuestNav,
   CoverUpload,
   MainChip,
   MAIN_CHIP_LABELS,
@@ -206,6 +207,23 @@ function showCoverErrorDemo() {
           :covers="row.covers"
           compact-privacy
         />
+      </div>
+    </section>
+
+    <section class="mt-10 space-y-4">
+      <h2 class="text-title">GuestNav · S09 guest chrome</h2>
+      <p class="text-body-sm text-muted">
+        Floating dock: bottom (M) / top (D). Prop ctaMode error — Primary «На главную» без secondary
+        (S11/S12).
+      </p>
+      <div class="max-w-[390px] rounded-lg border border-line bg-bg p-3">
+        <GuestNav :fixed="false" placement="bottom" />
+      </div>
+      <div class="max-w-[840px] rounded-lg border border-line bg-bg p-3">
+        <GuestNav :fixed="false" placement="top" />
+      </div>
+      <div class="max-w-[390px] rounded-lg border border-line bg-bg p-3">
+        <GuestNav :fixed="false" placement="bottom" cta-mode="error" />
       </div>
     </section>
 
