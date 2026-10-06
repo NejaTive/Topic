@@ -1,9 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
-import { ItemPlacement, TopicPrivacy, type TopicPrivacy as TopicPrivacyType } from '../generated/prisma/enums';
+import {
+  ItemPlacement,
+  TopicPrivacy,
+  type TopicPrivacy as TopicPrivacyType,
+} from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import type { CreateTopicDto } from './dto/create-topic.dto';
+import type { ShareTopicDto } from './dto/share-topic-response.dto';
 import type { TopicDetailDto, TopicListItemDto } from './dto/topic-response.dto';
 import type { UpdateTopicDto } from './dto/update-topic.dto';
 import { createShareId } from './share-id';
@@ -92,6 +101,58 @@ export class TopicsService {
       data,
     });
     return this.toDetail(topic);
+  }
+
+  /**
+   * Публичный Share (S09): без auth.
+   * private → 403 (даже при угаданном shareId); нет топика → 404.
+   * В ответе только ranked (inbox не отдаём).
+   */
+  async getByShareId(shareId: string): Promise<ShareTopicDto> {
+    const topic = await this.prisma.topic.findUnique({
+      where: { shareId },
+      select: {
+        title: true,
+        privacy: true,
+        owner: { select: { nick: true } },
+        items: {
+          where: { placement: ItemPlacement.ranked },
+          orderBy: { rankPosition: 'asc' },
+          select: {
+            id: true,
+            title: true,
+            rankPosition: true,
+            coverKey: true,
+          },
+        },
+      },
+    });
+
+    if (!topic) {
+      throw new NotFoundException({
+        message: 'Топик не найден',
+        statusCode: 404,
+      });
+    }
+
+    if (topic.privacy === TopicPrivacy.private) {
+      throw new ForbiddenException({
+        message: 'Топик недоступен',
+        statusCode: 403,
+      });
+    }
+
+    return {
+      title: topic.title,
+      privacy: topic.privacy,
+      ownerNick: topic.owner.nick,
+      items: topic.items.map((item) => ({
+        id: item.id,
+        title: item.title,
+        rankPosition: item.rankPosition as number,
+        coverUrl: this.storage.coverUrl(item.coverKey),
+      })),
+    };
   }
 
   /**
