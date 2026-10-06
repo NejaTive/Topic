@@ -44,11 +44,13 @@ export function useLogoutMutation() {
     onSuccess: () => {
       session.clear();
       queryClient.setQueryData(queryKeys.auth.me(), null);
+      queryClient.removeQueries({ queryKey: queryKeys.topics.list() });
     },
     onError: () => {
       // Cookie могла истечь — локально всё равно guest.
       session.clear();
       queryClient.setQueryData(queryKeys.auth.me(), null);
+      queryClient.removeQueries({ queryKey: queryKeys.topics.list() });
     },
   });
 }
