@@ -85,6 +85,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TopicsController_list"];
+        put?: never;
+        post: operations["TopicsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/topics/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TopicsController_getOne"];
+        put?: never;
+        post?: never;
+        delete: operations["TopicsController_remove"];
+        options?: never;
+        head?: never;
+        patch: operations["TopicsController_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -152,6 +184,63 @@ export interface components {
             message: string;
             /** @example 401 */
             statusCode: number;
+        };
+        TopicListItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Фильмы 2026 */
+            title: string;
+            /** @enum {string} */
+            privacy: "private" | "unlisted" | "public";
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * @description coverKey топ-3 ranked по rankPosition (или пустой массив). Элемент null — ranked без обложки.
+             * @example [
+             *       "covers/abc.webp",
+             *       null
+             *     ]
+             */
+            previewCovers: (string | null)[];
+        };
+        CreateTopicDto: {
+            /** @example Фильмы 2026 */
+            title: string;
+            /**
+             * @description По умолчанию unlisted
+             * @default unlisted
+             * @enum {string}
+             */
+            privacy: "private" | "unlisted" | "public";
+        };
+        TopicDetailDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Opaque shareId; не меняется при PATCH privacy
+             * @example xY7k_mPq2RnVw8sZ
+             */
+            shareId: string;
+            /** @example Фильмы 2026 */
+            title: string;
+            /** @enum {string} */
+            privacy: "private" | "unlisted" | "public";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        NotFoundResponseDto: {
+            /** @example Топик не найден */
+            message: string;
+            /** @example 404 */
+            statusCode: number;
+        };
+        UpdateTopicDto: {
+            /** @example Фильмы 2026 */
+            title?: string;
+            /** @enum {string} */
+            privacy?: "private" | "unlisted" | "public";
         };
     };
     responses: never;
@@ -296,6 +385,177 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    TopicsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicListItemDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    TopicsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTopicDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicDetailDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    TopicsController_getOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicDetailDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    TopicsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    TopicsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTopicDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicDetailDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
                 };
             };
         };
