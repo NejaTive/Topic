@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S03 — мои топики
+
+- **YouGile:** FRO-17
+- **Итог:** `/app/topics` (S03) вместо auth-stub: `GET /api/topics` через Vue Query, `AppNav` + `TopicRow`/privacy, empty «Создайте первый топик» + CTA, FAB(M)/header CTA(D) → S04 stub, tap → S05 stub; loading/error; logout чистит topics cache; README.
+- **Репо:** `feat/FRO-17` / [PR #26](https://github.com/NejaTive/Topic/pull/26) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~6 мин · всего ~10 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `pnpm --filter web build`; smoke login→list, empty, CTA/FAB→`/new`, tap→`:id`, guest `returnUrl`, `/app`→topics; без S04/S05 экранов и S13.
+
 ### 06.10.2026 — Собрать UI-Kit: Rank row, Cover upload, Main chip
 
 - **YouGile:** FRO-16
