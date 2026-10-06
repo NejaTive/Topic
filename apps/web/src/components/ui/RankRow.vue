@@ -17,6 +17,10 @@ const props = withDefaults(
     dragging?: boolean;
     /** Enable HTML5 DnD: ranked — только с handle; inbox — со всей строки. */
     dragEnabled?: boolean;
+    /** ranked: показывать grip (S09 read-only — false). */
+    showDragHandle?: boolean;
+    /** S09: без клика по title. */
+    readonly?: boolean;
   }>(),
   {
     rank: undefined,
@@ -24,8 +28,16 @@ const props = withDefaults(
     mode: 'ranked',
     dragging: false,
     dragEnabled: false,
+    showDragHandle: undefined,
+    readonly: false,
   },
 );
+
+const showHandle = computed(() => {
+  if (props.mode !== 'ranked') return false;
+  if (props.showDragHandle === false) return false;
+  return true;
+});
 
 const emit = defineEmits<{
   toRank: [];
@@ -88,7 +100,7 @@ function onDragEnd(event: DragEvent) {
   >
     <!-- DnD handle (ranked only); drag starts from here when dragEnabled -->
     <span
-      v-if="mode === 'ranked'"
+      v-if="showHandle"
       class="flex w-5 shrink-0 justify-center text-subtle"
       :class="dragEnabled ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'"
       aria-hidden="true"
@@ -128,7 +140,14 @@ function onDragEnd(event: DragEvent) {
       />
     </div>
 
+    <span
+      v-if="readonly"
+      class="min-w-0 flex-1 truncate text-left text-title text-ink"
+    >
+      {{ title }}
+    </span>
     <button
+      v-else
       type="button"
       class="min-w-0 flex-1 truncate text-left text-title text-ink outline-none"
       @click="emit('click', $event)"

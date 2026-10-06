@@ -6,6 +6,9 @@ import LoginPage from '@/pages/LoginPage.vue';
 import RegisterPage from '@/pages/RegisterPage.vue';
 import TopicCreatePage from '@/pages/TopicCreatePage.vue';
 import TopicDetailPage from '@/pages/TopicDetailPage.vue';
+import ShareForbiddenStubPage from '@/pages/ShareForbiddenStubPage.vue';
+import ShareNotFoundStubPage from '@/pages/ShareNotFoundStubPage.vue';
+import ShareViewPage from '@/pages/ShareViewPage.vue';
 import TopicsPage from '@/pages/TopicsPage.vue';
 import UiKitPage from '@/pages/UiKitPage.vue';
 import { useSessionStore } from '@/stores/session';
@@ -31,6 +34,21 @@ export const router = createRouter({
       name: 'register',
       component: RegisterPage,
       meta: { guestOnly: true },
+    },
+    {
+      path: '/t/:shareId',
+      name: 'share-view',
+      component: ShareViewPage,
+    },
+    {
+      path: '/share/no-access',
+      name: 'share-forbidden',
+      component: ShareForbiddenStubPage,
+    },
+    {
+      path: '/share/not-found',
+      name: 'share-not-found',
+      component: ShareNotFoundStubPage,
     },
     {
       path: '/app',

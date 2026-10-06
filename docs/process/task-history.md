@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S09 — share-view
+
+- **YouGile:** FRO-19
+- **Итог:** `/t/:shareId` без `requiresAuth`: GuestNav + `@ownerNick` + title + PrivacyChip + read-only RankRow (без handle/DnD); empty «Пока нечего показать»; `useShareQuery` → BAC-13; 403→`/share/no-access`, 404→`/share/not-found` (stubs); владелец на своём share остаётся на S09.
+- **Репо:** `feat/FRO-19` / [PR #33](https://github.com/NejaTive/Topic/pull/33) / (merge в develop)
+- **Длительность:** реализация ~15 мин · ревью ~14 мин · всего ~29 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `pnpm --filter web build`; smoke: unlisted/public guest, empty copy, private→no-access, missing→not-found, owner logged-in без redirect S05/AppNav, GuestNav Войти→/login; hi-fi S11/S12, OG/S10/DnD/inbox, returnUrl on login — out of scope.
+
 ### 06.10.2026 — Собрать GuestNav (M+D)
 
 - **YouGile:** FRO-18
