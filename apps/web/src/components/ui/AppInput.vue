@@ -8,6 +8,8 @@ const props = withDefaults(
     label: string;
     type?: AppInputType;
     error?: string;
+    /** Error border without message (e.g. login 401 on email). */
+    invalid?: boolean;
     disabled?: boolean;
     placeholder?: string;
     autocomplete?: string;
@@ -16,6 +18,7 @@ const props = withDefaults(
   {
     type: 'text',
     error: '',
+    invalid: false,
     disabled: false,
     placeholder: '',
     autocomplete: undefined,
@@ -29,7 +32,7 @@ const autoId = useId();
 const inputId = computed(() => props.id ?? `app-input-${autoId}`);
 const errorId = computed(() => `${inputId.value}-error`);
 
-const hasError = computed(() => Boolean(props.error));
+const hasError = computed(() => Boolean(props.error) || props.invalid);
 const isFilled = computed(() => model.value.length > 0);
 
 const fieldClass = computed(() => {
@@ -71,10 +74,10 @@ const fieldClass = computed(() => {
       :placeholder="placeholder"
       :autocomplete="autocomplete"
       :aria-invalid="hasError || undefined"
-      :aria-describedby="hasError ? errorId : undefined"
+      :aria-describedby="error ? errorId : undefined"
       :class="fieldClass"
     />
-    <p v-if="hasError" :id="errorId" class="text-caption text-danger" role="alert">
+    <p v-if="error" :id="errorId" class="text-caption text-danger" role="alert">
       {{ error }}
     </p>
   </div>

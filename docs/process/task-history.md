@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S01 — вход
+
+- **YouGile:** FRO-9
+- **Итог:** Экран `/login` по Figma Auth S01 (карточка M 358 / D 440): «← Topic», Email/Пароль, ссылка «Регистрация» → `/register`, Primary «Войти»; submit → login → `/app/topics` или безопасный `returnUrl`; error UI 401 (email invalid + сообщение на пароле) и validation 400/422 по полям; `AppInput` prop `invalid`.
+- **Репо:** `feat/FRO-9` / [PR #18](https://github.com/NejaTive/Topic/pull/18) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~13 мин · всего ~17 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build`; API+Vite proxy smoke register/login/me + 401/400; guestOnly/`returnUrl` по исходникам; browser MCP / Figma channel недоступны — M+D по исходникам; без «Забыли пароль?»/OAuth/S03.
+
 ### 06.10.2026 — Сверстать S00 — лендинг
 
 - **YouGile:** FRO-8

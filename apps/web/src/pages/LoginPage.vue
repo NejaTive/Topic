@@ -11,10 +11,12 @@ const login = useLoginMutation();
 
 const email = ref('');
 const password = ref('');
-const formError = ref('');
+const fieldErrors = ref<{ email?: string; password?: string }>({});
+const emailInvalid = ref(false);
 
 const isSubmitting = computed(() => login.isPending.value);
 
+/** Same-origin path only; reject protocol-relative and absolute URLs. */
 function resolveReturnPath(): string {
   const raw = route.query.returnUrl;
   if (typeof raw !== 'string' || !raw.startsWith('/') || raw.startsWith('//')) {
@@ -23,46 +25,101 @@ function resolveReturnPath(): string {
   return raw;
 }
 
+function clearErrors() {
+  fieldErrors.value = {};
+  emailInvalid.value = false;
+}
+
+function applyAuthError(err: unknown) {
+  clearErrors();
+  if (!(err instanceof AuthApiError)) {
+    fieldErrors.value = { password: 'Не удалось войти' };
+    return;
+  }
+
+  if (err.status === 401) {
+    emailInvalid.value = true;
+    fieldErrors.value = { password: err.message || 'Неверный email или пароль' };
+    return;
+  }
+
+  if (err.status === 400 || err.status === 422) {
+    if (err.fields && Object.keys(err.fields).length > 0) {
+      fieldErrors.value = {
+        email: err.fields.email,
+        password: err.fields.password,
+      };
+      return;
+    }
+    if (err.field === 'email' || err.field === 'password') {
+      fieldErrors.value = { [err.field]: err.message };
+      return;
+    }
+    fieldErrors.value = { password: err.message || 'Проверьте данные формы' };
+    return;
+  }
+
+  fieldErrors.value = { password: err.message || 'Не удалось войти' };
+}
+
 async function onSubmit() {
-  formError.value = '';
+  clearErrors();
   try {
     await login.mutateAsync({ email: email.value, password: password.value });
     await router.replace(resolveReturnPath());
   } catch (err) {
-    formError.value = err instanceof AuthApiError ? err.message : 'Не удалось войти';
+    applyAuthError(err);
   }
 }
 </script>
 
 <template>
-  <main class="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-8">
-    <div>
-      <h1 class="text-title">Вход</h1>
-      <p class="mt-2 text-body text-muted">Войдите, чтобы открыть свои топики.</p>
+  <main class="flex min-h-dvh items-center justify-center bg-bg px-4 py-8">
+    <div
+      class="flex w-full max-w-[358px] flex-col gap-3 rounded-lg border border-line bg-surface px-[25px] py-[29px] md:max-w-[440px]"
+    >
+      <RouterLink
+        to="/"
+        class="w-fit text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+      >
+        ← Topic
+      </RouterLink>
+
+      <h1 class="text-h1 text-ink">Вход</h1>
+
+      <form class="flex flex-col gap-3" @submit.prevent="onSubmit">
+        <AppInput
+          v-model="email"
+          label="Email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          :error="fieldErrors.email"
+          :invalid="emailInvalid"
+          :disabled="isSubmitting"
+        />
+        <AppInput
+          v-model="password"
+          label="Пароль"
+          type="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          :error="fieldErrors.password"
+          :disabled="isSubmitting"
+        />
+
+        <p class="text-label font-semibold text-muted">
+          Нет аккаунта?
+          <RouterLink
+            class="outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+            to="/register"
+          >
+            Регистрация
+          </RouterLink>
+        </p>
+
+        <AppButton type="submit" :loading="isSubmitting" class="w-full">Войти</AppButton>
+      </form>
     </div>
-
-    <form class="flex flex-col gap-4" @submit.prevent="onSubmit">
-      <AppInput
-        v-model="email"
-        label="Email"
-        type="email"
-        autocomplete="email"
-        :disabled="isSubmitting"
-      />
-      <AppInput
-        v-model="password"
-        label="Пароль"
-        type="password"
-        autocomplete="current-password"
-        :disabled="isSubmitting"
-      />
-      <p v-if="formError" class="text-caption text-danger" role="alert">{{ formError }}</p>
-      <AppButton type="submit" :loading="isSubmitting" class="w-full">Войти</AppButton>
-    </form>
-
-    <p class="text-body-sm text-muted">
-      Нет аккаунта?
-      <RouterLink class="text-accent font-semibold" to="/register">Зарегистрироваться</RouterLink>
-    </p>
   </main>
 </template>

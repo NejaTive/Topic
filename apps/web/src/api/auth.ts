@@ -5,15 +5,40 @@ export type AuthUser = components['schemas']['UserResponseDto'];
 export type RegisterBody = components['schemas']['RegisterDto'];
 export type LoginBody = components['schemas']['LoginDto'];
 
+export type AuthErrorField = 'email' | 'nick' | 'password';
+
 export class AuthApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
-    readonly field?: 'email' | 'nick',
+    readonly field?: AuthErrorField,
+    readonly fields?: Partial<Record<AuthErrorField, string>>,
   ) {
     super(message);
     this.name = 'AuthApiError';
   }
+}
+
+function validationMessages(error: unknown): string[] {
+  if (!error || typeof error !== 'object') return [];
+  const message = (error as { message?: unknown }).message;
+  if (typeof message === 'string') return [message];
+  if (Array.isArray(message)) {
+    return message.filter((item): item is string => typeof item === 'string');
+  }
+  return [];
+}
+
+function mapLoginValidationFields(
+  messages: string[],
+): Partial<Record<'email' | 'password', string>> {
+  const fields: Partial<Record<'email' | 'password', string>> = {};
+  for (const msg of messages) {
+    const lower = msg.toLowerCase();
+    if (lower.includes('email') && !fields.email) fields.email = msg;
+    else if (lower.includes('password') && !fields.password) fields.password = msg;
+  }
+  return fields;
 }
 
 export async function fetchMe(): Promise<AuthUser | null> {
@@ -43,6 +68,12 @@ export async function loginUser(body: LoginBody): Promise<AuthUser> {
         ? String((error as { message: string }).message)
         : 'Неверный email или пароль';
     throw new AuthApiError(message, 401);
+  }
+  if (response.status === 400 || response.status === 422) {
+    const messages = validationMessages(error);
+    const fields = mapLoginValidationFields(messages);
+    const fallback = messages[0] ?? 'Проверьте данные формы';
+    throw new AuthApiError(fallback, response.status, undefined, fields);
   }
   if (error || !data) {
     throw new AuthApiError('Не удалось войти', response.status);
