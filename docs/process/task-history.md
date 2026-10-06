@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S02 — регистрация
+
+- **YouGile:** FRO-10
+- **Итог:** Экран `/register` по Figma Auth S02 (карточка M 358 / D 440): «← Topic», Email/Ник/Пароль, ссылка «Войти» → `/login`, Primary «Зарегистрироваться»; submit → register → `/app/topics`; error UI 409 nick/email и validation 400/422 через `mapRegisterValidationFields`; `guestOnly` в router.
+- **Репо:** `feat/FRO-10` / [PR #19](https://github.com/NejaTive/Topic/pull/19) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~5 мин · всего ~9 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build`; API+Vite proxy smoke register/me + 409 nick/email + 400 nick/password; guestOnly/`← Topic`/`Войти` по исходникам; browser MCP недоступен — M+D по исходникам (как S01); без captcha/social/S03.
+
 ### 06.10.2026 — Сверстать S01 — вход
 
 - **YouGile:** FRO-9
