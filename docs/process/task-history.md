@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S06 и S07 — элемент
+
+- **YouGile:** FRO-14
+- **Итог:** Экраны S06 (`/items/new`) и S07 (`/items/:itemId`) с `requiresAuth`: create + optional cover → S05; edit title/cover, meta «Добавлен» + placement, rank/unrank (BAC-11), Сохранить/Удалить; RankRow → S07; CoverUpload ошибки 5 МБ/тип; без consumedAt/DnD/Share.
+- **Репо:** `feat/FRO-14` / [PR #30](https://github.com/NejaTive/Topic/pull/30) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~5 мин · всего ~9 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build` web ок; smoke: guest `returnUrl`, S05→add→inbox→S07→rank→ranked, edit/save, unrank, delete→S05, cover >5МБ client + тип server error state; cover fail after create → redirect S07 (handoff).
+
 ### 06.10.2026 — Добавить DnD ранга на S05
 
 - **YouGile:** FRO-13
