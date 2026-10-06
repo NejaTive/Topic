@@ -56,7 +56,7 @@ pnpm format:check    # Prettier check
 | Postgres      | `5432`                                         | user/password/db: `topic` / `topic` / `topic` |
 | MinIO API     | `9000`                                         | root: `minioadmin` / `minioadmin`             |
 | MinIO Console | [http://127.0.0.1:9001](http://127.0.0.1:9001) | те же root-креды                              |
-| Бакет         | —                                              | `topic-covers` (создаёт `minio-init`)         |
+| Бакет         | —                                              | `topic-covers` (`minio-init`: create + anonymous download) |
 
 ```bash
 pnpm infra:up
