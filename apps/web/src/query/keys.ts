@@ -5,5 +5,7 @@ export const queryKeys = {
   },
   topics: {
     list: () => ['topics', 'list'] as const,
+    detail: (id: string) => ['topics', 'detail', id] as const,
+    items: (id: string) => ['topics', 'items', id] as const,
   },
 };

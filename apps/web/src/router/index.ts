@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/pages/HomePage.vue';
+import ItemCreateStubPage from '@/pages/ItemCreateStubPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
 import RegisterPage from '@/pages/RegisterPage.vue';
 import TopicCreatePage from '@/pages/TopicCreatePage.vue';
-import TopicDetailStubPage from '@/pages/TopicDetailStubPage.vue';
+import TopicDetailPage from '@/pages/TopicDetailPage.vue';
 import TopicsPage from '@/pages/TopicsPage.vue';
 import UiKitPage from '@/pages/UiKitPage.vue';
 import { useSessionStore } from '@/stores/session';
@@ -47,10 +48,16 @@ export const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      // TEMP until FRO-12 (S05)
+      // TEMP until FRO-14 (S06)
+      path: '/app/topics/:id/items/new',
+      name: 'app-topic-item-create',
+      component: ItemCreateStubPage,
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/app/topics/:id',
       name: 'app-topic-detail',
-      component: TopicDetailStubPage,
+      component: TopicDetailPage,
       meta: { requiresAuth: true },
     },
     {
