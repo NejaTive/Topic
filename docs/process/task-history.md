@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Реализовать Items API и загрузку обложек
+
+- **YouGile:** BAC-11
+- **Итог:** Owner-only Items CRUD `/api/topics/:topicId/items` (inbox + ranked), create → unranked; rank/unrank с плотным `rankPosition`; cover multipart ≤5 МБ (magic-MIME → sharp webp → MinIO), replace/DELETE чистят объект; `coverUrl` path-style в README; DELETE топика чистит covers; OpenAPI + `schema.d.ts`; fix runtime `multer`.
+- **Репо:** `feat/BAC-11` / [PR #22](https://github.com/NejaTive/Topic/pull/22) / (merge в develop)
+- **Длительность:** реализация ~8 мин · ревью ~11 мин · всего ~19 мин
+- **Заметки:** чеклист ревью в карточке YouGile (цикл 2/3); smoke: multer start + Items routes, CRUD/rank/unrank, cover→MinIO, replace удаляет старый ключ, bad MIME 400 / >5MB 413, чужой topic 404, DELETE topic чистит S3; без mid-list reorder / signed URL / share.
+
 ### 06.10.2026 — Реализовать Topics API
 
 - **YouGile:** BAC-10
