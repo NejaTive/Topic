@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Сверстать S04 — создание топика
+
+- **YouGile:** FRO-11
+- **Итог:** `/app/topics/new` (S04) вместо stub: AppNav, title + MainChip (текст без presetKey), PrivacyChip selector (default unlisted — поле не шлётся, пока не трогали), `useCreateTopicMutation` → POST `/api/topics` → redirect `/app/topics/:id`; ошибки валидации API на поля; README.
+- **Репо:** `feat/FRO-11` / [PR #27](https://github.com/NejaTive/Topic/pull/27) / (merge в develop)
+- **Длительность:** реализация ~2 мин · ревью ~5 мин · всего ~7 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `pnpm --filter web build`; smoke: guest `returnUrl`, chip «Фильмы», create→unlisted + S05 stub, privacy touched→private, empty title client, title>200 API field error; без категорий/S03.
+
 ### 06.10.2026 — Сверстать S03 — мои топики
 
 - **YouGile:** FRO-17
