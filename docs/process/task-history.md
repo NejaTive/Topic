@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Добавить DnD ранга на S05
+
+- **YouGile:** FRO-13
+- **Итог:** Нативный HTML5 DnD на S05: ranked reorder через handle (`shadow-float`), POST `/items/reorder` (BAC-12) с optimistic UI + rollback; inbox→ranked в конец (BAC-11), без mid-insert/S08/↑↓; `RankRow.dragEnabled`.
+- **Репо:** `feat/FRO-13` / [PR #29](https://github.com/NejaTive/Topic/pull/29) / (merge в develop)
+- **Длительность:** реализация ~4 мин · ревью ~13 мин · всего ~17 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build` web ок; smoke: 5 ranked drag 1→3 + persist reload/API; inbox drop → конец; drag без handle не стартует; ошибка reorder → rollback + «Не удалось сохранить порядок»; без DnD-библиотек.
+
 ### 06.10.2026 — Сверстать S05 — редактор топика (без DnD)
 
 - **YouGile:** FRO-12
