@@ -1,11 +1,57 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { AppButton, AppInput } from '@/components/ui';
+import {
+  AppButton,
+  AppInput,
+  AppNav,
+  PrivacyChip,
+  TopicRow,
+  type AppNavActive,
+  type PrivacyValue,
+} from '@/components/ui';
 
 const email = ref('');
 const password = ref('secret');
 const errorEmail = ref('Некорректный email');
 const loading = ref(false);
+const navActive = ref<AppNavActive>('topics');
+
+const sampleRows: {
+  title: string;
+  meta: string;
+  privacy: PrivacyValue;
+  covers?: string[];
+}[] = [
+  {
+    title: 'Фильмы 2026',
+    meta: 'Изменено 5 окт',
+    privacy: 'public',
+    covers: [
+      'data:image/svg+xml,' +
+        encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40"><rect fill="#CFE6DF" width="32" height="40"/></svg>',
+        ),
+      'data:image/svg+xml,' +
+        encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40"><rect fill="#D4E0EF" width="32" height="40"/></svg>',
+        ),
+      'data:image/svg+xml,' +
+        encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40"><rect fill="#EDF0ED" width="32" height="40"/></svg>',
+        ),
+    ],
+  },
+  {
+    title: 'Книги по ссылке',
+    meta: 'Изменено 1 окт',
+    privacy: 'unlisted',
+  },
+  {
+    title: 'Личное',
+    meta: 'Изменено вчера',
+    privacy: 'private',
+  },
+];
 
 function toggleLoading() {
   loading.value = true;
@@ -16,10 +62,77 @@ function toggleLoading() {
 </script>
 
 <template>
-  <!-- TEMP: витрина UI-Kit для приёмки FRO-6; не продуктовый экран -->
-  <main class="min-h-dvh bg-bg p-8">
-    <h1 class="text-h2 text-ink">UI-Kit · Button & Input</h1>
-    <p class="mt-2 text-body-sm text-muted">Временная страница для сверки с Figma 04.1 / 04.2</p>
+  <!-- TEMP: витрина UI-Kit для приёмки; не продуктовый экран -->
+  <main class="min-h-dvh bg-bg p-8 pb-28 md:pb-8 md:pt-28">
+    <h1 class="text-h2 text-ink">UI-Kit · Nav, Topic row, Privacy</h1>
+    <p class="mt-2 text-body-sm text-muted">
+      Временная страница для сверки с Figma 04.3 / 04.5 / 04.6 (+ Button / Input)
+    </p>
+
+    <!-- Fixed dock samples: auto (viewport) — see edges of viewport -->
+    <AppNav
+      :active="navActive"
+      profile-label="Профиль"
+      @profile="navActive = 'profile'"
+      @logout="navActive = 'profile'"
+    />
+
+    <section class="mt-10 space-y-4">
+      <h2 class="text-title">PrivacyChip</h2>
+      <div class="flex flex-wrap items-center gap-3">
+        <PrivacyChip privacy="private" />
+        <PrivacyChip privacy="unlisted" />
+        <PrivacyChip privacy="public" />
+      </div>
+      <p class="text-caption text-muted">compact (mobile icon-only)</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <PrivacyChip privacy="private" compact />
+        <PrivacyChip privacy="unlisted" compact />
+        <PrivacyChip privacy="public" compact />
+      </div>
+    </section>
+
+    <section class="mt-10 max-w-lg space-y-2">
+      <h2 class="text-title">TopicRow · desktop (labeled chip)</h2>
+      <div class="rounded-lg border border-line bg-surface p-1">
+        <TopicRow
+          v-for="row in sampleRows"
+          :key="row.title"
+          :title="row.title"
+          :meta="row.meta"
+          :privacy="row.privacy"
+          :covers="row.covers"
+        />
+      </div>
+    </section>
+
+    <section class="mt-10 max-w-[358px] space-y-2">
+      <h2 class="text-title">TopicRow · mobile (compact chip)</h2>
+      <div class="rounded-lg border border-line bg-surface p-1">
+        <TopicRow
+          v-for="row in sampleRows"
+          :key="`m-${row.title}`"
+          :title="row.title"
+          :meta="row.meta"
+          :privacy="row.privacy"
+          :covers="row.covers"
+          compact-privacy
+        />
+      </div>
+    </section>
+
+    <section class="mt-10 space-y-4">
+      <h2 class="text-title">AppNav · placement samples</h2>
+      <p class="text-body-sm text-muted">
+        Fixed auto-dock на краях viewport. Ниже — inline bottom (M) и top (D).
+      </p>
+      <div class="max-w-[390px] rounded-lg border border-line bg-bg p-3">
+        <AppNav :fixed="false" placement="bottom" active="topics" />
+      </div>
+      <div class="rounded-lg border border-line bg-bg p-3">
+        <AppNav :fixed="false" placement="top" active="topics" profile-label="demo" />
+      </div>
+    </section>
 
     <section class="mt-10 space-y-4">
       <h2 class="text-title">AppButton · md (44)</h2>
