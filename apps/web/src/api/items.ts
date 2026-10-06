@@ -49,3 +49,30 @@ export async function rankItem(topicId: string, itemId: string): Promise<ItemDto
   }
   return data;
 }
+
+/** POST /api/topics/:topicId/items/reorder — полная перестановка ranked (BAC-12). */
+export async function reorderItems(
+  topicId: string,
+  orderedItemIds: string[],
+): Promise<ItemList> {
+  const { data, error, response } = await apiClient.POST(
+    '/api/topics/{topicId}/items/reorder',
+    {
+      params: { path: { topicId } },
+      body: { orderedItemIds },
+    },
+  );
+  if (response.status === 401) {
+    throw new ItemsApiError('Требуется вход', 401);
+  }
+  if (response.status === 404) {
+    throw new ItemsApiError('Топик не найден', 404);
+  }
+  if (response.status === 422) {
+    throw new ItemsApiError('Некорректный порядок рейтинга', 422);
+  }
+  if (error || !data) {
+    throw new ItemsApiError('Не удалось сохранить порядок', response.status);
+  }
+  return data;
+}

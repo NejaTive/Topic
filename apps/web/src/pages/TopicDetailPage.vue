@@ -14,6 +14,7 @@ import { useLogoutMutation } from '@/composables/useAuthMutations';
 import {
   useDeleteTopicMutation,
   useRankItemMutation,
+  useReorderItemsMutation,
   useUpdateTopicPrivacyMutation,
 } from '@/composables/useTopicMutations';
 import { useTopicItemsQuery } from '@/composables/useTopicItemsQuery';
@@ -21,6 +22,13 @@ import { useTopicQuery } from '@/composables/useTopicQuery';
 import { useSessionStore } from '@/stores/session';
 
 const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
+
+/** Custom MIME for HTML5 DnD payload (ranked reorder / inbox→ranked). */
+const DND_MIME = 'application/x-topic-item';
+
+type DndPayload =
+  | { source: 'ranked'; itemId: string }
+  | { source: 'inbox'; itemId: string };
 
 const route = useRoute();
 const router = useRouter();
@@ -34,10 +42,13 @@ const itemsQuery = useTopicItemsQuery(topicId);
 const updatePrivacy = useUpdateTopicPrivacyMutation(() => topicId.value);
 const deleteTopicMut = useDeleteTopicMutation();
 const rankItemMut = useRankItemMutation(() => topicId.value);
+const reorderMut = useReorderItemsMutation(() => topicId.value);
 
 const privacyOpen = ref(false);
 const actionError = ref('');
 const copyFeedback = ref('');
+const draggingId = ref<string | null>(null);
+const rankedDropActive = ref(false);
 
 /** Mobile chip compact for meta? Figma S05 meta uses labeled chip even on M. */
 const isMdUp = ref(false);
@@ -154,6 +165,145 @@ async function onToRank(itemId: string) {
     await rankItemMut.mutateAsync(itemId);
   } catch (err) {
     applyApiError(err, 'Не удалось перенести в рейтинг');
+  }
+}
+
+function readDndPayload(event: DragEvent): DndPayload | null {
+  const dt = event.dataTransfer;
+  if (!dt) return null;
+  const raw = dt.getData(DND_MIME) || dt.getData('text/plain');
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as DndPayload;
+    if (
+      (parsed.source === 'ranked' || parsed.source === 'inbox') &&
+      typeof parsed.itemId === 'string'
+    ) {
+      return parsed;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function writeDndPayload(event: DragEvent, payload: DndPayload) {
+  const dt = event.dataTransfer;
+  if (!dt) return;
+  dt.effectAllowed = 'move';
+  const raw = JSON.stringify(payload);
+  dt.setData(DND_MIME, raw);
+  // Safari: надёжно читается только text/plain
+  dt.setData('text/plain', raw);
+}
+
+function onInboxDragStart(event: DragEvent, itemId: string) {
+  writeDndPayload(event, { source: 'inbox', itemId });
+  draggingId.value = itemId;
+  clearActionError();
+}
+
+function onRankedDragStart(event: DragEvent, itemId: string) {
+  writeDndPayload(event, { source: 'ranked', itemId });
+  draggingId.value = itemId;
+  clearActionError();
+}
+
+function onRowDragEnd() {
+  draggingId.value = null;
+  rankedDropActive.value = false;
+}
+
+function onRankedDragOver(event: DragEvent) {
+  const types = event.dataTransfer?.types;
+  if (!types) return;
+  const ok =
+    [...types].includes(DND_MIME) || [...types].includes('text/plain');
+  if (!ok) return;
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+  rankedDropActive.value = true;
+}
+
+function onRankedDragLeave(event: DragEvent) {
+  const current = event.currentTarget as HTMLElement | null;
+  const related = event.relatedTarget as Node | null;
+  if (current && related && current.contains(related)) return;
+  rankedDropActive.value = false;
+}
+
+/** Slot index 0…N by pointer Y relative to ranked `<li>` midpoints. */
+function dropIndexFromY(clientY: number, listEl: HTMLElement): number {
+  const rows = [...listEl.querySelectorAll(':scope > li')];
+  for (let i = 0; i < rows.length; i++) {
+    const rect = rows[i]!.getBoundingClientRect();
+    if (clientY < rect.top + rect.height / 2) return i;
+  }
+  return rows.length;
+}
+
+function moveId(ids: string[], itemId: string, toIndex: number): string[] {
+  const fromIndex = ids.indexOf(itemId);
+  if (fromIndex < 0) return ids;
+  const next = [...ids];
+  next.splice(fromIndex, 1);
+  const adjusted = fromIndex < toIndex ? toIndex - 1 : toIndex;
+  next.splice(adjusted, 0, itemId);
+  return next;
+}
+
+async function onRankedDrop(event: DragEvent) {
+  event.preventDefault();
+  rankedDropActive.value = false;
+  const payload = readDndPayload(event);
+  draggingId.value = null;
+  if (!payload) return;
+
+  if (payload.source === 'inbox') {
+    // Без S08: inbox → только в конец ranked (не mid-insert).
+    await onToRank(payload.itemId);
+    return;
+  }
+
+  const listEl = event.currentTarget as HTMLElement;
+  const currentIds = ranked.value.map((item) => item.id);
+  if (!currentIds.includes(payload.itemId)) return;
+
+  const toIndex = dropIndexFromY(event.clientY, listEl);
+  const nextIds = moveId(currentIds, payload.itemId, toIndex);
+  if (nextIds.join(',') === currentIds.join(',')) return;
+
+  clearActionError();
+  try {
+    await reorderMut.mutateAsync(nextIds);
+  } catch (err) {
+    applyApiError(err, 'Не удалось сохранить порядок');
+  }
+}
+
+/** Drop on section chrome / empty ranked (inbox-only): inbox→end; ranked→append. */
+async function onRankedSectionDrop(event: DragEvent) {
+  event.preventDefault();
+  rankedDropActive.value = false;
+  const payload = readDndPayload(event);
+  draggingId.value = null;
+  if (!payload) return;
+
+  if (payload.source === 'inbox') {
+    await onToRank(payload.itemId);
+    return;
+  }
+
+  const currentIds = ranked.value.map((item) => item.id);
+  if (!currentIds.includes(payload.itemId)) return;
+  const nextIds = moveId(currentIds, payload.itemId, currentIds.length);
+  if (nextIds.join(',') === currentIds.join(',')) return;
+
+  clearActionError();
+  try {
+    await reorderMut.mutateAsync(nextIds);
+  } catch (err) {
+    applyApiError(err, 'Не удалось сохранить порядок');
   }
 }
 
@@ -363,9 +513,13 @@ function onRetry() {
                 <RankRow
                   class="!max-w-none w-full"
                   mode="inbox"
+                  drag-enabled
+                  :dragging="draggingId === item.id"
                   :title="item.title"
                   :cover-url="item.coverUrl ?? undefined"
                   @to-rank="onToRank(item.id)"
+                  @drag-start="onInboxDragStart($event, item.id)"
+                  @drag-end="onRowDragEnd"
                 />
               </li>
             </ul>
@@ -384,8 +538,18 @@ function onRetry() {
             </button>
           </section>
 
-          <!-- Ranked column -->
-          <section aria-labelledby="s05-rank-heading">
+          <!-- Ranked column (drop target: reorder + inbox→end) -->
+          <section
+            aria-labelledby="s05-rank-heading"
+            :class="
+              rankedDropActive
+                ? 'rounded-md ring-2 ring-accent ring-offset-2 ring-offset-bg'
+                : null
+            "
+            @dragover="onRankedDragOver"
+            @dragleave="onRankedDragLeave"
+            @drop="onRankedSectionDrop"
+          >
             <h2 id="s05-rank-heading" class="text-label font-bold text-ink md:text-title">
               Рейтинг
             </h2>
@@ -399,14 +563,20 @@ function onRetry() {
               v-else
               class="mt-3 flex list-none flex-col gap-1 p-0"
               aria-label="Рейтинг"
+              @dragover.stop="onRankedDragOver"
+              @drop.stop="onRankedDrop"
             >
               <li v-for="item in ranked" :key="item.id">
                 <RankRow
                   class="!max-w-none w-full"
                   mode="ranked"
+                  drag-enabled
+                  :dragging="draggingId === item.id"
                   :rank="item.rankPosition ?? undefined"
                   :title="item.title"
                   :cover-url="item.coverUrl ?? undefined"
+                  @drag-start="onRankedDragStart($event, item.id)"
+                  @drag-end="onRowDragEnd"
                 />
               </li>
             </ul>

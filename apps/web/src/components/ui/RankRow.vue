@@ -3,7 +3,7 @@ export type RankRowMode = 'ranked' | 'inbox';
 </script>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -13,21 +13,28 @@ const props = withDefaults(
     coverUrl?: string;
     /** inbox: CTA «В рейтинг»; ranked: rank badge + visual handle. */
     mode?: RankRowMode;
-    /** Visual dragging state (shadow); no DnD logic. */
+    /** Visual dragging state (shadow); set by parent during HTML5 DnD. */
     dragging?: boolean;
+    /** Enable HTML5 DnD: ranked — только с handle; inbox — со всей строки. */
+    dragEnabled?: boolean;
   }>(),
   {
     rank: undefined,
     coverUrl: undefined,
     mode: 'ranked',
     dragging: false,
+    dragEnabled: false,
   },
 );
 
 const emit = defineEmits<{
   toRank: [];
   click: [event: MouseEvent];
+  dragStart: [event: DragEvent];
+  dragEnd: [event: DragEvent];
 }>();
+
+const handleArmed = ref(false);
 
 const isTopThree = computed(
   () => props.mode === 'ranked' && props.rank != null && props.rank >= 1 && props.rank <= 3,
@@ -36,6 +43,33 @@ const isTopThree = computed(
 const rankToneClass = computed(() =>
   isTopThree.value ? 'text-rank-top' : 'text-rank',
 );
+
+function armHandle() {
+  if (props.dragEnabled && props.mode === 'ranked') {
+    handleArmed.value = true;
+  }
+}
+
+function disarmHandle() {
+  handleArmed.value = false;
+}
+
+function onDragStart(event: DragEvent) {
+  if (!props.dragEnabled) {
+    event.preventDefault();
+    return;
+  }
+  if (props.mode === 'ranked' && !handleArmed.value) {
+    event.preventDefault();
+    return;
+  }
+  emit('dragStart', event);
+}
+
+function onDragEnd(event: DragEvent) {
+  handleArmed.value = false;
+  emit('dragEnd', event);
+}
 </script>
 
 <template>
@@ -45,15 +79,23 @@ const rankToneClass = computed(() =>
       dragging
         ? 'border-line bg-surface shadow-float'
         : 'hover:bg-surface-sunken focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring',
+      dragEnabled && mode === 'inbox' ? 'cursor-grab' : null,
     ]"
     :data-state="dragging ? 'dragging' : 'default'"
+    :draggable="dragEnabled"
+    @dragstart="onDragStart"
+    @dragend="onDragEnd"
   >
-    <!-- Visual handle only (DnD → FRO-13); no ↑↓ / «позиция N» -->
+    <!-- DnD handle (ranked only); drag starts from here when dragEnabled -->
     <span
       v-if="mode === 'ranked'"
-      class="flex w-5 shrink-0 cursor-grab justify-center text-subtle"
+      class="flex w-5 shrink-0 justify-center text-subtle"
+      :class="dragEnabled ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'"
       aria-hidden="true"
       data-slot="drag-handle"
+      @pointerdown="armHandle"
+      @pointerup="disarmHandle"
+      @pointercancel="disarmHandle"
     >
       <svg class="size-4" viewBox="0 0 16 16" fill="currentColor">
         <circle cx="5" cy="4" r="1.25" />
