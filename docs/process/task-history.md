@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Собрать UI-Kit: Rank row, Cover upload, Main chip
+
+- **YouGile:** FRO-16
+- **Итог:** `RankRow` (cover thumb, title, rank badge top-3 accent, visual drag-handle, inbox «В рейтинг»; states default/hover/focus/dragging; max-w 358), `CoverUpload` (empty/hover/filled/error, file input, emit `file`, copy «до 5 МБ» + client check), `MainChip` (Фильмы/Сериалы/Книги/Игры → emit label); экспорт `@/components/ui`; витрина `/dev/ui-kit`; README; без DnD/↑↓/Privacy.
+- **Репо:** `feat/FRO-16` / [PR #25](https://github.com/NejaTive/Topic/pull/25) / (merge в develop)
+- **Длительность:** реализация ~2 мин · ревью ~4 мин · всего ~6 мин
+- **Заметки:** чеклист ревью в карточке YouGile; `typecheck`/`build`; smoke `/dev/ui-kit` (MainChip emit, Cover error/>5МБ, RankRow top-3/dragging/inbox); без DnD (FRO-13) и S04–S07 экранов.
+
 ### 06.10.2026 — Собрать UI-Kit: Nav, Topic row, Privacy chip
 
 - **YouGile:** FRO-15
