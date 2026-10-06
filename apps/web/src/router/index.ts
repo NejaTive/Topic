@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import AccessDeniedPage from '@/pages/AccessDeniedPage.vue';
 import HomePage from '@/pages/HomePage.vue';
 import ItemCreatePage from '@/pages/ItemCreatePage.vue';
 import ItemDetailPage from '@/pages/ItemDetailPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
+import NotFoundPage from '@/pages/NotFoundPage.vue';
 import RegisterPage from '@/pages/RegisterPage.vue';
 import TopicCreatePage from '@/pages/TopicCreatePage.vue';
 import TopicDetailPage from '@/pages/TopicDetailPage.vue';
-import ShareForbiddenStubPage from '@/pages/ShareForbiddenStubPage.vue';
-import ShareNotFoundStubPage from '@/pages/ShareNotFoundStubPage.vue';
 import ShareViewPage from '@/pages/ShareViewPage.vue';
 import TopicsPage from '@/pages/TopicsPage.vue';
 import UiKitPage from '@/pages/UiKitPage.vue';
@@ -43,12 +43,12 @@ export const router = createRouter({
     {
       path: '/share/no-access',
       name: 'share-forbidden',
-      component: ShareForbiddenStubPage,
+      component: AccessDeniedPage,
     },
     {
       path: '/share/not-found',
       name: 'share-not-found',
-      component: ShareNotFoundStubPage,
+      component: NotFoundPage,
     },
     {
       path: '/app',
@@ -89,6 +89,11 @@ export const router = createRouter({
       path: '/dev/ui-kit',
       name: 'dev-ui-kit',
       component: UiKitPage,
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: NotFoundPage,
     },
   ],
 });
