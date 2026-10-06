@@ -41,6 +41,19 @@ function mapLoginValidationFields(
   return fields;
 }
 
+function mapRegisterValidationFields(
+  messages: string[],
+): Partial<Record<AuthErrorField, string>> {
+  const fields: Partial<Record<AuthErrorField, string>> = {};
+  for (const msg of messages) {
+    const lower = msg.toLowerCase();
+    if (lower.includes('nick') && !fields.nick) fields.nick = msg;
+    else if (lower.includes('email') && !fields.email) fields.email = msg;
+    else if (lower.includes('password') && !fields.password) fields.password = msg;
+  }
+  return fields;
+}
+
 export async function fetchMe(): Promise<AuthUser | null> {
   const { data, response } = await apiClient.GET('/api/auth/me');
   if (response.status === 401) return null;
@@ -53,6 +66,12 @@ export async function registerUser(body: RegisterBody): Promise<AuthUser> {
   if (response.status === 409 && error && typeof error === 'object' && 'message' in error) {
     const conflict = error as components['schemas']['ConflictResponseDto'];
     throw new AuthApiError(conflict.message, 409, conflict.field);
+  }
+  if (response.status === 400 || response.status === 422) {
+    const messages = validationMessages(error);
+    const fields = mapRegisterValidationFields(messages);
+    const fallback = messages[0] ?? 'Проверьте данные формы';
+    throw new AuthApiError(fallback, response.status, undefined, fields);
   }
   if (error || !data) {
     throw new AuthApiError('Не удалось зарегистрироваться', response.status);

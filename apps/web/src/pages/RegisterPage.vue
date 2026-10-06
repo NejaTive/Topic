@@ -11,14 +11,54 @@ const register = useRegisterMutation();
 const email = ref('');
 const nick = ref('');
 const password = ref('');
+const fieldErrors = ref<{ email?: string; nick?: string; password?: string }>({});
 const formError = ref('');
-const fieldErrors = ref<{ email?: string; nick?: string }>({});
 
 const isSubmitting = computed(() => register.isPending.value);
 
-async function onSubmit() {
-  formError.value = '';
+function clearErrors() {
   fieldErrors.value = {};
+  formError.value = '';
+}
+
+function applyAuthError(err: unknown) {
+  clearErrors();
+  if (!(err instanceof AuthApiError)) {
+    formError.value = 'Не удалось зарегистрироваться';
+    return;
+  }
+
+  if (err.status === 409) {
+    if (err.field === 'email' || err.field === 'nick') {
+      fieldErrors.value = { [err.field]: err.message };
+      return;
+    }
+    formError.value = err.message || 'Конфликт данных';
+    return;
+  }
+
+  if (err.status === 400 || err.status === 422) {
+    if (err.fields && Object.keys(err.fields).length > 0) {
+      fieldErrors.value = {
+        email: err.fields.email,
+        nick: err.fields.nick,
+        password: err.fields.password,
+      };
+      return;
+    }
+    if (err.field === 'email' || err.field === 'nick' || err.field === 'password') {
+      fieldErrors.value = { [err.field]: err.message };
+      return;
+    }
+    formError.value = err.message || 'Проверьте данные формы';
+    return;
+  }
+
+  formError.value = err.message || 'Не удалось зарегистрироваться';
+}
+
+async function onSubmit() {
+  clearErrors();
   try {
     await register.mutateAsync({
       email: email.value,
@@ -27,53 +67,70 @@ async function onSubmit() {
     });
     await router.replace('/app/topics');
   } catch (err) {
-    if (err instanceof AuthApiError && err.field) {
-      fieldErrors.value = { [err.field]: err.message };
-      return;
-    }
-    formError.value = err instanceof AuthApiError ? err.message : 'Не удалось зарегистрироваться';
+    applyAuthError(err);
   }
 }
 </script>
 
 <template>
-  <main class="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-8">
-    <div>
-      <h1 class="text-title">Регистрация</h1>
-      <p class="mt-2 text-body text-muted">Создайте аккаунт Topic.</p>
+  <main class="flex min-h-dvh items-center justify-center bg-bg px-4 py-8">
+    <div
+      class="flex w-full max-w-[358px] flex-col gap-3 rounded-lg border border-line bg-surface px-[25px] py-[29px] md:max-w-[440px]"
+    >
+      <RouterLink
+        to="/"
+        class="w-fit text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+      >
+        ← Topic
+      </RouterLink>
+
+      <h1 class="text-h1 text-ink">Регистрация</h1>
+
+      <form class="flex flex-col gap-3" @submit.prevent="onSubmit">
+        <AppInput
+          v-model="email"
+          label="Email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          :error="fieldErrors.email"
+          :disabled="isSubmitting"
+        />
+        <AppInput
+          v-model="nick"
+          label="Ник"
+          type="text"
+          autocomplete="username"
+          placeholder="topic_fan"
+          :error="fieldErrors.nick"
+          :disabled="isSubmitting"
+        />
+        <AppInput
+          v-model="password"
+          label="Пароль"
+          type="password"
+          autocomplete="new-password"
+          placeholder="••••••••"
+          :error="fieldErrors.password"
+          :disabled="isSubmitting"
+        />
+
+        <p class="text-label font-semibold text-muted">
+          Уже есть аккаунт?
+          <RouterLink
+            class="outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+            to="/login"
+          >
+            Войти
+          </RouterLink>
+        </p>
+
+        <p v-if="formError" class="text-caption text-danger" role="alert">{{ formError }}</p>
+
+        <AppButton type="submit" :loading="isSubmitting" class="w-full">
+          Зарегистрироваться
+        </AppButton>
+      </form>
     </div>
-
-    <form class="flex flex-col gap-4" @submit.prevent="onSubmit">
-      <AppInput
-        v-model="email"
-        label="Email"
-        type="email"
-        autocomplete="email"
-        :error="fieldErrors.email"
-        :disabled="isSubmitting"
-      />
-      <AppInput
-        v-model="nick"
-        label="Ник"
-        type="text"
-        autocomplete="username"
-        :error="fieldErrors.nick"
-        :disabled="isSubmitting"
-      />
-      <AppInput
-        v-model="password"
-        label="Пароль"
-        type="password"
-        autocomplete="new-password"
-        :disabled="isSubmitting"
-      />
-      <p v-if="formError" class="text-caption text-danger" role="alert">{{ formError }}</p>
-      <AppButton type="submit" :loading="isSubmitting" class="w-full">Создать аккаунт</AppButton>
-    </form>
-
-    <p class="text-body-sm text-muted">
-      Уже есть аккаунт?
-      <RouterLink class="text-accent font-semibold" to="/login">Войти</RouterLink>
-    </p>
   </main>
 </template>
