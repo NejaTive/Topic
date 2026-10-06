@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { ItemPlacement, TopicPrivacy, type TopicPrivacy as TopicPrivacyType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import type { CreateTopicDto } from './dto/create-topic.dto';
 import type { TopicDetailDto, TopicListItemDto } from './dto/topic-response.dto';
 import type { UpdateTopicDto } from './dto/update-topic.dto';
@@ -9,7 +10,10 @@ import { createShareId } from './share-id';
 
 @Injectable()
 export class TopicsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async listForOwner(ownerId: string): Promise<TopicListItemDto[]> {
     const topics = await this.prisma.topic.findMany({
@@ -93,12 +97,8 @@ export class TopicsService {
   /**
    * Удаление топика владельца.
    *
-   * Порядок (координация с BAC-11 / storage):
-   * 1. owner-check;
-   * 2. собрать coverKey у items;
-   * 3. удалить Topic в БД (Prisma Cascade → Items);
-   * 4. best-effort удалить cover-объекты из S3/MinIO по ключам
-   *    (пока storage-клиента нет — no-op; появится с BAC-11).
+   * Порядок: (1) owner-check → (2) собрать coverKey → (3) Cascade в БД →
+   * (4) best-effort удаление объектов из S3/MinIO.
    */
   async deleteOwned(ownerId: string, topicId: string): Promise<void> {
     await this.findOwnedOrThrow(ownerId, topicId);
@@ -112,7 +112,7 @@ export class TopicsService {
       .filter((key): key is string => key != null);
 
     await this.prisma.topic.delete({ where: { id: topicId } });
-    await this.deleteCoverObjects(coverKeys);
+    await this.storage.deleteObjects(coverKeys);
   }
 
   private async findOwnedOrThrow(ownerId: string, topicId: string) {
@@ -172,10 +172,5 @@ export class TopicsService {
       parts.push(...constraint.fields);
     }
     return parts.join(' ').toLowerCase().includes('shareid');
-  }
-
-  /** BAC-11: удаление объектов по ключам. Сейчас no-op. */
-  private async deleteCoverObjects(_coverKeys: string[]): Promise<void> {
-    // Storage-клиент появится с BAC-11 (обложки). Порядок вызова — после Cascade в БД.
   }
 }

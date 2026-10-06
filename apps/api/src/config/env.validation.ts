@@ -30,7 +30,30 @@ class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   DATABASE_URL!: string;
+
+  /** S3-совместимый endpoint (MinIO в dev), без trailing slash. */
+  @IsString()
+  @IsNotEmpty()
+  S3_ENDPOINT!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_ACCESS_KEY!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_SECRET_KEY!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_BUCKET!: string;
+
+  /** База публичных URL обложек (path-style: `{S3_PUBLIC_URL}/{bucket}/{key}`). */
+  @IsString()
+  @IsNotEmpty()
+  S3_PUBLIC_URL!: string;
 }
+
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
   const validated = plainToInstance(EnvironmentVariables, config, {
