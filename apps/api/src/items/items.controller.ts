@@ -26,6 +26,7 @@ import {
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { SESSION_COOKIE_NAME } from '../auth/auth.constants';
@@ -41,6 +42,7 @@ import {
   ItemListDto,
   ItemNotFoundResponseDto,
 } from './dto/item-response.dto';
+import { ReorderItemsDto } from './dto/reorder-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
 
@@ -78,6 +80,22 @@ export class ItemsController {
     @Body() dto: CreateItemDto,
   ): Promise<ItemDto> {
     return this.items.createForOwner(user.id, topicId, dto);
+  }
+
+  @Post('reorder')
+  @ApiOkResponse({ type: ItemListDto })
+  @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
+  @ApiNotFoundResponse({ type: NotFoundResponseDto })
+  @ApiUnprocessableEntityResponse({
+    description:
+      'orderedItemIds не является полной перестановкой ranked id топика',
+  })
+  reorder(
+    @CurrentUser() user: AuthUser,
+    @Param('topicId', ParseUUIDPipe) topicId: string,
+    @Body() dto: ReorderItemsDto,
+  ): Promise<ItemListDto> {
+    return this.items.reorderRankedOwned(user.id, topicId, dto);
   }
 
   @Get(':itemId')

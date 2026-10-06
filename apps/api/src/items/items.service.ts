@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Prisma, type Item } from '../generated/prisma/client';
 import { ItemPlacement } from '../generated/prisma/enums';
@@ -9,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import type { CreateItemDto } from './dto/create-item.dto';
 import type { ItemDto, ItemListDto } from './dto/item-response.dto';
+import type { ReorderItemsDto } from './dto/reorder-items.dto';
 import type { UpdateItemDto } from './dto/update-item.dto';
 
 @Injectable()
@@ -125,6 +127,69 @@ export class ItemsService {
     if (coverKey) {
       await this.storage.deleteObjects([coverKey]);
     }
+  }
+
+  /**
+   * Полная перестановка ranked одной транзакцией.
+   * `orderedItemIds` — точная перестановка всех ranked id топика → rankPosition 1…N.
+   */
+  async reorderRankedOwned(
+    ownerId: string,
+    topicId: string,
+    dto: ReorderItemsDto,
+  ): Promise<ItemListDto> {
+    await this.findOwnedTopicOrThrow(ownerId, topicId);
+
+    await this.prisma.$transaction(async (tx) => {
+      const ranked = await tx.item.findMany({
+        where: { topicId, placement: ItemPlacement.ranked },
+        select: { id: true },
+      });
+      const rankedIds = new Set(ranked.map((row) => row.id));
+      const ordered = dto.orderedItemIds;
+      const orderedUnique = new Set(ordered);
+
+      if (
+        ordered.length !== rankedIds.size ||
+        orderedUnique.size !== ordered.length
+      ) {
+        throw new UnprocessableEntityException({
+          message:
+            'orderedItemIds должен содержать ровно все ranked-элементы топика без дубликатов',
+          statusCode: 422,
+        });
+      }
+
+      for (const id of ordered) {
+        if (!rankedIds.has(id)) {
+          throw new UnprocessableEntityException({
+            message: 'orderedItemIds содержит id вне ranked этого топика',
+            statusCode: 422,
+          });
+        }
+      }
+
+      if (ordered.length > 0) {
+        const values = ordered.map(
+          (id, index) => Prisma.sql`(${id}, CAST(${index + 1} AS integer))`,
+        );
+        await tx.$executeRaw`
+          UPDATE "Item" AS i
+          SET "rankPosition" = v.pos
+          FROM (VALUES ${Prisma.join(values)}) AS v(id, pos)
+          WHERE i.id = v.id
+            AND i."topicId" = ${topicId}
+            AND i.placement = CAST('ranked' AS "ItemPlacement")
+        `;
+      }
+
+      await tx.topic.update({
+        where: { id: topicId },
+        data: { updatedAt: new Date() },
+      });
+    });
+
+    return this.listForOwner(ownerId, topicId);
   }
 
   /** В конец ranked (плотный rankPosition). Уже ranked — тоже в конец. */
