@@ -30,6 +30,14 @@
 
 ## Записи
 
+### 06.10.2026 — Переупорядочить ranked одной транзакцией
+
+- **YouGile:** BAC-12
+- **Итог:** `POST /api/topics/:topicId/items/reorder` с `{ orderedItemIds: uuid[] }` — полная перестановка ranked → плотный `rankPosition` 1…N в одной `$transaction` (raw SQL `UPDATE … FROM VALUES`); чужой топик 404, невалидный набор 422; OpenAPI + `schema.d.ts`; README.
+- **Репо:** `feat/BAC-12` / [PR #23](https://github.com/NejaTive/Topic/pull/23) / (merge в develop)
+- **Длительность:** реализация ~6 мин · ревью ~4 мин · всего ~10 мин
+- **Заметки:** чеклист ревью в карточке YouGile; smoke: reverse mid-list + GET, dense 1…N, inbox unchanged, 401/404/422 (partial/dup/inbox/unknown), empty ranked `[]`; typecheck OK. POST без `@HttpCode(200)` даёт 201 (как rank/unrank). Без DnD/↑↓/S08.
+
 ### 06.10.2026 — Реализовать Items API и загрузку обложек
 
 - **YouGile:** BAC-11
