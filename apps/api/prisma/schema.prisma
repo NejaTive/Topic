@@ -8,6 +8,17 @@ datasource db {
   provider = "postgresql"
 }
 
+enum TopicPrivacy {
+  private
+  unlisted
+  public
+}
+
+enum ItemPlacement {
+  unranked
+  ranked
+}
+
 /// Пользователь. `nick` хранится в lowercase — unique = case-insensitive.
 model User {
   id           String    @id @default(uuid())
@@ -16,6 +27,7 @@ model User {
   passwordHash String
   createdAt    DateTime  @default(now())
   sessions     Session[]
+  topics       Topic[]
 }
 
 /// Opaque-сессия (tokenHash в БД; cookie с токеном — на уровне app).
@@ -28,4 +40,33 @@ model Session {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+/// Топик владельца. `shareId` стабилен при смене privacy; ранги элементов — плотный 1…N в приложении.
+model Topic {
+  id        String       @id @default(uuid())
+  shareId   String       @unique
+  ownerId   String
+  owner     User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  title     String
+  privacy   TopicPrivacy @default(unlisted)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  items     Item[]
+
+  @@index([ownerId])
+}
+
+/// Элемент топика. `coverKey` — ключ в S3/MinIO; `rankPosition` только при placement=ranked (плотный 1…N).
+model Item {
+  id           String        @id @default(uuid())
+  topicId      String
+  topic        Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  title        String
+  coverKey     String?
+  placement    ItemPlacement
+  rankPosition Int?
+  createdAt    DateTime      @default(now())
+
+  @@index([topicId, placement, rankPosition])
 }
