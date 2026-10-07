@@ -256,7 +256,7 @@
 - Отложено в реализации (продуктовые договорённости в stage-0/1 **не отменены**, вернуться явно; записи в `docs/backlog/ideas.md`):
   - ↑↓ / «переместить на позицию N» как альтернатива DnD (a11y);
   - UX «Топик изменился» + optimistic-проверка версии (до этого возможен тихий overwrite порядка).
-- Также не решено / позже: OG-превью (отдельный slice), **тесты** (владелец: делаем отдельно, не добавляем сейчас), prod-хостинг и prod-хранилище, rate-limit на auth, способ подключения токенов в Tailwind.
+- Также не решено / позже: OG-превью (отдельный slice), **тесты** (владелец: делаем отдельно, не добавляем сейчас), ~~prod-хостинг и prod-хранилище~~ (закрыто 08.10.2026), rate-limit на auth, способ подключения токенов в Tailwind.
 - ~~В `.cursor/rules/` стек не фиксируем (до отдельного OK).~~ — **отменено 05.10.2026:** владелец дал OK, стек зафиксирован в `.cursor/rules/engineering/tech-stack.mdc` (always-apply; docs остаются SoT). Архитектура/структура папок и дизайн-код-правила в rules по-прежнему не описываются.
   - Пометка к записи 03.10 («UI-язык, стек, архитектура, тесты, дизайн-код — в rules пока не описываем»): для **стека** устарело.
 
@@ -477,3 +477,12 @@
 - В UI писать классы в канонической форме IntelliSense (`rem: 16`): px→шкала для spacing/leading/size, `h-(--token)`, `foo!` вместо `!foo`.
 - Шрифтовые `text-[Npx]` не заменять на spacing-`text-N`, если компилятор так не канонизирует (у нас `--text-*`).
 - Канон: `.cursor/rules/engineering/tailwind-canonical.mdc`.
+
+### Prod-хостинг и CI/CD (VPS)
+
+- **Хостинг:** VPS (PL), Ubuntu 22.04, Docker Compose в `/opt/topic`.
+- **Стек на сервере:** Caddy (образ `topic-web`: SPA + reverse proxy) + Nest (`topic-api`) + Postgres + MinIO (обложки на том же VPS).
+- **Сеть:** один origin по **HTTP/IP без TLS** на первом этапе; MinIO/Postgres наружу не публиковать.
+- **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
+- **Promote:** фичи через `develop`; релиз = merge в `main`.
+- Отложено: домен, TLS/`Secure` cookie, rate-limit auth, внешний object storage.
