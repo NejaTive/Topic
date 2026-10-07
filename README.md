@@ -51,11 +51,11 @@ pnpm format:check    # Prettier check
 
 Локальный стек: Postgres 17 и MinIO (S3-совместимое хранилище обложек). Значения по умолчанию зашиты в `compose.yaml` (`${VAR:-default}`) — стек поднимается без `.env`. Переменные задокументированы в `.env.example`.
 
-| Сервис        | Порт (localhost)                               | Креды (dev-only)                              |
-| ------------- | ---------------------------------------------- | --------------------------------------------- |
-| Postgres      | `5432`                                         | user/password/db: `topic` / `topic` / `topic` |
-| MinIO API     | `9000`                                         | root: `minioadmin` / `minioadmin`             |
-| MinIO Console | [http://127.0.0.1:9001](http://127.0.0.1:9001) | те же root-креды                              |
+| Сервис        | Порт (localhost)                               | Креды (dev-only)                                           |
+| ------------- | ---------------------------------------------- | ---------------------------------------------------------- |
+| Postgres      | `5432`                                         | user/password/db: `topic` / `topic` / `topic`              |
+| MinIO API     | `9000`                                         | root: `minioadmin` / `minioadmin`                          |
+| MinIO Console | [http://127.0.0.1:9001](http://127.0.0.1:9001) | те же root-креды                                           |
 | Бакет         | —                                              | `topic-covers` (`minio-init`: create + anonymous download) |
 
 ```bash

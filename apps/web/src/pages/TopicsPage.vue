@@ -29,9 +29,7 @@ onUnmounted(() => {
 });
 
 const topics = computed(() => topicsQuery.data.value ?? []);
-const isEmpty = computed(
-  () => topicsQuery.isSuccess.value && topics.value.length === 0,
-);
+const isEmpty = computed(() => topicsQuery.isSuccess.value && topics.value.length === 0);
 const profileLabel = computed(() => session.user?.nick ?? 'Профиль');
 
 function goCreate() {
@@ -54,11 +52,7 @@ function onRetry() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav
-      active="topics"
-      :profile-label="profileLabel"
-      @logout="onLogout"
-    />
+    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[720px] md:px-8 md:pb-10 md:pt-28"
@@ -74,11 +68,7 @@ function onRetry() {
         </AppButton>
       </header>
 
-      <p
-        v-if="topicsQuery.isPending.value"
-        class="mt-10 text-body text-muted"
-        role="status"
-      >
+      <p v-if="topicsQuery.isPending.value" class="mt-10 text-body text-muted" role="status">
         Загрузка…
       </p>
 
@@ -91,10 +81,7 @@ function onRetry() {
         <AppButton variant="secondary" size="sm" @click="onRetry">Повторить</AppButton>
       </div>
 
-      <div
-        v-else-if="isEmpty"
-        class="mt-16 flex flex-col items-center gap-4 text-center md:mt-24"
-      >
+      <div v-else-if="isEmpty" class="mt-16 flex flex-col items-center gap-4 text-center md:mt-24">
         <p class="text-title text-ink">Создайте первый топик</p>
         <p class="max-w-[280px] text-body-sm text-muted">
           Соберите рейтинг фильмов, книг или чего угодно — и поделитесь ссылкой.
@@ -125,12 +112,7 @@ function onRetry() {
       @click="goCreate"
     >
       <svg class="size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path
-          d="M12 5v14M5 12h14"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-        />
+        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
       </svg>
     </button>
   </div>

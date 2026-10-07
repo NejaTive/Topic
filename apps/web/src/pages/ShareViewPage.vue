@@ -13,9 +13,7 @@ const shareQuery = useShareQuery(shareId);
 
 const share = computed(() => shareQuery.data.value);
 const rankedItems = computed(() => share.value?.items ?? []);
-const isEmptyRanked = computed(
-  () => shareQuery.isSuccess.value && rankedItems.value.length === 0,
-);
+const isEmptyRanked = computed(() => shareQuery.isSuccess.value && rankedItems.value.length === 0);
 
 watch(
   () => shareQuery.error.value,
@@ -44,20 +42,15 @@ function onRetry() {
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[804px] md:px-0 md:pb-10 md:pt-28"
     >
-      <p
-        v-if="shareQuery.isPending.value"
-        class="text-body text-muted"
-        role="status"
-      >
-        Загрузка…
-      </p>
+      <p v-if="shareQuery.isPending.value" class="text-body text-muted" role="status">Загрузка…</p>
 
       <div
         v-else-if="
           shareQuery.isError.value &&
-          !(shareQuery.error.value instanceof ShareApiError &&
-            (shareQuery.error.value.status === 403 ||
-              shareQuery.error.value.status === 404))
+          !(
+            shareQuery.error.value instanceof ShareApiError &&
+            (shareQuery.error.value.status === 403 || shareQuery.error.value.status === 404)
+          )
         "
         class="flex flex-col items-start gap-3"
         role="alert"
@@ -74,9 +67,7 @@ function onRetry() {
 
       <template v-else-if="share">
         <div class="flex flex-wrap items-center gap-2">
-          <span class="text-label font-semibold text-muted">
-            @{{ share.ownerNick }}
-          </span>
+          <span class="text-label font-semibold text-muted"> @{{ share.ownerNick }} </span>
           <PrivacyChip :privacy="share.privacy" />
         </div>
 
@@ -84,19 +75,11 @@ function onRetry() {
           {{ share.title }}
         </h1>
 
-        <p
-          v-if="isEmptyRanked"
-          class="mt-12 text-title text-ink md:mt-16"
-          role="status"
-        >
+        <p v-if="isEmptyRanked" class="mt-12 text-title text-ink md:mt-16" role="status">
           Пока нечего показать
         </p>
 
-        <ul
-          v-else
-          class="mt-8 flex list-none flex-col gap-3 p-0 md:mt-10"
-          aria-label="Рейтинг"
-        >
+        <ul v-else class="mt-8 flex list-none flex-col gap-3 p-0 md:mt-10" aria-label="Рейтинг">
           <li
             v-for="item in rankedItems"
             :key="item.id"

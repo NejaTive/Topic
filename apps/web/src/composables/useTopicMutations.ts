@@ -1,14 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import {
-  rankItem,
-  reorderItems,
-  type ItemList,
-} from '@/api/items';
-import {
-  deleteTopic,
-  updateTopic,
-  type TopicDetail,
-} from '@/api/topics';
+import { rankItem, reorderItems, type ItemList } from '@/api/items';
+import { deleteTopic, updateTopic, type TopicDetail } from '@/api/topics';
 import type { PrivacyValue } from '@/components/ui';
 import { queryKeys } from '@/query/keys';
 
@@ -17,8 +9,7 @@ export function useUpdateTopicPrivacyMutation(topicId: () => string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (privacy: PrivacyValue) =>
-      updateTopic(topicId(), { privacy }),
+    mutationFn: (privacy: PrivacyValue) => updateTopic(topicId(), { privacy }),
     onSuccess: (topic: TopicDetail) => {
       queryClient.setQueryData(queryKeys.topics.detail(topic.id), topic);
       void queryClient.invalidateQueries({ queryKey: queryKeys.topics.list() });
@@ -59,8 +50,7 @@ export function useReorderItemsMutation(topicId: () => string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (orderedItemIds: string[]) =>
-      reorderItems(topicId(), orderedItemIds),
+    mutationFn: (orderedItemIds: string[]) => reorderItems(topicId(), orderedItemIds),
     onMutate: async (orderedItemIds) => {
       const id = topicId();
       const key = queryKeys.topics.items(id);

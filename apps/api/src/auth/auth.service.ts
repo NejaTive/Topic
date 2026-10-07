@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -118,10 +114,7 @@ export class AuthService {
   }
 
   private rethrowUniqueConflict(error: unknown): void {
-    if (
-      !(error instanceof Prisma.PrismaClientKnownRequestError) ||
-      error.code !== 'P2002'
-    ) {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
       return;
     }
 
@@ -150,8 +143,7 @@ export class AuthService {
     }
 
     const driver = meta?.driverAdapterError as
-      | { cause?: { constraint?: { index?: string; fields?: string[] } } }
-      | undefined;
+      { cause?: { constraint?: { index?: string; fields?: string[] } } } | undefined;
     const constraint = driver?.cause?.constraint;
     if (constraint?.index) {
       parts.push(constraint.index);

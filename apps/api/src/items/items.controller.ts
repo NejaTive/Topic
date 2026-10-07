@@ -37,11 +37,7 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { COVER_MAX_BYTES } from '../storage/storage.service';
 import { NotFoundResponseDto } from '../topics/dto/topic-response.dto';
 import { CreateItemDto } from './dto/create-item.dto';
-import {
-  ItemDto,
-  ItemListDto,
-  ItemNotFoundResponseDto,
-} from './dto/item-response.dto';
+import { ItemDto, ItemListDto, ItemNotFoundResponseDto } from './dto/item-response.dto';
 import { ReorderItemsDto } from './dto/reorder-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
@@ -87,8 +83,7 @@ export class ItemsController {
   @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
   @ApiNotFoundResponse({ type: NotFoundResponseDto })
   @ApiUnprocessableEntityResponse({
-    description:
-      'orderedItemIds не является полной перестановкой ranked id топика',
+    description: 'orderedItemIds не является полной перестановкой ranked id топика',
   })
   reorder(
     @CurrentUser() user: AuthUser,

@@ -3,17 +3,9 @@ import { computed, onUnmounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import {
-  AppButton,
-  AppInput,
-  AppNav,
-  CoverUpload,
-} from '@/components/ui';
+import { AppButton, AppInput, AppNav, CoverUpload } from '@/components/ui';
 import { useLogoutMutation } from '@/composables/useAuthMutations';
-import {
-  useCreateItemMutation,
-  useUploadItemCoverMutation,
-} from '@/composables/useItemMutations';
+import { useCreateItemMutation, useUploadItemCoverMutation } from '@/composables/useItemMutations';
 import { useTopicQuery } from '@/composables/useTopicQuery';
 import { useSessionStore } from '@/stores/session';
 
@@ -41,9 +33,7 @@ const formError = ref('');
 
 const profileLabel = computed(() => session.user?.nick ?? 'Профиль');
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
-const isSubmitting = computed(
-  () => createItem.isPending.value || uploadCover.isPending.value,
-);
+const isSubmitting = computed(() => createItem.isPending.value || uploadCover.isPending.value);
 
 function revokePreview() {
   if (coverPreviewUrl.value?.startsWith('blob:')) {
@@ -78,9 +68,7 @@ function onCoverClear() {
 function applyError(err: unknown, preferCover = false) {
   if (err instanceof TopicsApiError || err instanceof ItemsApiError) {
     if (err.status === 401) {
-      void router.replace(
-        `/login?returnUrl=${encodeURIComponent(route.fullPath)}`,
-      );
+      void router.replace(`/login?returnUrl=${encodeURIComponent(route.fullPath)}`);
       return;
     }
     if (err.status === 404) {
@@ -144,11 +132,7 @@ async function onLogout() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav
-      active="topics"
-      :profile-label="profileLabel"
-      @logout="onLogout"
-    />
+    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[640px] md:px-8 md:pb-10 md:pt-28"
@@ -161,28 +145,17 @@ async function onLogout() {
       </RouterLink>
 
       <h1 class="mt-4 text-h1 text-ink">Добавить элемент</h1>
-      <p class="mt-2 text-body-sm text-muted">
-        Попадёт в «Ещё не оценены»
-      </p>
+      <p class="mt-2 text-body-sm text-muted">Попадёт в «Ещё не оценены»</p>
 
-      <p
-        v-if="topicQuery.isError.value"
-        class="mt-6 text-body text-danger"
-        role="alert"
-      >
+      <p v-if="topicQuery.isError.value" class="mt-6 text-body text-danger" role="alert">
         {{
-          topicQuery.error.value instanceof TopicsApiError &&
-          topicQuery.error.value.status === 404
+          topicQuery.error.value instanceof TopicsApiError && topicQuery.error.value.status === 404
             ? 'Топик не найден'
             : 'Не удалось загрузить топик'
         }}
       </p>
 
-      <form
-        v-else
-        class="mt-6 flex flex-col gap-5"
-        @submit.prevent="onSubmit"
-      >
+      <form v-else class="mt-6 flex flex-col gap-5" @submit.prevent="onSubmit">
         <AppInput
           v-model="title"
           label="Название *"
@@ -205,11 +178,7 @@ async function onLogout() {
           {{ formError }}
         </p>
 
-        <AppButton
-          type="submit"
-          :loading="isSubmitting"
-          class="w-full md:w-auto md:min-w-[200px]"
-        >
+        <AppButton type="submit" :loading="isSubmitting" class="w-full md:w-auto md:min-w-[200px]">
           Добавить
         </AppButton>
       </form>

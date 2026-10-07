@@ -39,11 +39,7 @@ export class ItemsService {
     return { inbox, ranked };
   }
 
-  async createForOwner(
-    ownerId: string,
-    topicId: string,
-    dto: CreateItemDto,
-  ): Promise<ItemDto> {
+  async createForOwner(ownerId: string, topicId: string, dto: CreateItemDto): Promise<ItemDto> {
     await this.findOwnedTopicOrThrow(ownerId, topicId);
 
     const item = await this.prisma.$transaction(async (tx) => {
@@ -65,11 +61,7 @@ export class ItemsService {
     return this.toDto(item);
   }
 
-  async getOwned(
-    ownerId: string,
-    topicId: string,
-    itemId: string,
-  ): Promise<ItemDto> {
+  async getOwned(ownerId: string, topicId: string, itemId: string): Promise<ItemDto> {
     const item = await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
     return this.toDto(item);
   }
@@ -104,11 +96,7 @@ export class ItemsService {
     return this.toDto(item);
   }
 
-  async deleteOwned(
-    ownerId: string,
-    topicId: string,
-    itemId: string,
-  ): Promise<void> {
+  async deleteOwned(ownerId: string, topicId: string, itemId: string): Promise<void> {
     const item = await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
     const coverKey = item.coverKey;
     const wasRanked = item.placement === ItemPlacement.ranked;
@@ -149,10 +137,7 @@ export class ItemsService {
       const ordered = dto.orderedItemIds;
       const orderedUnique = new Set(ordered);
 
-      if (
-        ordered.length !== rankedIds.size ||
-        orderedUnique.size !== ordered.length
-      ) {
+      if (ordered.length !== rankedIds.size || orderedUnique.size !== ordered.length) {
         throw new UnprocessableEntityException({
           message:
             'orderedItemIds должен содержать ровно все ranked-элементы топика без дубликатов',
@@ -193,11 +178,7 @@ export class ItemsService {
   }
 
   /** В конец ranked (плотный rankPosition). Уже ranked — тоже в конец. */
-  async rankOwned(
-    ownerId: string,
-    topicId: string,
-    itemId: string,
-  ): Promise<ItemDto> {
+  async rankOwned(ownerId: string, topicId: string, itemId: string): Promise<ItemDto> {
     await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
 
     const item = await this.prisma.$transaction(async (tx) => {
@@ -230,11 +211,7 @@ export class ItemsService {
   }
 
   /** В inbox; сжатие рангов оставшихся ranked. */
-  async unrankOwned(
-    ownerId: string,
-    topicId: string,
-    itemId: string,
-  ): Promise<ItemDto> {
+  async unrankOwned(ownerId: string, topicId: string, itemId: string): Promise<ItemDto> {
     await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
 
     const item = await this.prisma.$transaction(async (tx) => {
@@ -285,11 +262,7 @@ export class ItemsService {
     return this.toDto(updated);
   }
 
-  async deleteCoverOwned(
-    ownerId: string,
-    topicId: string,
-    itemId: string,
-  ): Promise<ItemDto> {
+  async deleteCoverOwned(ownerId: string, topicId: string, itemId: string): Promise<ItemDto> {
     const item = await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
     const oldKey = item.coverKey;
 
@@ -345,10 +318,7 @@ export class ItemsService {
     return item;
   }
 
-  private async compactRanks(
-    tx: Prisma.TransactionClient,
-    topicId: string,
-  ): Promise<void> {
+  private async compactRanks(tx: Prisma.TransactionClient, topicId: string): Promise<void> {
     const ranked = await tx.item.findMany({
       where: { topicId, placement: ItemPlacement.ranked },
       orderBy: { rankPosition: 'asc' },

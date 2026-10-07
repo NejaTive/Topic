@@ -54,8 +54,7 @@
 
   /* font/family + системный fallback */
   --font-sans: 'Onest Variable', 'Onest', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* typography/* → утилиты text-* */
   --text-display: 40px;

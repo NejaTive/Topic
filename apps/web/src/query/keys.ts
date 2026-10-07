@@ -7,8 +7,7 @@ export const queryKeys = {
     list: () => ['topics', 'list'] as const,
     detail: (id: string) => ['topics', 'detail', id] as const,
     items: (id: string) => ['topics', 'items', id] as const,
-    item: (topicId: string, itemId: string) =>
-      ['topics', 'item', topicId, itemId] as const,
+    item: (topicId: string, itemId: string) => ['topics', 'item', topicId, itemId] as const,
   },
   share: {
     detail: (shareId: string) => ['share', 'detail', shareId] as const,

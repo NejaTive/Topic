@@ -4,10 +4,7 @@ import { fetchItem } from '@/api/items';
 import { queryKeys } from '@/query/keys';
 
 /** GET /api/topics/:topicId/items/:itemId → S07. */
-export function useItemQuery(
-  topicId: MaybeRefOrGetter<string>,
-  itemId: MaybeRefOrGetter<string>,
-) {
+export function useItemQuery(topicId: MaybeRefOrGetter<string>, itemId: MaybeRefOrGetter<string>) {
   const tid = computed(() => toValue(topicId));
   const iid = computed(() => toValue(itemId));
 

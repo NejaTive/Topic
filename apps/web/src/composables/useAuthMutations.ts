@@ -1,11 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
-import {
-  loginUser,
-  logoutUser,
-  registerUser,
-  type LoginBody,
-  type RegisterBody,
-} from '@/api/auth';
+import { loginUser, logoutUser, registerUser, type LoginBody, type RegisterBody } from '@/api/auth';
 import { queryKeys } from '@/query/keys';
 import { useSessionStore } from '@/stores/session';
 

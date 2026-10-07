@@ -94,12 +94,8 @@ const shellClass = computed(() => {
 const brandClass =
   'rounded-md text-[22px] font-bold leading-tight text-ink outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring';
 
-const showCompactCtas = computed(
-  () => props.placement === 'bottom' || props.placement === 'auto',
-);
-const showWideCtas = computed(
-  () => props.placement === 'top' || props.placement === 'auto',
-);
+const showCompactCtas = computed(() => props.placement === 'bottom' || props.placement === 'auto');
+const showWideCtas = computed(() => props.placement === 'top' || props.placement === 'auto');
 </script>
 
 <template>
@@ -116,12 +112,7 @@ const showWideCtas = computed(
         <RouterLink v-slot="{ navigate }" :to="resolvedPrimaryTo" custom>
           <AppButton size="sm" @click="navigate">{{ resolvedPrimaryLabel }}</AppButton>
         </RouterLink>
-        <RouterLink
-          v-if="showJoinCta"
-          v-slot="{ navigate }"
-          :to="resolvedSecondaryTo"
-          custom
-        >
+        <RouterLink v-if="showJoinCta" v-slot="{ navigate }" :to="resolvedSecondaryTo" custom>
           <AppButton variant="ghost" size="sm" @click="navigate">
             {{ resolvedSecondaryLabel }}
           </AppButton>
@@ -137,12 +128,7 @@ const showWideCtas = computed(
         <RouterLink v-slot="{ navigate }" :to="resolvedPrimaryTo" custom>
           <AppButton @click="navigate">{{ resolvedPrimaryLabel }}</AppButton>
         </RouterLink>
-        <RouterLink
-          v-if="showJoinCta"
-          v-slot="{ navigate }"
-          :to="resolvedSecondaryTo"
-          custom
-        >
+        <RouterLink v-if="showJoinCta" v-slot="{ navigate }" :to="resolvedSecondaryTo" custom>
           <AppButton variant="ghost" @click="navigate">{{ resolvedSecondaryLabel }}</AppButton>
         </RouterLink>
       </div>

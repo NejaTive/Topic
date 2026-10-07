@@ -13,6 +13,7 @@ NestJS REST API (Prisma + Postgres).
 **Share HTTP (публичный, без cookie):** `GET /api/t/:shareId` → `{ title, privacy, ownerNick, items }` — только `placement=ranked` по `rankPosition`; у item: `id`, `title`, `rankPosition`, `coverUrl` nullable. Inbox не отдаём. `privacy=private` → **403** (в т.ч. для владельца по этому маршруту); нет / удалён → **404**. OG / signed URL — out of scope.
 
 **Items HTTP (владелец, cookie session):** под `/api/topics/:topicId/items`:
+
 - `GET` — `{ inbox, ranked }` (секции по placement);
 - `POST` — create → `unranked`;
 - `POST /reorder` — тело `{ orderedItemIds: uuid[] }`: полная перестановка **всех** ranked id топика одной транзакцией → плотный `rankPosition` 1…N; ответ `{ inbox, ranked }`; невалидный набор id → **422**;

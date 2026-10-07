@@ -1,9 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import {
-  DeleteObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   BadRequestException,
   Injectable,
@@ -29,9 +25,7 @@ export class StorageService implements OnModuleInit {
     const accessKeyId = this.config.getOrThrow<string>('S3_ACCESS_KEY');
     const secretAccessKey = this.config.getOrThrow<string>('S3_SECRET_KEY');
     this.bucket = this.config.getOrThrow<string>('S3_BUCKET');
-    this.publicBaseUrl = this.config
-      .getOrThrow<string>('S3_PUBLIC_URL')
-      .replace(/\/$/, '');
+    this.publicBaseUrl = this.config.getOrThrow<string>('S3_PUBLIC_URL').replace(/\/$/, '');
 
     this.client = new S3Client({
       endpoint,
@@ -97,9 +91,7 @@ export class StorageService implements OnModuleInit {
     const unique = [...new Set(keys.filter(Boolean))];
     for (const key of unique) {
       try {
-        await this.client.send(
-          new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
-        );
+        await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
       } catch (error) {
         console.warn(`storage: не удалось удалить ${key}`, error);
       }

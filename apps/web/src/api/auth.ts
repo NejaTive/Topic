@@ -41,9 +41,7 @@ function mapLoginValidationFields(
   return fields;
 }
 
-function mapRegisterValidationFields(
-  messages: string[],
-): Partial<Record<AuthErrorField, string>> {
+function mapRegisterValidationFields(messages: string[]): Partial<Record<AuthErrorField, string>> {
   const fields: Partial<Record<AuthErrorField, string>> = {};
   for (const msg of messages) {
     const lower = msg.toLowerCase();

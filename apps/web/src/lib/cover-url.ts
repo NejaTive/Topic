@@ -17,7 +17,5 @@ export function coverUrlFromKey(key: string | null | undefined): string | null {
 
 export function previewCoverUrls(keys: Array<string | null> | undefined): string[] {
   if (!keys?.length) return [];
-  return keys
-    .map((key) => coverUrlFromKey(key))
-    .filter((url): url is string => Boolean(url));
+  return keys.map((key) => coverUrlFromKey(key)).filter((url): url is string => Boolean(url));
 }

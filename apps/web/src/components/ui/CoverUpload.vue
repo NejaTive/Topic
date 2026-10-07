@@ -132,12 +132,7 @@ function clearCover(event: MouseEvent) {
         v-if="!hasPreview"
         class="relative z-10 flex flex-col items-center gap-1 px-3 text-center"
       >
-        <svg
-          class="size-8 text-subtle"
-          viewBox="0 0 32 32"
-          fill="none"
-          aria-hidden="true"
-        >
+        <svg class="size-8 text-subtle" viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <rect
             x="4"
             y="6"

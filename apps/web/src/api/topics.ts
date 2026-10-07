@@ -29,9 +29,7 @@ function validationMessages(error: unknown): string[] {
   return [];
 }
 
-function mapCreateValidationFields(
-  messages: string[],
-): Partial<Record<TopicsErrorField, string>> {
+function mapCreateValidationFields(messages: string[]): Partial<Record<TopicsErrorField, string>> {
   const fields: Partial<Record<TopicsErrorField, string>> = {};
   for (const msg of messages) {
     const lower = msg.toLowerCase();

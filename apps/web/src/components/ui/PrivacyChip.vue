@@ -40,10 +40,7 @@ const toneClass = computed(() => {
 <template>
   <span
     class="inline-flex items-center justify-center gap-1 rounded-sm font-sans"
-    :class="[
-      toneClass,
-      compact ? 'size-6' : 'h-6 px-2 text-caption',
-    ]"
+    :class="[toneClass, compact ? 'size-6' : 'h-6 px-2 text-caption']"
     :title="compact ? label : undefined"
     :aria-label="label"
   >
@@ -77,13 +74,7 @@ const toneClass = computed(() => {
         stroke-linecap="round"
       />
     </svg>
-    <svg
-      v-else
-      class="size-3.5 shrink-0"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg v-else class="size-3.5 shrink-0" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <circle cx="7" cy="7" r="5.25" stroke="currentColor" stroke-width="1.5" />
       <ellipse cx="7" cy="7" rx="2.25" ry="5.25" stroke="currentColor" stroke-width="1.5" />
       <path d="M1.75 7h10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />

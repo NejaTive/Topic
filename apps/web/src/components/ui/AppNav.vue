@@ -64,12 +64,8 @@ const shellClass = computed(() => {
   }
 });
 
-const showMobileChrome = computed(
-  () => props.placement === 'bottom' || props.placement === 'auto',
-);
-const showDesktopChrome = computed(
-  () => props.placement === 'top' || props.placement === 'auto',
-);
+const showMobileChrome = computed(() => props.placement === 'bottom' || props.placement === 'auto');
+const showDesktopChrome = computed(() => props.placement === 'top' || props.placement === 'auto');
 </script>
 
 <template>
@@ -92,9 +88,33 @@ const showDesktopChrome = computed(
             :class="isTopics ? 'bg-accent-soft' : 'bg-transparent'"
           >
             <svg class="size-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <rect x="3" y="4" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.5" />
-              <rect x="3" y="9" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.5" />
-              <rect x="3" y="14" width="10" height="3" rx="1" stroke="currentColor" stroke-width="1.5" />
+              <rect
+                x="3"
+                y="4"
+                width="14"
+                height="3"
+                rx="1"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <rect
+                x="3"
+                y="9"
+                width="14"
+                height="3"
+                rx="1"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <rect
+                x="3"
+                y="14"
+                width="10"
+                height="3"
+                rx="1"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
             </svg>
           </span>
           <span class="font-semibold">Мои топики</span>

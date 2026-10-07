@@ -52,9 +52,7 @@ const isTopThree = computed(
   () => props.mode === 'ranked' && props.rank != null && props.rank >= 1 && props.rank <= 3,
 );
 
-const rankToneClass = computed(() =>
-  isTopThree.value ? 'text-rank-top' : 'text-rank',
-);
+const rankToneClass = computed(() => (isTopThree.value ? 'text-rank-top' : 'text-rank'));
 
 function armHandle() {
   if (props.dragEnabled && props.mode === 'ranked') {
@@ -132,18 +130,10 @@ function onDragEnd(event: DragEvent) {
       class="h-12 w-9 shrink-0 overflow-hidden rounded-sm border border-line bg-surface-sunken"
       aria-hidden="true"
     >
-      <img
-        v-if="coverUrl"
-        :src="coverUrl"
-        alt=""
-        class="size-full object-cover"
-      />
+      <img v-if="coverUrl" :src="coverUrl" alt="" class="size-full object-cover" />
     </div>
 
-    <span
-      v-if="readonly"
-      class="min-w-0 flex-1 truncate text-left text-title text-ink"
-    >
+    <span v-if="readonly" class="min-w-0 flex-1 truncate text-left text-title text-ink">
       {{ title }}
     </span>
     <button

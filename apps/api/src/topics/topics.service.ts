@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import {
   ItemPlacement,
@@ -208,10 +204,7 @@ export class TopicsService {
   }
 
   private isShareIdConflict(error: unknown): boolean {
-    if (
-      !(error instanceof Prisma.PrismaClientKnownRequestError) ||
-      error.code !== 'P2002'
-    ) {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
       return false;
     }
     const meta = error.meta as Record<string, unknown> | undefined;
@@ -223,8 +216,7 @@ export class TopicsService {
       parts.push(target);
     }
     const driver = meta?.driverAdapterError as
-      | { cause?: { constraint?: { index?: string; fields?: string[] } } }
-      | undefined;
+      { cause?: { constraint?: { index?: string; fields?: string[] } } } | undefined;
     const constraint = driver?.cause?.constraint;
     if (constraint?.index) {
       parts.push(constraint.index);

@@ -275,12 +275,7 @@ function showCoverErrorDemo() {
       <h2 class="text-title">AppInput</h2>
       <AppInput v-model="email" label="Email" type="email" placeholder="you@example.com" />
       <AppInput v-model="password" label="Пароль" type="password" />
-      <AppInput
-        v-model="errorEmail"
-        label="С ошибкой"
-        type="email"
-        error="Некорректный email"
-      />
+      <AppInput v-model="errorEmail" label="С ошибкой" type="email" error="Некорректный email" />
       <AppInput model-value="Disabled" label="Disabled" disabled />
     </section>
   </main>

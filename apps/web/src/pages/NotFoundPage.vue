@@ -3,8 +3,5 @@ import ErrorStateView from '@/components/ErrorStateView.vue';
 </script>
 
 <template>
-  <ErrorStateView
-    title="Не найдено"
-    subtitle="Битая ссылка или топик удалён"
-  />
+  <ErrorStateView title="Не найдено" subtitle="Битая ссылка или топик удалён" />
 </template>

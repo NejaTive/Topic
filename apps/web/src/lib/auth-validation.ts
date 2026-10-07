@@ -14,10 +14,7 @@ function isEmail(value: string): boolean {
   return EMAIL_RE.test(value);
 }
 
-export function validateLoginForm(input: {
-  email: string;
-  password: string;
-}): LoginFieldErrors {
+export function validateLoginForm(input: { email: string; password: string }): LoginFieldErrors {
   const errors: LoginFieldErrors = {};
   const email = input.email.trim();
 
@@ -66,8 +63,6 @@ export function validateRegisterForm(input: {
   return errors;
 }
 
-export function hasFieldErrors(
-  errors: Record<string, string | undefined>,
-): boolean {
+export function hasFieldErrors(errors: Record<string, string | undefined>): boolean {
   return Object.values(errors).some((msg) => Boolean(msg));
 }

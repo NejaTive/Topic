@@ -31,9 +31,7 @@ const formError = ref('');
 
 const isSubmitting = computed(() => createTopic.isPending.value);
 const profileLabel = computed(() => session.user?.nick ?? 'Профиль');
-const selectedChip = computed(() =>
-  MAIN_CHIP_LABELS.find((label) => title.value === label),
-);
+const selectedChip = computed(() => MAIN_CHIP_LABELS.find((label) => title.value === label));
 
 function clearErrors() {
   fieldErrors.value = {};
@@ -113,11 +111,7 @@ async function onLogout() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav
-      active="topics"
-      :profile-label="profileLabel"
-      @logout="onLogout"
-    />
+    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[440px] md:px-8 md:pb-10 md:pt-28"
@@ -159,11 +153,7 @@ async function onLogout() {
 
         <fieldset class="flex flex-col gap-2 border-0 p-0">
           <legend class="text-label text-ink">Приватность</legend>
-          <div
-            class="flex flex-wrap gap-2"
-            role="radiogroup"
-            aria-label="Приватность топика"
-          >
+          <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="Приватность топика">
             <button
               v-for="option in PRIVACY_OPTIONS"
               :key="option"
@@ -191,9 +181,7 @@ async function onLogout() {
           {{ formError }}
         </p>
 
-        <AppButton type="submit" :loading="isSubmitting" class="w-full">
-          Создать
-        </AppButton>
+        <AppButton type="submit" :loading="isSubmitting" class="w-full"> Создать </AppButton>
       </form>
     </main>
   </div>

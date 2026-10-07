@@ -29,10 +29,9 @@ function errorMessage(error: unknown, fallback: string): string {
 
 /** GET /api/topics/:topicId/items — inbox + ranked (BAC-11). */
 export async function fetchTopicItems(topicId: string): Promise<ItemList> {
-  const { data, error, response } = await apiClient.GET(
-    '/api/topics/{topicId}/items',
-    { params: { path: { topicId } } },
-  );
+  const { data, error, response } = await apiClient.GET('/api/topics/{topicId}/items', {
+    params: { path: { topicId } },
+  });
   if (response.status === 401) {
     throw new ItemsApiError('Требуется вход', 401);
   }
@@ -47,10 +46,9 @@ export async function fetchTopicItems(topicId: string): Promise<ItemList> {
 
 /** GET /api/topics/:topicId/items/:itemId — карточка элемента (S07). */
 export async function fetchItem(topicId: string, itemId: string): Promise<ItemDto> {
-  const { data, error, response } = await apiClient.GET(
-    '/api/topics/{topicId}/items/{itemId}',
-    { params: { path: { topicId, itemId } } },
-  );
+  const { data, error, response } = await apiClient.GET('/api/topics/{topicId}/items/{itemId}', {
+    params: { path: { topicId, itemId } },
+  });
   if (response.status === 401) {
     throw new ItemsApiError('Требуется вход', 401);
   }
@@ -64,17 +62,11 @@ export async function fetchItem(topicId: string, itemId: string): Promise<ItemDt
 }
 
 /** POST /api/topics/:topicId/items — создать в inbox (S06). */
-export async function createItem(
-  topicId: string,
-  body: CreateItemBody,
-): Promise<ItemDto> {
-  const { data, error, response } = await apiClient.POST(
-    '/api/topics/{topicId}/items',
-    {
-      params: { path: { topicId } },
-      body,
-    },
-  );
+export async function createItem(topicId: string, body: CreateItemBody): Promise<ItemDto> {
+  const { data, error, response } = await apiClient.POST('/api/topics/{topicId}/items', {
+    params: { path: { topicId } },
+    body,
+  });
   if (response.status === 401) {
     throw new ItemsApiError('Требуется вход', 401);
   }
@@ -82,10 +74,7 @@ export async function createItem(
     throw new ItemsApiError('Топик не найден', 404);
   }
   if (response.status === 400 || response.status === 422) {
-    throw new ItemsApiError(
-      errorMessage(error, 'Проверьте название элемента'),
-      response.status,
-    );
+    throw new ItemsApiError(errorMessage(error, 'Проверьте название элемента'), response.status);
   }
   if (error || !data) {
     throw new ItemsApiError('Не удалось создать элемент', response.status);
@@ -99,13 +88,10 @@ export async function updateItem(
   itemId: string,
   body: UpdateItemBody,
 ): Promise<ItemDto> {
-  const { data, error, response } = await apiClient.PATCH(
-    '/api/topics/{topicId}/items/{itemId}',
-    {
-      params: { path: { topicId, itemId } },
-      body,
-    },
-  );
+  const { data, error, response } = await apiClient.PATCH('/api/topics/{topicId}/items/{itemId}', {
+    params: { path: { topicId, itemId } },
+    body,
+  });
   if (response.status === 401) {
     throw new ItemsApiError('Требуется вход', 401);
   }
@@ -113,10 +99,7 @@ export async function updateItem(
     throw new ItemsApiError('Элемент не найден', 404);
   }
   if (response.status === 400 || response.status === 422) {
-    throw new ItemsApiError(
-      errorMessage(error, 'Проверьте название элемента'),
-      response.status,
-    );
+    throw new ItemsApiError(errorMessage(error, 'Проверьте название элемента'), response.status);
   }
   if (error || !data) {
     throw new ItemsApiError('Не удалось сохранить элемент', response.status);
@@ -126,10 +109,9 @@ export async function updateItem(
 
 /** DELETE /api/topics/:topicId/items/:itemId. */
 export async function deleteItem(topicId: string, itemId: string): Promise<void> {
-  const { error, response } = await apiClient.DELETE(
-    '/api/topics/{topicId}/items/{itemId}',
-    { params: { path: { topicId, itemId } } },
-  );
+  const { error, response } = await apiClient.DELETE('/api/topics/{topicId}/items/{itemId}', {
+    params: { path: { topicId, itemId } },
+  });
   if (response.status === 401) {
     throw new ItemsApiError('Требуется вход', 401);
   }
@@ -178,17 +160,11 @@ export async function unrankItem(topicId: string, itemId: string): Promise<ItemD
 }
 
 /** POST /api/topics/:topicId/items/reorder — полная перестановка ranked (BAC-12). */
-export async function reorderItems(
-  topicId: string,
-  orderedItemIds: string[],
-): Promise<ItemList> {
-  const { data, error, response } = await apiClient.POST(
-    '/api/topics/{topicId}/items/reorder',
-    {
-      params: { path: { topicId } },
-      body: { orderedItemIds },
-    },
-  );
+export async function reorderItems(topicId: string, orderedItemIds: string[]): Promise<ItemList> {
+  const { data, error, response } = await apiClient.POST('/api/topics/{topicId}/items/reorder', {
+    params: { path: { topicId } },
+    body: { orderedItemIds },
+  });
   if (response.status === 401) {
     throw new ItemsApiError('Требуется вход', 401);
   }
@@ -208,10 +184,7 @@ function coverUploadError(error: unknown, status: number): ItemsApiError {
   if (status === 401) return new ItemsApiError('Требуется вход', 401);
   if (status === 404) return new ItemsApiError('Элемент не найден', 404);
   if (status === 413) {
-    return new ItemsApiError(
-      errorMessage(error, 'Файл обложки больше 5 МБ'),
-      413,
-    );
+    return new ItemsApiError(errorMessage(error, 'Файл обложки больше 5 МБ'), 413);
   }
   if (status === 400) {
     return new ItemsApiError(
@@ -219,10 +192,7 @@ function coverUploadError(error: unknown, status: number): ItemsApiError {
       400,
     );
   }
-  return new ItemsApiError(
-    errorMessage(error, 'Не удалось загрузить обложку'),
-    status,
-  );
+  return new ItemsApiError(errorMessage(error, 'Не удалось загрузить обложку'), status);
 }
 
 /** POST multipart cover ≤5 МБ (BAC-11). */
@@ -251,10 +221,7 @@ export async function uploadItemCover(
 }
 
 /** DELETE cover of item. */
-export async function deleteItemCover(
-  topicId: string,
-  itemId: string,
-): Promise<ItemDto> {
+export async function deleteItemCover(topicId: string, itemId: string): Promise<ItemDto> {
   const { data, error, response } = await apiClient.DELETE(
     '/api/topics/{topicId}/items/{itemId}/cover',
     { params: { path: { topicId, itemId } } },

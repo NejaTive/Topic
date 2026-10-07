@@ -3,12 +3,7 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import {
-  AppButton,
-  AppInput,
-  AppNav,
-  CoverUpload,
-} from '@/components/ui';
+import { AppButton, AppInput, AppNav, CoverUpload } from '@/components/ui';
 import { useLogoutMutation } from '@/composables/useAuthMutations';
 import {
   useDeleteItemCoverMutation,
@@ -20,10 +15,7 @@ import {
 } from '@/composables/useItemMutations';
 import { useItemQuery } from '@/composables/useItemQuery';
 import { useTopicQuery } from '@/composables/useTopicQuery';
-import {
-  formatItemAddedAt,
-  formatItemPlacement,
-} from '@/lib/format-item-meta';
+import { formatItemAddedAt, formatItemPlacement } from '@/lib/format-item-meta';
 import { useSessionStore } from '@/stores/session';
 
 const route = useRoute();
@@ -89,13 +81,9 @@ const isBusy = computed(
     unrankMut.isPending.value,
 );
 
-const addedLabel = computed(() =>
-  item.value ? formatItemAddedAt(item.value.createdAt) : '',
-);
+const addedLabel = computed(() => (item.value ? formatItemAddedAt(item.value.createdAt) : ''));
 const placementLabel = computed(() =>
-  item.value
-    ? formatItemPlacement(item.value.placement, item.value.rankPosition)
-    : '',
+  item.value ? formatItemPlacement(item.value.placement, item.value.rankPosition) : '',
 );
 const isUnranked = computed(() => item.value?.placement === 'unranked');
 
@@ -131,9 +119,7 @@ function clearActionError() {
 function applyError(err: unknown, fallback: string, preferCover = false) {
   if (err instanceof TopicsApiError || err instanceof ItemsApiError) {
     if (err.status === 401) {
-      void router.replace(
-        `/login?returnUrl=${encodeURIComponent(route.fullPath)}`,
-      );
+      void router.replace(`/login?returnUrl=${encodeURIComponent(route.fullPath)}`);
       return;
     }
     if (preferCover && (err.status === 400 || err.status === 413)) {
@@ -153,9 +139,7 @@ function applyError(err: unknown, fallback: string, preferCover = false) {
 function applyActionError(err: unknown, fallback: string) {
   if (err instanceof TopicsApiError || err instanceof ItemsApiError) {
     if (err.status === 401) {
-      void router.replace(
-        `/login?returnUrl=${encodeURIComponent(route.fullPath)}`,
-      );
+      void router.replace(`/login?returnUrl=${encodeURIComponent(route.fullPath)}`);
       return;
     }
     actionError.value = err.message || fallback;
@@ -258,11 +242,7 @@ function onRetry() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav
-      active="topics"
-      :profile-label="profileLabel"
-      @logout="onLogout"
-    />
+    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[640px] md:px-8 md:pb-10 md:pt-28"
@@ -297,9 +277,7 @@ function onRetry() {
               : 'Не удалось загрузить элемент'
           }}
         </p>
-        <AppButton variant="secondary" size="sm" @click="onRetry">
-          Повторить
-        </AppButton>
+        <AppButton variant="secondary" size="sm" @click="onRetry"> Повторить </AppButton>
       </div>
 
       <template v-else-if="item">
@@ -358,9 +336,7 @@ function onRetry() {
             {{ actionError }}
           </p>
 
-          <div
-            class="flex flex-col gap-3 md:flex-row md:items-center md:gap-3"
-          >
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
             <AppButton
               type="submit"
               :loading="

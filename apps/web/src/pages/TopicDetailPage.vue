@@ -3,13 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import {
-  AppButton,
-  AppNav,
-  PrivacyChip,
-  RankRow,
-  type PrivacyValue,
-} from '@/components/ui';
+import { AppButton, AppNav, PrivacyChip, RankRow, type PrivacyValue } from '@/components/ui';
 import { useLogoutMutation } from '@/composables/useAuthMutations';
 import {
   useDeleteTopicMutation,
@@ -26,9 +20,7 @@ const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
 /** Custom MIME for HTML5 DnD payload (ranked reorder / inbox→ranked). */
 const DND_MIME = 'application/x-topic-item';
 
-type DndPayload =
-  | { source: 'ranked'; itemId: string }
-  | { source: 'inbox'; itemId: string };
+type DndPayload = { source: 'ranked'; itemId: string } | { source: 'inbox'; itemId: string };
 
 const route = useRoute();
 const router = useRouter();
@@ -72,16 +64,10 @@ const inbox = computed(() => itemsQuery.data.value?.inbox ?? []);
 const ranked = computed(() => itemsQuery.data.value?.ranked ?? []);
 
 const isEmpty = computed(
-  () =>
-    itemsQuery.isSuccess.value &&
-    inbox.value.length === 0 &&
-    ranked.value.length === 0,
+  () => itemsQuery.isSuccess.value && inbox.value.length === 0 && ranked.value.length === 0,
 );
 const isInboxOnly = computed(
-  () =>
-    itemsQuery.isSuccess.value &&
-    inbox.value.length > 0 &&
-    ranked.value.length === 0,
+  () => itemsQuery.isSuccess.value && inbox.value.length > 0 && ranked.value.length === 0,
 );
 
 const shareUrl = computed(() => {
@@ -101,9 +87,7 @@ function clearActionError() {
 function applyApiError(err: unknown, fallback: string) {
   if (err instanceof TopicsApiError || err instanceof ItemsApiError) {
     if (err.status === 401) {
-      void router.replace(
-        `/login?returnUrl=${encodeURIComponent(route.fullPath)}`,
-      );
+      void router.replace(`/login?returnUrl=${encodeURIComponent(route.fullPath)}`);
       return;
     }
     actionError.value = err.message || fallback;
@@ -217,8 +201,7 @@ function onRowDragEnd() {
 function onRankedDragOver(event: DragEvent) {
   const types = event.dataTransfer?.types;
   if (!types) return;
-  const ok =
-    [...types].includes(DND_MIME) || [...types].includes('text/plain');
+  const ok = [...types].includes(DND_MIME) || [...types].includes('text/plain');
   if (!ok) return;
   event.preventDefault();
   if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
@@ -334,11 +317,7 @@ function onRetry() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav
-      active="topics"
-      :profile-label="profileLabel"
-      @logout="onLogout"
-    />
+    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[1200px] md:px-8 md:pb-10 md:pt-28"
@@ -386,9 +365,7 @@ function onRetry() {
               type="button"
               class="rounded-sm outline-none transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
               :class="
-                privacyOpen
-                  ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg'
-                  : 'hover:opacity-90'
+                privacyOpen ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : 'hover:opacity-90'
               "
               :aria-expanded="privacyOpen"
               aria-haspopup="listbox"
@@ -475,26 +452,15 @@ function onRetry() {
           </button>
         </div>
 
-        <p
-          v-if="copyFeedback"
-          class="mt-2 text-caption text-accent"
-          role="status"
-        >
+        <p v-if="copyFeedback" class="mt-2 text-caption text-accent" role="status">
           {{ copyFeedback }}
         </p>
-        <p
-          v-if="actionError"
-          class="mt-2 text-caption text-danger"
-          role="alert"
-        >
+        <p v-if="actionError" class="mt-2 text-caption text-danger" role="alert">
           {{ actionError }}
         </p>
 
         <!-- Empty: no items at all -->
-        <div
-          v-if="isEmpty"
-          class="mt-12 flex flex-col items-start gap-4 md:mt-16"
-        >
+        <div v-if="isEmpty" class="mt-12 flex flex-col items-start gap-4 md:mt-16">
           <p class="text-title text-ink">Добавьте первый элемент</p>
           <button
             type="button"
@@ -531,12 +497,7 @@ function onRetry() {
                 />
               </li>
             </ul>
-            <p
-              v-if="inbox.length === 0"
-              class="mt-3 text-body-sm text-muted"
-            >
-              Пока пусто
-            </p>
+            <p v-if="inbox.length === 0" class="mt-3 text-body-sm text-muted">Пока пусто</p>
             <button
               type="button"
               class="mt-3 text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
@@ -550,9 +511,7 @@ function onRetry() {
           <section
             aria-labelledby="s05-rank-heading"
             :class="
-              rankedDropActive
-                ? 'rounded-md ring-2 ring-accent ring-offset-2 ring-offset-bg'
-                : null
+              rankedDropActive ? 'rounded-md ring-2 ring-accent ring-offset-2 ring-offset-bg' : null
             "
             @dragover="onRankedDragOver"
             @dragleave="onRankedDragLeave"
@@ -561,10 +520,7 @@ function onRetry() {
             <h2 id="s05-rank-heading" class="text-label font-bold text-ink md:text-title">
               Рейтинг
             </h2>
-            <p
-              v-if="isInboxOnly"
-              class="mt-3 text-body-sm text-muted"
-            >
+            <p v-if="isInboxOnly" class="mt-3 text-body-sm text-muted">
               Перенесите в рейтинг, когда будете готовы
             </p>
             <ul
@@ -589,10 +545,7 @@ function onRetry() {
                 />
               </li>
             </ul>
-            <p
-              v-if="ranked.length === 0 && !isInboxOnly"
-              class="mt-3 text-body-sm text-muted"
-            >
+            <p v-if="ranked.length === 0 && !isInboxOnly" class="mt-3 text-body-sm text-muted">
               Пока пусто
             </p>
           </section>

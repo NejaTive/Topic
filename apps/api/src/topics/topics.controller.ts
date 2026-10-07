@@ -26,11 +26,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UnauthorizedResponseDto } from '../auth/dto/user-response.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CreateTopicDto } from './dto/create-topic.dto';
-import {
-  NotFoundResponseDto,
-  TopicDetailDto,
-  TopicListItemDto,
-} from './dto/topic-response.dto';
+import { NotFoundResponseDto, TopicDetailDto, TopicListItemDto } from './dto/topic-response.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
 import { TopicsService } from './topics.service';
 
@@ -52,10 +48,7 @@ export class TopicsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: TopicDetailDto })
   @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
-  create(
-    @CurrentUser() user: AuthUser,
-    @Body() dto: CreateTopicDto,
-  ): Promise<TopicDetailDto> {
+  create(@CurrentUser() user: AuthUser, @Body() dto: CreateTopicDto): Promise<TopicDetailDto> {
     return this.topics.createForOwner(user.id, dto);
   }
 
