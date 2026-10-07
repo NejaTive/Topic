@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { AuthApiError } from '@/api/auth';
 import { AppButton, AppInput } from '@/components/ui';
 import { useLoginMutation } from '@/composables/useAuthMutations';
+import { hasFieldErrors, validateLoginForm } from '@/lib/auth-validation';
 
 const route = useRoute();
 const router = useRouter();
@@ -64,8 +65,20 @@ function applyAuthError(err: unknown) {
 
 async function onSubmit() {
   clearErrors();
+  const localErrors = validateLoginForm({
+    email: email.value,
+    password: password.value,
+  });
+  if (hasFieldErrors(localErrors)) {
+    fieldErrors.value = localErrors;
+    return;
+  }
+
   try {
-    await login.mutateAsync({ email: email.value, password: password.value });
+    await login.mutateAsync({
+      email: email.value.trim(),
+      password: password.value,
+    });
     await router.replace(resolveReturnPath());
   } catch (err) {
     applyAuthError(err);
@@ -87,7 +100,7 @@ async function onSubmit() {
 
       <h1 class="text-h1 text-ink">Вход</h1>
 
-      <form class="flex flex-col gap-3" @submit.prevent="onSubmit">
+      <form class="flex flex-col gap-3" novalidate @submit.prevent="onSubmit">
         <AppInput
           v-model="email"
           label="Email"
@@ -111,7 +124,7 @@ async function onSubmit() {
         <p class="text-label font-semibold text-muted">
           Нет аккаунта?
           <RouterLink
-            class="outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+            class="text-accent font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
             to="/register"
           >
             Регистрация

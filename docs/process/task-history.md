@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 07.10.2026 — Ревью Auth — валидация login/register и правки UI
+
+- **YouGile:** FRO-21
+- **Итог:** Клиентская валидация login/register (`auth-validation.ts`) до запроса к API; русские сообщения class-validator в LoginDto/RegisterDto; accent-ссылки Войти/Регистрация; AppButton md `px-6` + `cursor-pointer`.
+- **Репо:** `fix/FRO-21` / [PR #35](https://github.com/NejaTive/Topic/pull/35) / (merge в develop)
+- **Заметки:** manual-close после ручного ревью владельцем; BAC DTO в том же коммите.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 06.10.2026 — Сверстать S11 и S12 — ошибки доступа/404
 
 - **YouGile:** FRO-20
