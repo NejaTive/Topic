@@ -320,8 +320,8 @@
 
 ### Share — продуктовые уточнения (нарезка 4d)
 
-- Guest chrome на S09: Primary **«Войти»** → `/login`; Ghost **«Присоединиться»** → `/` (орфография с «и»; в Figma опечатка «Присоедениться»).
-- Владелец на своём unlisted/public `/t/:shareId` остаётся на **S09** (preview как у гостя), без redirect на S05; CTA «Редактировать» на S09 не делаем в этом эпике.
+- ~~Guest chrome на S09: Primary «Войти» → `/login`; Ghost «Присоединиться» → `/`.~~ — **отменено 07.10.2026** (см. блок «S09 header»).
+- Владелец на своём unlisted/public `/t/:shareId` остаётся на **S09** (preview), без redirect на S05; CTA «Редактировать» на S09 не делаем в этом эпике.
 - Share API: **403** (private / недоступен) отдельно от **404** (нет / удалён) — под экраны S11 / S12.
 - Карточки YouGile: **BAC-13**, **FRO-18**, **FRO-19** (эпик Share); S11–S12 — эпик Page Error.
 
@@ -439,3 +439,11 @@
 
 - После любой задачи с правками в репо — **до коммита** `pnpm run format`; правки Prettier — в тот же коммит.
 - Канон: `.cursor/rules/collaboration/working-style.mdc`; skills `yougile-executor` / `yougile-manual-close` / `yougile-reviewer`.
+
+### S09 header — два состояния по сессии
+
+- На `/t/:shareId` хедер зависит только от авторизации:
+  - **гость** — `GuestNav` `ctaMode=share`: одна Primary **«Присоединиться»** → `/` (лендинг); без «Войти».
+  - **авторизованный** — обычный `AppNav` (как в app).
+- Орфография CTA: **«Присоединиться»** (с «и»; в Figma бывает опечатка «Присоедениться»).
+- Без redirect владельца на S05; preview share остаётся на S09.

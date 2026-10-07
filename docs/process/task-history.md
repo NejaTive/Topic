@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 07.10.2026 — AppNav / GuestNav — хедер по макетам и два состояния S09
+
+- **YouGile:** FRO-22
+- **Итог:** AppNav M+D по Figma (табы, soft-well/pill, иконки; Лента/Профиль disabled); active «Мои топики» только на `/app/topics*`; S09 гость — GuestNav `share` («Присоединиться»→`/`), авторизованный — AppNav; decisions/README/UI-Kit.
+- **Репо:** `style/FRO-22` / [PR #36](https://github.com/NejaTive/Topic/pull/36) / (merge в develop)
+- **Заметки:** manual-close; владелец прогнал UI вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 07.10.2026 — Ревью Auth — валидация login/register и правки UI
 
 - **YouGile:** FRO-21

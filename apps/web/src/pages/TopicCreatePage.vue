@@ -11,15 +11,11 @@ import {
   PrivacyChip,
   type PrivacyValue,
 } from '@/components/ui';
-import { useLogoutMutation } from '@/composables/useAuthMutations';
 import { useCreateTopicMutation } from '@/composables/useCreateTopicMutation';
-import { useSessionStore } from '@/stores/session';
 
 const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
 
-const session = useSessionStore();
 const router = useRouter();
-const logout = useLogoutMutation();
 const createTopic = useCreateTopicMutation();
 
 const title = ref('');
@@ -30,7 +26,6 @@ const fieldErrors = ref<{ title?: string; privacy?: string }>({});
 const formError = ref('');
 
 const isSubmitting = computed(() => createTopic.isPending.value);
-const profileLabel = computed(() => session.user?.nick ?? 'Профиль');
 const selectedChip = computed(() => MAIN_CHIP_LABELS.find((label) => title.value === label));
 
 function clearErrors() {
@@ -102,16 +97,11 @@ async function onSubmit() {
     applyCreateError(err);
   }
 }
-
-async function onLogout() {
-  await logout.mutateAsync();
-  await router.replace('/login');
-}
 </script>
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
+    <AppNav />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[440px] md:px-8 md:pb-10 md:pt-28"
