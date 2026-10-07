@@ -394,3 +394,12 @@
 - Порядок полей: YouGile → Итог → Репо → Заметки (опц.) → **Доработка после ревью** → **Длительность** (в конце).
 - **Доработка после ревью:** `нет` или `да (цикл N/3; …)` — был ли FAIL-возврат в «В разработке» до финального OK.
 - Канон: [`task-history.md`](task-history.md); skill `yougile-reviewer`.
+
+### Skill «запуск проекта»
+
+- Project skill: `.cursor/skills/engineering/start-project/SKILL.md`.
+- Skills раскладываем по секциям как rules: `collaboration/` (YouGile), `engineering/` (dev/стек).
+- Поднимает локальный стек Topic (infra → migrate deploy → `pnpm dev`); профили `full` / `infra` / `api` / `web`.
+- Отчёт агента: markdown **вне** code fence (кликабельные ссылки); секции Infra / API / Web с таблицами + dev-креды; **длительность** старта (всего + по сервисам), не часы; профиль (`full`/…) в отчёт не писать.
+- Остановка — зеркальный каркас («остановлен» + shutdown ~Xs); только по просьбе владельца или cleanup вызывающего skill (ревьюер).
+- Канон: `.cursor/skills/engineering/start-project/SKILL.md`.
