@@ -26,7 +26,14 @@ const fieldErrors = ref<{ title?: string; privacy?: string }>({});
 const formError = ref('');
 
 const isSubmitting = computed(() => createTopic.isPending.value);
-const selectedChip = computed(() => MAIN_CHIP_LABELS.find((label) => title.value === label));
+
+/** B+C: подсказки только после ввода; exact match и пустое поле — ряд скрыт. */
+const visibleChips = computed(() => {
+  const q = title.value.trim().toLowerCase();
+  if (!q) return [];
+  if (MAIN_CHIP_LABELS.some((label) => label.toLowerCase() === q)) return [];
+  return MAIN_CHIP_LABELS.filter((label) => label.toLowerCase().startsWith(q));
+});
 
 function clearErrors() {
   fieldErrors.value = {};
@@ -114,10 +121,6 @@ async function onSubmit() {
       </RouterLink>
 
       <h1 class="mt-4 text-h1 text-ink">Новый топик</h1>
-      <p class="mt-2 text-body-sm text-muted">
-        Подсказка подставит название — можно изменить. Приватность по умолчанию — по ссылке.
-      </p>
-
       <form class="mt-6 flex flex-col gap-5" @submit.prevent="onSubmit">
         <div class="flex flex-col gap-2">
           <AppInput
@@ -129,40 +132,40 @@ async function onSubmit() {
             :error="fieldErrors.title"
             :disabled="isSubmitting"
           />
-          <div class="flex flex-wrap gap-2" role="group" aria-label="Подсказки названия">
+          <div
+            v-if="visibleChips.length > 0"
+            class="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Подсказки названия"
+          >
             <MainChip
-              v-for="label in MAIN_CHIP_LABELS"
+              v-for="label in visibleChips"
               :key="label"
               :label="label"
-              :selected="selectedChip === label"
+              :selected="false"
               :disabled="isSubmitting"
               @select="onChipSelect"
             />
           </div>
         </div>
 
-        <fieldset class="flex flex-col gap-2 border-0 p-0">
-          <legend class="text-label text-ink">Приватность</legend>
+        <fieldset class="border-0 p-0">
+          <legend class="mb-2 text-label text-ink">Приватность</legend>
           <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="Приватность топика">
             <button
               v-for="option in PRIVACY_OPTIONS"
               :key="option"
               type="button"
               role="radio"
-              class="rounded-sm outline-none transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-              :class="
-                privacy === option
-                  ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg'
-                  : 'hover:opacity-90'
-              "
+              class="cursor-pointer rounded-sm outline-none transition-opacity hover:enabled:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
               :aria-checked="privacy === option"
               :disabled="isSubmitting"
               @click="onPrivacySelect(option)"
             >
-              <PrivacyChip :privacy="option" />
+              <PrivacyChip :privacy="option" :selected="privacy === option" />
             </button>
           </div>
-          <p v-if="fieldErrors.privacy" class="text-caption text-danger" role="alert">
+          <p v-if="fieldErrors.privacy" class="mt-2 text-caption text-danger" role="alert">
             {{ fieldErrors.privacy }}
           </p>
         </fieldset>

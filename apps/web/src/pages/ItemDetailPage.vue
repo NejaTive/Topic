@@ -14,7 +14,6 @@ import {
 } from '@/composables/useItemMutations';
 import { useItemQuery } from '@/composables/useItemQuery';
 import { useTopicQuery } from '@/composables/useTopicQuery';
-import { formatItemAddedAt, formatItemPlacement } from '@/lib/format-item-meta';
 
 const route = useRoute();
 const router = useRouter();
@@ -75,12 +74,6 @@ const isBusy = computed(
     rankMut.isPending.value ||
     unrankMut.isPending.value,
 );
-
-const addedLabel = computed(() => (item.value ? formatItemAddedAt(item.value.createdAt) : ''));
-const placementLabel = computed(() =>
-  item.value ? formatItemPlacement(item.value.placement, item.value.rankPosition) : '',
-);
-const isUnranked = computed(() => item.value?.placement === 'unranked');
 
 watch(
   () => item.value?.title,
@@ -206,24 +199,6 @@ async function onDelete() {
   }
 }
 
-async function onToRank() {
-  clearActionError();
-  try {
-    await rankMut.mutateAsync();
-  } catch (err) {
-    applyActionError(err, 'Не удалось перенести в рейтинг');
-  }
-}
-
-async function onToInbox() {
-  clearActionError();
-  try {
-    await unrankMut.mutateAsync();
-  } catch (err) {
-    applyActionError(err, 'Не удалось вернуть в inbox');
-  }
-}
-
 function onRetry() {
   void topicQuery.refetch();
   void itemQuery.refetch();
@@ -290,34 +265,6 @@ function onRetry() {
             @file="onCoverFile"
             @clear="onCoverClear"
           />
-
-          <div class="flex flex-col gap-1">
-            <p class="text-body-sm text-muted">{{ addedLabel }}</p>
-            <p class="text-body-sm font-medium text-ink">{{ placementLabel }}</p>
-          </div>
-
-          <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <AppButton
-              v-if="isUnranked"
-              type="button"
-              variant="secondary"
-              :disabled="isBusy"
-              class="w-full sm:w-auto"
-              @click="onToRank"
-            >
-              В рейтинг
-            </AppButton>
-            <AppButton
-              v-else
-              type="button"
-              variant="secondary"
-              :disabled="isBusy"
-              class="w-full sm:w-auto"
-              @click="onToInbox"
-            >
-              В inbox
-            </AppButton>
-          </div>
 
           <p v-if="formError" class="text-caption text-danger" role="alert">
             {{ formError }}

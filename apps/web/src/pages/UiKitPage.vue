@@ -6,6 +6,7 @@ import {
   AppNav,
   GuestNav,
   CoverUpload,
+  EmptyState,
   MainChip,
   MAIN_CHIP_LABELS,
   PrivacyChip,
@@ -33,11 +34,11 @@ const sampleRows: {
   title: string;
   meta: string;
   privacy: PrivacyValue;
-  covers?: string[];
+  covers?: Array<string | null>;
 }[] = [
   {
     title: 'Фильмы 2026',
-    meta: 'Изменено 5 окт',
+    meta: 'обновлён вчера',
     privacy: 'public',
     covers: [
       'data:image/svg+xml,' +
@@ -56,12 +57,12 @@ const sampleRows: {
   },
   {
     title: 'Книги по ссылке',
-    meta: 'Изменено 1 окт',
+    meta: 'обновлён 1 окт',
     privacy: 'unlisted',
   },
   {
     title: 'Личное',
-    meta: 'Изменено вчера',
+    meta: 'обновлён сегодня',
     privacy: 'private',
   },
 ];
@@ -142,7 +143,7 @@ function showCoverErrorDemo() {
 
     <section class="mt-10 space-y-2">
       <h2 class="text-title">RankRow · ranked (mobile 358)</h2>
-      <div class="max-w-[358px] rounded-lg border border-line bg-surface p-1">
+      <div class="flex max-w-[358px] flex-col gap-3">
         <RankRow :rank="1" title="Dune 2" :cover-url="sampleCover" />
         <RankRow :rank="2" title="Arrival" :cover-url="sampleCover" />
         <RankRow :rank="3" title="Blade Runner 2049" :cover-url="sampleCover" />
@@ -153,7 +154,7 @@ function showCoverErrorDemo() {
 
     <section class="mt-10 space-y-2">
       <h2 class="text-title">RankRow · inbox</h2>
-      <div class="max-w-[358px] rounded-lg border border-line bg-surface p-1">
+      <div class="flex max-w-[358px] flex-col gap-3">
         <RankRow mode="inbox" title="Ещё не оценён" :cover-url="sampleCover" />
         <RankRow mode="inbox" title="Без обложки" />
       </div>
@@ -166,6 +167,12 @@ function showCoverErrorDemo() {
         <PrivacyChip privacy="unlisted" />
         <PrivacyChip privacy="public" />
       </div>
+      <p class="text-caption text-muted">selected</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <PrivacyChip privacy="private" selected />
+        <PrivacyChip privacy="unlisted" selected />
+        <PrivacyChip privacy="public" selected />
+      </div>
       <p class="text-caption text-muted">compact (mobile icon-only)</p>
       <div class="flex flex-wrap items-center gap-3">
         <PrivacyChip privacy="private" compact />
@@ -174,33 +181,29 @@ function showCoverErrorDemo() {
       </div>
     </section>
 
-    <section class="mt-10 max-w-lg space-y-2">
+    <section class="mt-10 max-w-[960px] space-y-3">
       <h2 class="text-title">TopicRow · desktop (labeled chip)</h2>
-      <div class="rounded-lg border border-line bg-surface p-1">
-        <TopicRow
-          v-for="row in sampleRows"
-          :key="row.title"
-          :title="row.title"
-          :meta="row.meta"
-          :privacy="row.privacy"
-          :covers="row.covers"
-        />
-      </div>
+      <TopicRow
+        v-for="row in sampleRows"
+        :key="row.title"
+        :title="row.title"
+        :meta="row.meta"
+        :privacy="row.privacy"
+        :covers="row.covers"
+      />
     </section>
 
-    <section class="mt-10 max-w-[358px] space-y-2">
+    <section class="mt-10 max-w-[358px] space-y-3">
       <h2 class="text-title">TopicRow · mobile (compact chip)</h2>
-      <div class="rounded-lg border border-line bg-surface p-1">
-        <TopicRow
-          v-for="row in sampleRows"
-          :key="`m-${row.title}`"
-          :title="row.title"
-          :meta="row.meta"
-          :privacy="row.privacy"
-          :covers="row.covers"
-          compact-privacy
-        />
-      </div>
+      <TopicRow
+        v-for="row in sampleRows"
+        :key="`m-${row.title}`"
+        :title="row.title"
+        :meta="row.meta"
+        :privacy="row.privacy"
+        :covers="row.covers"
+        compact-privacy
+      />
     </section>
 
     <section class="mt-10 space-y-4">
@@ -230,6 +233,13 @@ function showCoverErrorDemo() {
       </div>
       <div class="rounded-lg border border-line bg-bg p-3">
         <AppNav :fixed="false" placement="top" active="topics" />
+      </div>
+    </section>
+
+    <section class="mt-10 space-y-4">
+      <h2 class="text-title">EmptyState · With CTA</h2>
+      <div class="max-w-[720px]">
+        <EmptyState />
       </div>
     </section>
 

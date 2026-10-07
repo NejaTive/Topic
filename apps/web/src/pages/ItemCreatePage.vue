@@ -135,8 +135,6 @@ async function onSubmit() {
       </RouterLink>
 
       <h1 class="mt-4 text-h1 text-ink">Добавить элемент</h1>
-      <p class="mt-2 text-body-sm text-muted">Попадёт в «Ещё не оценены»</p>
-
       <p v-if="topicQuery.isError.value" class="mt-6 text-body text-danger" role="alert">
         {{
           topicQuery.error.value instanceof TopicsApiError && topicQuery.error.value.status === 404

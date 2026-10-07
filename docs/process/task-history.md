@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 07.10.2026 — Topics UI — S03/S05/RankRow по макетам и mobile DnD
+
+- **YouGile:** FRO-23
+- **Итог:** S03 TopicsPage (карточки TopicRow, EmptyState, M CTA над dock / D header); RankRow grab-zone + Pointer DnD на S05 (touch/mouse); EmptyState и правки смежных страниц; decisions по grab-zone.
+- **Репо:** `style/FRO-23` / [PR #37](https://github.com/NejaTive/Topic/pull/37) / (merge в develop)
+- **Заметки:** manual-close; владелец прогнал UI вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 07.10.2026 — AppNav / GuestNav — хедер по макетам и два состояния S09
 
 - **YouGile:** FRO-22

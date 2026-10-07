@@ -3,7 +3,14 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import { AppButton, AppNav, PrivacyChip, RankRow, type PrivacyValue } from '@/components/ui';
+import {
+  AppButton,
+  AppNav,
+  PrivacyChip,
+  RankRow,
+  type PrivacyValue,
+  type RankRowDragPoint,
+} from '@/components/ui';
 import {
   useDeleteTopicMutation,
   useRankItemMutation,
@@ -15,10 +22,7 @@ import { useTopicQuery } from '@/composables/useTopicQuery';
 
 const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
 
-/** Custom MIME for HTML5 DnD payload (ranked reorder / inbox→ranked). */
-const DND_MIME = 'application/x-topic-item';
-
-type DndPayload = { source: 'ranked'; itemId: string } | { source: 'inbox'; itemId: string };
+type ActiveDrag = { source: 'ranked' | 'inbox'; itemId: string };
 
 const route = useRoute();
 const router = useRouter();
@@ -37,6 +41,9 @@ const actionError = ref('');
 const copyFeedback = ref('');
 const draggingId = ref<string | null>(null);
 const rankedDropActive = ref(false);
+const activeDrag = ref<ActiveDrag | null>(null);
+const rankedSectionRef = ref<HTMLElement | null>(null);
+const rankedListRef = ref<HTMLElement | null>(null);
 
 /** Mobile chip compact for meta? Figma S05 meta uses labeled chip even on M. */
 const isMdUp = ref(false);
@@ -52,15 +59,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', syncViewport);
+  unlockScrollForDrag();
 });
 
 const topic = computed(() => topicQuery.data.value);
 const inbox = computed(() => itemsQuery.data.value?.inbox ?? []);
 const ranked = computed(() => itemsQuery.data.value?.ranked ?? []);
 
-const isEmpty = computed(
-  () => itemsQuery.isSuccess.value && inbox.value.length === 0 && ranked.value.length === 0,
-);
 const isInboxOnly = computed(
   () => itemsQuery.isSuccess.value && inbox.value.length > 0 && ranked.value.length === 0,
 );
@@ -147,69 +152,6 @@ async function onToRank(itemId: string) {
   }
 }
 
-function readDndPayload(event: DragEvent): DndPayload | null {
-  const dt = event.dataTransfer;
-  if (!dt) return null;
-  const raw = dt.getData(DND_MIME) || dt.getData('text/plain');
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw) as DndPayload;
-    if (
-      (parsed.source === 'ranked' || parsed.source === 'inbox') &&
-      typeof parsed.itemId === 'string'
-    ) {
-      return parsed;
-    }
-  } catch {
-    /* ignore */
-  }
-  return null;
-}
-
-function writeDndPayload(event: DragEvent, payload: DndPayload) {
-  const dt = event.dataTransfer;
-  if (!dt) return;
-  dt.effectAllowed = 'move';
-  const raw = JSON.stringify(payload);
-  dt.setData(DND_MIME, raw);
-  // Safari: надёжно читается только text/plain
-  dt.setData('text/plain', raw);
-}
-
-function onInboxDragStart(event: DragEvent, itemId: string) {
-  writeDndPayload(event, { source: 'inbox', itemId });
-  draggingId.value = itemId;
-  clearActionError();
-}
-
-function onRankedDragStart(event: DragEvent, itemId: string) {
-  writeDndPayload(event, { source: 'ranked', itemId });
-  draggingId.value = itemId;
-  clearActionError();
-}
-
-function onRowDragEnd() {
-  draggingId.value = null;
-  rankedDropActive.value = false;
-}
-
-function onRankedDragOver(event: DragEvent) {
-  const types = event.dataTransfer?.types;
-  if (!types) return;
-  const ok = [...types].includes(DND_MIME) || [...types].includes('text/plain');
-  if (!ok) return;
-  event.preventDefault();
-  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
-  rankedDropActive.value = true;
-}
-
-function onRankedDragLeave(event: DragEvent) {
-  const current = event.currentTarget as HTMLElement | null;
-  const related = event.relatedTarget as Node | null;
-  if (current && related && current.contains(related)) return;
-  rankedDropActive.value = false;
-}
-
 /** Slot index 0…N by pointer Y relative to ranked `<li>` midpoints. */
 function dropIndexFromY(clientY: number, listEl: HTMLElement): number {
   const rows = [...listEl.querySelectorAll(':scope > li')];
@@ -230,51 +172,68 @@ function moveId(ids: string[], itemId: string, toIndex: number): string[] {
   return next;
 }
 
-async function onRankedDrop(event: DragEvent) {
-  event.preventDefault();
-  rankedDropActive.value = false;
-  const payload = readDndPayload(event);
-  draggingId.value = null;
-  if (!payload) return;
-
-  if (payload.source === 'inbox') {
-    // Без S08: inbox → только в конец ranked (не mid-insert).
-    await onToRank(payload.itemId);
-    return;
-  }
-
-  const listEl = event.currentTarget as HTMLElement;
-  const currentIds = ranked.value.map((item) => item.id);
-  if (!currentIds.includes(payload.itemId)) return;
-
-  const toIndex = dropIndexFromY(event.clientY, listEl);
-  const nextIds = moveId(currentIds, payload.itemId, toIndex);
-  if (nextIds.join(',') === currentIds.join(',')) return;
-
-  clearActionError();
-  try {
-    await reorderMut.mutateAsync(nextIds);
-  } catch (err) {
-    applyApiError(err, 'Не удалось сохранить порядок');
-  }
+function pointInRect(x: number, y: number, rect: DOMRect): boolean {
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 }
 
-/** Drop on section chrome / empty ranked (inbox-only): inbox→end; ranked→append. */
-async function onRankedSectionDrop(event: DragEvent) {
-  event.preventDefault();
-  rankedDropActive.value = false;
-  const payload = readDndPayload(event);
-  draggingId.value = null;
-  if (!payload) return;
+function isOverRanked(point: RankRowDragPoint): boolean {
+  const el = rankedSectionRef.value;
+  if (!el) return false;
+  return pointInRect(point.clientX, point.clientY, el.getBoundingClientRect());
+}
 
-  if (payload.source === 'inbox') {
-    await onToRank(payload.itemId);
+function lockScrollForDrag() {
+  document.body.style.overflow = 'hidden';
+  document.body.style.touchAction = 'none';
+}
+
+function unlockScrollForDrag() {
+  document.body.style.overflow = '';
+  document.body.style.touchAction = '';
+}
+
+function onRowDragBegin(source: ActiveDrag['source'], itemId: string) {
+  activeDrag.value = { source, itemId };
+  draggingId.value = itemId;
+  rankedDropActive.value = true;
+  lockScrollForDrag();
+  clearActionError();
+}
+
+function onRowDragMove(point: RankRowDragPoint) {
+  if (!activeDrag.value) return;
+  rankedDropActive.value = isOverRanked(point);
+}
+
+function onRowDragCancel() {
+  activeDrag.value = null;
+  draggingId.value = null;
+  rankedDropActive.value = false;
+  unlockScrollForDrag();
+}
+
+async function onRowDragFinish(point: RankRowDragPoint) {
+  const drag = activeDrag.value;
+  activeDrag.value = null;
+  draggingId.value = null;
+  rankedDropActive.value = false;
+  unlockScrollForDrag();
+  if (!drag) return;
+
+  if (!isOverRanked(point)) return;
+
+  if (drag.source === 'inbox') {
+    // Без S08: inbox → только в конец ranked (не mid-insert).
+    await onToRank(drag.itemId);
     return;
   }
 
   const currentIds = ranked.value.map((item) => item.id);
-  if (!currentIds.includes(payload.itemId)) return;
-  const nextIds = moveId(currentIds, payload.itemId, currentIds.length);
+  if (!currentIds.includes(drag.itemId)) return;
+
+  const listEl = rankedListRef.value;
+  const toIndex = listEl ? dropIndexFromY(point.clientY, listEl) : currentIds.length;
+  const nextIds = moveId(currentIds, drag.itemId, toIndex);
   if (nextIds.join(',') === currentIds.join(',')) return;
 
   clearActionError();
@@ -310,11 +269,11 @@ function onRetry() {
     <AppNav />
 
     <main
-      class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[1200px] md:px-8 md:pb-10 md:pt-28"
+      class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[1280px] md:px-10 md:pb-10 md:pt-28"
     >
       <RouterLink
         to="/app/topics"
-        class="w-fit text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+        class="w-fit text-body-sm font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
       >
         ← Мои топики
       </RouterLink>
@@ -348,22 +307,19 @@ function onRetry() {
           {{ topic.title }}
         </h1>
 
-        <!-- Meta: privacy (+ copy unlisted) | delete -->
-        <div class="mt-3 flex items-center justify-between gap-3">
+        <!-- Meta: privacy (+ copy unlisted) | delete — Figma SPACE_BETWEEN -->
+        <div class="mt-3 flex items-center justify-between gap-3 md:mt-4">
           <div class="flex min-w-0 items-center gap-2">
             <button
               type="button"
-              class="rounded-sm outline-none transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-              :class="
-                privacyOpen ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : 'hover:opacity-90'
-              "
+              class="rounded-sm outline-none transition-opacity hover:enabled:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring cursor-pointer"
               :aria-expanded="privacyOpen"
               aria-haspopup="listbox"
               aria-label="Приватность топика"
               :disabled="busyPrivacy"
               @click="togglePrivacyPicker"
             >
-              <PrivacyChip :privacy="topic.privacy" />
+              <PrivacyChip :privacy="topic.privacy" :selected="privacyOpen" />
             </button>
 
             <!-- Mobile Unlisted: icon copy 24 -->
@@ -407,7 +363,6 @@ function onRetry() {
 
           <AppButton
             variant="danger-ghost"
-            size="sm"
             class="shrink-0"
             :disabled="busyDelete"
             :loading="busyDelete"
@@ -428,17 +383,12 @@ function onRetry() {
             :key="option"
             type="button"
             role="option"
-            class="rounded-sm outline-none transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-            :class="
-              topic.privacy === option
-                ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg'
-                : 'hover:opacity-90'
-            "
+            class="rounded-sm outline-none transition-opacity hover:enabled:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring cursor-pointer"
             :aria-selected="topic.privacy === option"
             :disabled="busyPrivacy"
             @click="onPrivacySelect(option)"
           >
-            <PrivacyChip :privacy="option" />
+            <PrivacyChip :privacy="option" :selected="topic.privacy === option" />
           </button>
         </div>
 
@@ -449,29 +399,22 @@ function onRetry() {
           {{ actionError }}
         </p>
 
-        <!-- Empty: no items at all -->
-        <div v-if="isEmpty" class="mt-12 flex flex-col items-start gap-4 md:mt-16">
-          <p class="text-title text-ink">Добавьте первый элемент</p>
-          <button
-            type="button"
-            class="text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-            @click="goAddItem"
-          >
-            + Добавить элемент
-          </button>
-        </div>
-
-        <!-- Lists: mobile stack / desktop 2 columns -->
+        <!-- Lists: mobile stack / desktop 2 колонки-панели (Figma col-inbox | col-ranked) -->
         <div
-          v-else
-          class="mt-8 flex flex-col gap-8 md:mt-10 md:grid md:grid-cols-2 md:items-start md:gap-10"
+          class="mt-8 flex flex-col gap-8 md:mt-6 md:grid md:grid-cols-2 md:items-stretch md:gap-6"
         >
           <!-- Inbox column -->
-          <section aria-labelledby="s05-inbox-heading">
-            <h2 id="s05-inbox-heading" class="text-label font-bold text-ink md:text-title">
+          <section
+            class="md:rounded-lg md:border md:border-line md:bg-surface md:p-5"
+            aria-labelledby="s05-inbox-heading"
+          >
+            <h2
+              id="s05-inbox-heading"
+              class="text-body-sm font-bold text-ink md:text-body md:font-bold"
+            >
               Ещё не оценены
             </h2>
-            <ul class="mt-3 flex list-none flex-col gap-1 p-0" aria-label="Ещё не оценены">
+            <ul class="mt-3 flex list-none flex-col gap-3 p-0" aria-label="Ещё не оценены">
               <li v-for="item in inbox" :key="item.id">
                 <RankRow
                   class="!max-w-none w-full"
@@ -481,16 +424,17 @@ function onRetry() {
                   :title="item.title"
                   :cover-url="item.coverUrl ?? undefined"
                   @click="goItem(item.id)"
-                  @to-rank="onToRank(item.id)"
-                  @drag-start="onInboxDragStart($event, item.id)"
-                  @drag-end="onRowDragEnd"
+                  @drag-begin="onRowDragBegin('inbox', item.id)"
+                  @drag-move="onRowDragMove"
+                  @drag-finish="onRowDragFinish"
+                  @drag-cancel="onRowDragCancel"
                 />
               </li>
             </ul>
             <p v-if="inbox.length === 0" class="mt-3 text-body-sm text-muted">Пока пусто</p>
             <button
               type="button"
-              class="mt-3 text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+              class="mt-3 text-body-sm font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring cursor-pointer"
               @click="goAddItem"
             >
               + Добавить элемент
@@ -499,15 +443,15 @@ function onRetry() {
 
           <!-- Ranked column (drop target: reorder + inbox→end) -->
           <section
+            ref="rankedSectionRef"
+            class="md:rounded-lg md:border md:border-line md:bg-surface md:p-5"
             aria-labelledby="s05-rank-heading"
-            :class="
-              rankedDropActive ? 'rounded-md ring-2 ring-accent ring-offset-2 ring-offset-bg' : null
-            "
-            @dragover="onRankedDragOver"
-            @dragleave="onRankedDragLeave"
-            @drop="onRankedSectionDrop"
+            :class="rankedDropActive ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : null"
           >
-            <h2 id="s05-rank-heading" class="text-label font-bold text-ink md:text-title">
+            <h2
+              id="s05-rank-heading"
+              class="text-body-sm font-bold text-ink md:text-body md:font-bold"
+            >
               Рейтинг
             </h2>
             <p v-if="isInboxOnly" class="mt-3 text-body-sm text-muted">
@@ -515,10 +459,9 @@ function onRetry() {
             </p>
             <ul
               v-else
-              class="mt-3 flex list-none flex-col gap-1 p-0"
+              ref="rankedListRef"
+              class="mt-3 flex list-none flex-col gap-3 p-0"
               aria-label="Рейтинг"
-              @dragover.stop="onRankedDragOver"
-              @drop.stop="onRankedDrop"
             >
               <li v-for="item in ranked" :key="item.id">
                 <RankRow
@@ -530,8 +473,10 @@ function onRetry() {
                   :title="item.title"
                   :cover-url="item.coverUrl ?? undefined"
                   @click="goItem(item.id)"
-                  @drag-start="onRankedDragStart($event, item.id)"
-                  @drag-end="onRowDragEnd"
+                  @drag-begin="onRowDragBegin('ranked', item.id)"
+                  @drag-move="onRowDragMove"
+                  @drag-finish="onRowDragFinish"
+                  @drag-cancel="onRowDragCancel"
                 />
               </li>
             </ul>

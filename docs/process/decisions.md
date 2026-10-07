@@ -447,3 +447,9 @@
   - **авторизованный** — обычный `AppNav` (как в app).
 - Орфография CTA: **«Присоединиться»** (с «и»; в Figma бывает опечатка «Присоедениться»).
 - Без redirect владельца на S05; preview share остаётся на S09.
+
+### Rank row — зона grab
+
+- Справа на RankRow (код + Figma UI-Kit): **`grab-zone`** ~44px на всю высоту карточки — DnD только отсюда (`cursor-grab`); тело карточки — клик в деталку (`cursor-pointer`).
+- Визуал зоны: fill `color/surface-sunken`, левый edge `color/line`, правые углы `radius/md`; Drag — fill `color/accent/soft`; Hover-карточки — fill зоны `color/line` (контраст к sunken-карточке).
+- Figma: masters `Rank row MOBILE` (`35:614`) и `Rank row DESKTOP` (`34:1561`), все варианты с handle; **NoDragable** без зоны. Instances на S05 подтягиваются из masters.

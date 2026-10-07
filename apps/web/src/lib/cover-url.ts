@@ -15,7 +15,8 @@ export function coverUrlFromKey(key: string | null | undefined): string | null {
   return `${publicBase}/${bucket}/${key}`;
 }
 
-export function previewCoverUrls(keys: Array<string | null> | undefined): string[] {
+/** До 3 URL/null в порядке rank — null = placeholder в TopicRow. */
+export function previewCoverUrls(keys: Array<string | null> | undefined): Array<string | null> {
   if (!keys?.length) return [];
-  return keys.map((key) => coverUrlFromKey(key)).filter((url): url is string => Boolean(url));
+  return keys.slice(0, 3).map((key) => coverUrlFromKey(key));
 }

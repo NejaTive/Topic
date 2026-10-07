@@ -2,7 +2,7 @@
 import { computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ShareApiError } from '@/api/share';
-import { AppNav, GuestNav, PrivacyChip, RankRow } from '@/components/ui';
+import { AppNav, GuestNav, RankRow } from '@/components/ui';
 import { useShareQuery } from '@/composables/useShareQuery';
 import { useSessionStore } from '@/stores/session';
 
@@ -72,7 +72,6 @@ function onRetry() {
       <template v-else-if="share">
         <div class="flex flex-wrap items-center gap-2">
           <span class="text-label font-semibold text-muted"> @{{ share.ownerNick }} </span>
-          <PrivacyChip :privacy="share.privacy" />
         </div>
 
         <h1 class="mt-2 text-h1 text-ink md:text-[32px] md:leading-[41px]">
@@ -84,13 +83,9 @@ function onRetry() {
         </p>
 
         <ul v-else class="mt-8 flex list-none flex-col gap-3 p-0 md:mt-10" aria-label="Рейтинг">
-          <li
-            v-for="item in rankedItems"
-            :key="item.id"
-            class="rounded-md border border-line bg-surface"
-          >
+          <li v-for="item in rankedItems" :key="item.id">
             <RankRow
-              class="!max-w-none w-full px-3 py-1"
+              class="!max-w-none w-full"
               mode="ranked"
               readonly
               :show-drag-handle="false"

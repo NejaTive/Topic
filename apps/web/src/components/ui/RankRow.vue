@@ -1,5 +1,10 @@
 <script lang="ts">
 export type RankRowMode = 'ranked' | 'inbox';
+
+export type RankRowDragPoint = {
+  clientX: number;
+  clientY: number;
+};
 </script>
 
 <script setup lang="ts">
@@ -11,15 +16,15 @@ const props = withDefaults(
     /** 1-based rank; top-3 get accent badge color. */
     rank?: number;
     coverUrl?: string;
-    /** inbox: CTA «В рейтинг»; ranked: rank badge + visual handle. */
+    /** inbox: handle справа; ranked: rank + handle. */
     mode?: RankRowMode;
-    /** Visual dragging state (shadow); set by parent during HTML5 DnD. */
+    /** Visual dragging state (accent border + shadow). */
     dragging?: boolean;
-    /** Enable HTML5 DnD: ranked — только с handle; inbox — со всей строки. */
+    /** DnD только с правого handle (Pointer Events — работает и на touch). */
     dragEnabled?: boolean;
-    /** ranked: показывать grip (S09 read-only — false). */
+    /** Показывать grip (S09 read-only — false). */
     showDragHandle?: boolean;
-    /** S09: без клика по title. */
+    /** S09: без клика по карточке. */
     readonly?: boolean;
   }>(),
   {
@@ -33,20 +38,32 @@ const props = withDefaults(
   },
 );
 
+/** Figma Rank row: handle справа на ranked/inbox; NoDragable / S09 — скрыт. */
 const showHandle = computed(() => {
-  if (props.mode !== 'ranked') return false;
   if (props.showDragHandle === false) return false;
+  if (props.readonly) return false;
   return true;
 });
 
 const emit = defineEmits<{
-  toRank: [];
   click: [event: MouseEvent];
-  dragStart: [event: DragEvent];
-  dragEnd: [event: DragEvent];
+  /** Pointer DnD (mouse + touch) — старт после порога сдвига. */
+  dragBegin: [point: RankRowDragPoint];
+  dragMove: [point: RankRowDragPoint];
+  dragFinish: [point: RankRowDragPoint];
+  dragCancel: [];
 }>();
 
-const handleArmed = ref(false);
+/** Подавить click после DnD. */
+const suppressClick = ref(false);
+
+const pointerId = ref<number | null>(null);
+const originX = ref(0);
+const originY = ref(0);
+const gestureActive = ref(false);
+const passedThreshold = ref(false);
+
+const DRAG_THRESHOLD_PX = 6;
 
 const isTopThree = computed(
   () => props.mode === 'ranked' && props.rank != null && props.rank >= 1 && props.rank <= 3,
@@ -54,58 +71,149 @@ const isTopThree = computed(
 
 const rankToneClass = computed(() => (isTopThree.value ? 'text-rank-top' : 'text-rank'));
 
-function armHandle() {
-  if (props.dragEnabled && props.mode === 'ranked') {
-    handleArmed.value = true;
+function pointFrom(event: PointerEvent): RankRowDragPoint {
+  return { clientX: event.clientX, clientY: event.clientY };
+}
+
+function onHandlePointerDown(event: PointerEvent) {
+  if (!props.dragEnabled) return;
+  // Только primary button / touch / pen
+  if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  pointerId.value = event.pointerId;
+  originX.value = event.clientX;
+  originY.value = event.clientY;
+  gestureActive.value = true;
+  passedThreshold.value = false;
+
+  const target = event.currentTarget as HTMLElement;
+  target.setPointerCapture(event.pointerId);
+}
+
+function onHandlePointerMove(event: PointerEvent) {
+  if (!gestureActive.value || event.pointerId !== pointerId.value) return;
+
+  const dx = event.clientX - originX.value;
+  const dy = event.clientY - originY.value;
+
+  if (!passedThreshold.value) {
+    if (dx * dx + dy * dy < DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) return;
+    passedThreshold.value = true;
+    suppressClick.value = true;
+    emit('dragBegin', pointFrom(event));
   }
+
+  event.preventDefault();
+  emit('dragMove', pointFrom(event));
 }
 
-function disarmHandle() {
-  handleArmed.value = false;
-}
+function endGesture(event: PointerEvent, cancelled: boolean) {
+  if (!gestureActive.value || event.pointerId !== pointerId.value) return;
 
-function onDragStart(event: DragEvent) {
-  if (!props.dragEnabled) {
-    event.preventDefault();
+  const target = event.currentTarget as HTMLElement;
+  if (target.hasPointerCapture(event.pointerId)) {
+    target.releasePointerCapture(event.pointerId);
+  }
+
+  const wasDragging = passedThreshold.value;
+  gestureActive.value = false;
+  pointerId.value = null;
+  passedThreshold.value = false;
+
+  if (cancelled || !wasDragging) {
+    if (wasDragging) emit('dragCancel');
+    requestAnimationFrame(() => {
+      suppressClick.value = false;
+    });
     return;
   }
-  if (props.mode === 'ranked' && !handleArmed.value) {
-    event.preventDefault();
-    return;
-  }
-  emit('dragStart', event);
+
+  emit('dragFinish', pointFrom(event));
+  requestAnimationFrame(() => {
+    suppressClick.value = false;
+  });
 }
 
-function onDragEnd(event: DragEvent) {
-  handleArmed.value = false;
-  emit('dragEnd', event);
+function onHandlePointerUp(event: PointerEvent) {
+  endGesture(event, false);
+}
+
+function onHandlePointerCancel(event: PointerEvent) {
+  endGesture(event, true);
+}
+
+function onCardClick(event: MouseEvent) {
+  if (props.readonly || suppressClick.value) return;
+  emit('click', event);
+}
+
+function onCardKeydown(event: KeyboardEvent) {
+  if (props.readonly) return;
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault();
+  onCardClick(event as unknown as MouseEvent);
 }
 </script>
 
 <template>
+  <!-- Figma: surface + line border, radius 8, cover 44×56, handle справа -->
   <div
-    class="group flex w-full max-w-[358px] items-center gap-3 rounded-md border border-transparent bg-transparent px-2 py-2 transition-colors outline-none"
+    class="group flex w-full max-w-[358px] items-center gap-3 rounded-md border bg-surface px-3 py-2 transition-colors outline-none select-none"
     :class="[
       dragging
-        ? 'border-line bg-surface shadow-float'
-        : 'hover:bg-surface-sunken focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus-ring',
-      dragEnabled && mode === 'inbox' ? 'cursor-grab' : null,
+        ? 'border-accent shadow-float'
+        : 'border-line hover:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
+      readonly ? 'cursor-default' : 'cursor-pointer',
     ]"
     :data-state="dragging ? 'dragging' : 'default'"
-    :draggable="dragEnabled"
-    @dragstart="onDragStart"
-    @dragend="onDragEnd"
+    :role="readonly ? undefined : 'button'"
+    :tabindex="readonly ? undefined : 0"
+    @click="onCardClick"
+    @keydown="onCardKeydown"
   >
-    <!-- DnD handle (ranked only); drag starts from here when dragEnabled -->
+    <span
+      v-if="mode === 'ranked' && rank != null"
+      class="w-7 shrink-0 text-center text-rank-m tabular-nums"
+      :class="[rankToneClass, isTopThree ? 'font-mono font-bold' : 'font-medium']"
+      :aria-label="`Место ${rank}`"
+    >
+      {{ rank }}
+    </span>
+
+    <div class="h-14 w-11 shrink-0 overflow-hidden rounded-sm bg-line" aria-hidden="true">
+      <img
+        v-if="coverUrl"
+        :src="coverUrl"
+        alt=""
+        class="size-full object-cover"
+        draggable="false"
+      />
+    </div>
+
+    <span class="min-w-0 flex-1 truncate text-left text-title text-ink">
+      {{ title }}
+    </span>
+
+    <!-- Hit-area: Pointer Events + touch-action:none — DnD на touch/mobile -->
     <span
       v-if="showHandle"
-      class="flex w-5 shrink-0 justify-center text-subtle"
-      :class="dragEnabled ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'"
+      class="-my-2 -mr-3 flex w-11 shrink-0 items-center justify-center self-stretch rounded-r-md border-l border-line bg-surface-sunken pl-2 pr-3 text-muted transition-colors touch-none"
+      :class="[
+        dragEnabled
+          ? 'cursor-grab active:cursor-grabbing hover:bg-line hover:text-ink'
+          : 'cursor-default',
+        dragging ? 'bg-accent-soft text-accent' : null,
+      ]"
       aria-hidden="true"
       data-slot="drag-handle"
-      @pointerdown="armHandle"
-      @pointerup="disarmHandle"
-      @pointercancel="disarmHandle"
+      @click.stop
+      @pointerdown="onHandlePointerDown"
+      @pointermove="onHandlePointerMove"
+      @pointerup="onHandlePointerUp"
+      @pointercancel="onHandlePointerCancel"
     >
       <svg class="size-4" viewBox="0 0 16 16" fill="currentColor">
         <circle cx="5" cy="4" r="1.25" />
@@ -116,42 +224,5 @@ function onDragEnd(event: DragEvent) {
         <circle cx="11" cy="12" r="1.25" />
       </svg>
     </span>
-
-    <span
-      v-if="mode === 'ranked' && rank != null"
-      class="w-7 shrink-0 text-center font-mono text-rank-m tabular-nums"
-      :class="rankToneClass"
-      :aria-label="`Место ${rank}`"
-    >
-      {{ rank }}
-    </span>
-
-    <div
-      class="h-12 w-9 shrink-0 overflow-hidden rounded-sm border border-line bg-surface-sunken"
-      aria-hidden="true"
-    >
-      <img v-if="coverUrl" :src="coverUrl" alt="" class="size-full object-cover" />
-    </div>
-
-    <span v-if="readonly" class="min-w-0 flex-1 truncate text-left text-title text-ink">
-      {{ title }}
-    </span>
-    <button
-      v-else
-      type="button"
-      class="min-w-0 flex-1 truncate text-left text-title text-ink outline-none"
-      @click="emit('click', $event)"
-    >
-      {{ title }}
-    </button>
-
-    <button
-      v-if="mode === 'inbox'"
-      type="button"
-      class="shrink-0 rounded-md px-2 py-1.5 text-body-sm font-semibold text-accent outline-none transition-colors hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-      @click.stop="emit('toRank')"
-    >
-      В рейтинг
-    </button>
   </div>
 </template>
