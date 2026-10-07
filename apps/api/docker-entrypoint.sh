@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+pnpm run db:migrate:deploy
+exec node dist/main.js

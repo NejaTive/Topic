@@ -11,6 +11,7 @@
     "openapi:export": "nest start --entryFile openapi/export-openapi",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio"
   },
   "dependencies": {

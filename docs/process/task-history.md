@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 08.10.2026 — CI/CD деплой на VPS (Caddy + GHCR)
+
+- **YouGile:** BAC-14
+- **Итог:** Dockerfiles api/web (Caddy), prod compose + Caddyfile, GitHub Actions deploy при push в `main`; docs/decisions (VPS + MinIO, HTTP/IP).
+- **Репо:** `chore/BAC-14` / [PR #39](https://github.com/NejaTive/Topic/pull/39) / (merge в develop)
+- **Заметки:** manual-close; локальная сборка образов OK; выкат на VPS — после merge в `main` и secrets.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 08.10.2026 — S05 — DnD рейтинга на @vue-dnd-kit (live-gap)
 
 - **YouGile:** FRO-24
