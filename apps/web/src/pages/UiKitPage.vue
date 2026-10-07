@@ -11,7 +11,6 @@ import {
   PrivacyChip,
   RankRow,
   TopicRow,
-  type AppNavActive,
   type PrivacyValue,
 } from '@/components/ui';
 
@@ -19,7 +18,6 @@ const email = ref('');
 const password = ref('secret');
 const errorEmail = ref('Некорректный email');
 const loading = ref(false);
-const navActive = ref<AppNavActive>('topics');
 
 const selectedChip = ref<string | null>(null);
 const coverPreview = ref<string | null>(null);
@@ -105,12 +103,7 @@ function showCoverErrorDemo() {
       Button / Input)
     </p>
 
-    <AppNav
-      :active="navActive"
-      profile-label="Профиль"
-      @profile="navActive = 'profile'"
-      @logout="navActive = 'profile'"
-    />
+    <AppNav />
 
     <section class="mt-10 space-y-4">
       <h2 class="text-title">MainChip · подсказки S04</h2>
@@ -213,14 +206,14 @@ function showCoverErrorDemo() {
     <section class="mt-10 space-y-4">
       <h2 class="text-title">GuestNav · S09 / S11–S12</h2>
       <p class="text-body-sm text-muted">
-        Floating dock: bottom (M) / top (D). Prop ctaMode error — Primary «На главную» без secondary
-        (экраны S11/S12).
+        Floating dock: bottom (M) / top (D). S09 share — Primary «Присоединиться»; error — «На
+        главную» (S11/S12).
       </p>
       <div class="max-w-[390px] rounded-lg border border-line bg-bg p-3">
-        <GuestNav :fixed="false" placement="bottom" />
+        <GuestNav :fixed="false" placement="bottom" cta-mode="share" />
       </div>
       <div class="max-w-[840px] rounded-lg border border-line bg-bg p-3">
-        <GuestNav :fixed="false" placement="top" />
+        <GuestNav :fixed="false" placement="top" cta-mode="share" />
       </div>
       <div class="max-w-[390px] rounded-lg border border-line bg-bg p-3">
         <GuestNav :fixed="false" placement="bottom" cta-mode="error" />
@@ -236,7 +229,7 @@ function showCoverErrorDemo() {
         <AppNav :fixed="false" placement="bottom" active="topics" />
       </div>
       <div class="rounded-lg border border-line bg-bg p-3">
-        <AppNav :fixed="false" placement="top" active="topics" profile-label="demo" />
+        <AppNav :fixed="false" placement="top" active="topics" />
       </div>
     </section>
 

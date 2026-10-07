@@ -2,11 +2,13 @@
 import { computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ShareApiError } from '@/api/share';
-import { GuestNav, PrivacyChip, RankRow } from '@/components/ui';
+import { AppNav, GuestNav, PrivacyChip, RankRow } from '@/components/ui';
 import { useShareQuery } from '@/composables/useShareQuery';
+import { useSessionStore } from '@/stores/session';
 
 const route = useRoute();
 const router = useRouter();
+const session = useSessionStore();
 
 const shareId = computed(() => String(route.params.shareId ?? ''));
 const shareQuery = useShareQuery(shareId);
@@ -14,6 +16,7 @@ const shareQuery = useShareQuery(shareId);
 const share = computed(() => shareQuery.data.value);
 const rankedItems = computed(() => share.value?.items ?? []);
 const isEmptyRanked = computed(() => shareQuery.isSuccess.value && rankedItems.value.length === 0);
+const isAuthed = computed(() => session.status === 'authed');
 
 watch(
   () => shareQuery.error.value,
@@ -37,7 +40,8 @@ function onRetry() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <GuestNav />
+    <AppNav v-if="isAuthed" />
+    <GuestNav v-else cta-mode="share" />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[804px] md:px-0 md:pb-10 md:pt-28"

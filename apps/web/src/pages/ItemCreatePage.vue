@@ -4,15 +4,11 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
 import { AppButton, AppInput, AppNav, CoverUpload } from '@/components/ui';
-import { useLogoutMutation } from '@/composables/useAuthMutations';
 import { useCreateItemMutation, useUploadItemCoverMutation } from '@/composables/useItemMutations';
 import { useTopicQuery } from '@/composables/useTopicQuery';
-import { useSessionStore } from '@/stores/session';
 
 const route = useRoute();
 const router = useRouter();
-const session = useSessionStore();
-const logout = useLogoutMutation();
 
 const topicId = computed(() => String(route.params.id ?? ''));
 const topicQuery = useTopicQuery(topicId);
@@ -31,7 +27,6 @@ const coverError = ref<string | null>(null);
 const fieldErrors = ref<{ title?: string }>({});
 const formError = ref('');
 
-const profileLabel = computed(() => session.user?.nick ?? 'Профиль');
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
 const isSubmitting = computed(() => createItem.isPending.value || uploadCover.isPending.value);
 
@@ -123,16 +118,11 @@ async function onSubmit() {
     applyError(err);
   }
 }
-
-async function onLogout() {
-  await logout.mutateAsync();
-  await router.replace('/login');
-}
 </script>
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
+    <AppNav />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[640px] md:px-8 md:pb-10 md:pt-28"

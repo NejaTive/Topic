@@ -4,7 +4,6 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
 import { AppButton, AppNav, PrivacyChip, RankRow, type PrivacyValue } from '@/components/ui';
-import { useLogoutMutation } from '@/composables/useAuthMutations';
 import {
   useDeleteTopicMutation,
   useRankItemMutation,
@@ -13,7 +12,6 @@ import {
 } from '@/composables/useTopicMutations';
 import { useTopicItemsQuery } from '@/composables/useTopicItemsQuery';
 import { useTopicQuery } from '@/composables/useTopicQuery';
-import { useSessionStore } from '@/stores/session';
 
 const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
 
@@ -24,8 +22,6 @@ type DndPayload = { source: 'ranked'; itemId: string } | { source: 'inbox'; item
 
 const route = useRoute();
 const router = useRouter();
-const session = useSessionStore();
-const logout = useLogoutMutation();
 
 const topicId = computed(() => String(route.params.id ?? ''));
 
@@ -58,7 +54,6 @@ onUnmounted(() => {
   window.removeEventListener('resize', syncViewport);
 });
 
-const profileLabel = computed(() => session.user?.nick ?? 'Профиль');
 const topic = computed(() => topicQuery.data.value);
 const inbox = computed(() => itemsQuery.data.value?.inbox ?? []);
 const ranked = computed(() => itemsQuery.data.value?.ranked ?? []);
@@ -304,11 +299,6 @@ function goItem(itemId: string) {
   });
 }
 
-async function onLogout() {
-  await logout.mutateAsync();
-  await router.replace('/login');
-}
-
 function onRetry() {
   void topicQuery.refetch();
   void itemsQuery.refetch();
@@ -317,7 +307,7 @@ function onRetry() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
+    <AppNav />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[1200px] md:px-8 md:pb-10 md:pt-28"

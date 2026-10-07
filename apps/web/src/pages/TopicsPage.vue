@@ -2,15 +2,11 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { AppButton, AppNav, TopicRow } from '@/components/ui';
-import { useLogoutMutation } from '@/composables/useAuthMutations';
 import { useTopicsQuery } from '@/composables/useTopicsQuery';
 import { previewCoverUrls } from '@/lib/cover-url';
 import { formatTopicUpdatedAt } from '@/lib/format-topic-meta';
-import { useSessionStore } from '@/stores/session';
 
-const session = useSessionStore();
 const router = useRouter();
-const logout = useLogoutMutation();
 const topicsQuery = useTopicsQuery();
 
 const compactPrivacy = ref(true);
@@ -30,19 +26,12 @@ onUnmounted(() => {
 
 const topics = computed(() => topicsQuery.data.value ?? []);
 const isEmpty = computed(() => topicsQuery.isSuccess.value && topics.value.length === 0);
-const profileLabel = computed(() => session.user?.nick ?? 'Профиль');
-
 function goCreate() {
   void router.push({ name: 'app-topic-create' });
 }
 
 function goTopic(id: string) {
   void router.push({ name: 'app-topic-detail', params: { id } });
-}
-
-async function onLogout() {
-  await logout.mutateAsync();
-  await router.replace('/login');
 }
 
 function onRetry() {
@@ -52,7 +41,7 @@ function onRetry() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
+    <AppNav />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[720px] md:px-8 md:pb-10 md:pt-28"

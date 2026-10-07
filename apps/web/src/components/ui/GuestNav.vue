@@ -4,8 +4,12 @@ import { RouterLink } from 'vue-router';
 import AppButton from './AppButton.vue';
 
 export type GuestNavPlacement = 'auto' | 'bottom' | 'top';
-/** guest — Share chrome; error — S11/S12 (Primary «На главную»). */
-export type GuestNavCtaMode = 'guest' | 'error';
+/**
+ * guest — demo/витрина («Войти» + «Присоединиться»);
+ * share — S09 гость (одна Primary «Присоединиться» → `/`);
+ * error — S11/S12 (Primary «На главную»).
+ */
+export type GuestNavCtaMode = 'guest' | 'share' | 'error';
 
 const props = withDefaults(
   defineProps<{
@@ -13,12 +17,12 @@ const props = withDefaults(
     placement?: GuestNavPlacement;
     /** false — relative shell for UI-Kit samples (not viewport-fixed). */
     fixed?: boolean;
-    /** guest: «Войти» + «Присоединиться»; error: one Primary «На главную» → `/`. */
+    /** guest | share | error — см. GuestNavCtaMode. */
     ctaMode?: GuestNavCtaMode;
     brandTo?: string;
     /** guest primary target (default /login). */
     loginTo?: string;
-    /** guest secondary target (default /). */
+    /** join / share primary target (default /). */
     joinTo?: string;
     /** Override primary label/to (e.g. error screens). */
     primaryLabel?: string;
@@ -45,12 +49,15 @@ const props = withDefaults(
 
 const resolvedPrimaryLabel = computed(() => {
   if (props.primaryLabel !== undefined) return props.primaryLabel;
-  return props.ctaMode === 'error' ? 'На главную' : 'Войти';
+  if (props.ctaMode === 'error') return 'На главную';
+  if (props.ctaMode === 'share') return 'Присоединиться';
+  return 'Войти';
 });
 
 const resolvedPrimaryTo = computed(() => {
   if (props.primaryTo !== undefined) return props.primaryTo;
-  return props.ctaMode === 'error' ? '/' : props.loginTo;
+  if (props.ctaMode === 'error' || props.ctaMode === 'share') return props.joinTo;
+  return props.loginTo;
 });
 
 const resolvedSecondaryLabel = computed(() => props.secondaryLabel ?? 'Присоединиться');

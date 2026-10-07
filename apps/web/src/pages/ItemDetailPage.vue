@@ -4,7 +4,6 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
 import { AppButton, AppInput, AppNav, CoverUpload } from '@/components/ui';
-import { useLogoutMutation } from '@/composables/useAuthMutations';
 import {
   useDeleteItemCoverMutation,
   useDeleteItemMutation,
@@ -16,12 +15,9 @@ import {
 import { useItemQuery } from '@/composables/useItemQuery';
 import { useTopicQuery } from '@/composables/useTopicQuery';
 import { formatItemAddedAt, formatItemPlacement } from '@/lib/format-item-meta';
-import { useSessionStore } from '@/stores/session';
 
 const route = useRoute();
 const router = useRouter();
-const session = useSessionStore();
-const logout = useLogoutMutation();
 
 const topicId = computed(() => String(route.params.id ?? ''));
 const itemId = computed(() => String(route.params.itemId ?? ''));
@@ -60,7 +56,6 @@ const fieldErrors = ref<{ title?: string }>({});
 const formError = ref('');
 const actionError = ref('');
 
-const profileLabel = computed(() => session.user?.nick ?? 'Профиль');
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
 const item = computed(() => itemQuery.data.value);
 
@@ -229,11 +224,6 @@ async function onToInbox() {
   }
 }
 
-async function onLogout() {
-  await logout.mutateAsync();
-  await router.replace('/login');
-}
-
 function onRetry() {
   void topicQuery.refetch();
   void itemQuery.refetch();
@@ -242,7 +232,7 @@ function onRetry() {
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <AppNav active="topics" :profile-label="profileLabel" @logout="onLogout" />
+    <AppNav />
 
     <main
       class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[640px] md:px-8 md:pb-10 md:pt-28"
