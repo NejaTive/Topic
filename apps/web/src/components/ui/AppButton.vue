@@ -30,7 +30,7 @@ const isInteractive = computed(() => !props.disabled && !props.loading);
 const sizeClass = computed(() =>
   props.size === 'sm'
     ? 'h-[var(--size-control-sm)] px-3 text-body-sm'
-    : 'h-[var(--size-control-md)] px-4 text-label',
+    : 'h-[var(--size-control-md)] px-6 text-label',
 );
 
 const variantClass = computed(() => {
@@ -77,7 +77,7 @@ function onClick(event: MouseEvent) {
 <template>
   <button
     :type="type"
-    class="inline-flex items-center justify-center gap-2 rounded-md font-sans font-semibold transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:pointer-events-none disabled:cursor-not-allowed"
+    class="inline-flex items-center justify-center gap-2 rounded-md font-sans font-semibold transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:pointer-events-none disabled:cursor-not-allowed cursor-pointer"
     :class="[sizeClass, variantClass, disabledClass, loading && 'pointer-events-none']"
     :disabled="disabled || loading"
     :aria-busy="loading || undefined"
