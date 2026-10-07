@@ -59,8 +59,9 @@ curl -fsS "http://127.0.0.1/api/health"
 ## Релизный поток
 
 1. Фичи мержатся в `develop` (PR).
-2. Promote: PR / merge `develop` → `main` (владелец).
-3. Workflow `Deploy` собирает образы, синхронизирует `compose.prod.yaml`, поднимает стек, ждёт `/api/health`.
+2. Promote: skill **`publish-prod`** (или вручную) — PR / merge `develop` → `main`.
+3. **Версия (A):** annotated git tag `vX.Y.Z` на merge-commit в `main` (не файл VERSION / не health — это отложено).
+4. Workflow `Deploy` собирает образы, синхронизирует `compose.prod.yaml`, поднимает стек, ждёт `/api/health`.
 
 ## Откат
 

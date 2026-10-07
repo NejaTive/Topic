@@ -484,5 +484,6 @@
 - **Стек на сервере:** Caddy (образ `topic-web`: SPA + reverse proxy) + Nest (`topic-api`) + Postgres + MinIO (обложки на том же VPS).
 - **Сеть:** один origin по **HTTP/IP без TLS** на первом этапе; MinIO/Postgres наружу не публиковать.
 - **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
-- **Promote:** фичи через `develop`; релиз = merge в `main`.
-- Отложено: домен, TLS/`Secure` cookie, rate-limit auth, внешний object storage.
+- **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`).
+- **Версии (A):** annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit в `main` перед/сразу после выката; skill предлагает bump, владелец подтверждает.
+- **Отложено (B и прочее):** `VERSION` / bump package.json / version в health·UI / теги GHCR `:X.Y.Z`; домен, TLS/`Secure` cookie, rate-limit auth, внешний object storage.
