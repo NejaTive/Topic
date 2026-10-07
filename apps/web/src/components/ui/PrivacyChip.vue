@@ -8,9 +8,12 @@ const props = withDefaults(
     privacy: PrivacyValue;
     /** Mobile: icon-only 24×24; desktop: icon + label. */
     compact?: boolean;
+    /** Selected in a picker — denser fill, no outer ring. */
+    selected?: boolean;
   }>(),
   {
     compact: false,
+    selected: false,
   },
 );
 
@@ -28,19 +31,23 @@ const label = computed(() => {
 const toneClass = computed(() => {
   switch (props.privacy) {
     case 'private':
-      return 'bg-surface-sunken text-muted';
+      return props.selected ? 'bg-line-strong text-ink' : 'bg-surface-sunken text-muted';
     case 'unlisted':
-      return 'bg-info-soft text-info';
+      return props.selected ? 'bg-info-hover text-info' : 'bg-info-soft text-info';
     case 'public':
-      return 'bg-accent-soft text-accent';
+      return props.selected ? 'bg-accent-soft-hover text-accent' : 'bg-accent-soft text-accent';
   }
 });
 </script>
 
 <template>
   <span
-    class="inline-flex items-center justify-center gap-1 rounded-sm font-sans"
-    :class="[toneClass, compact ? 'size-6' : 'h-6 px-2 text-caption']"
+    class="inline-flex items-center justify-center gap-1 rounded-sm font-sans transition-colors"
+    :class="[
+      toneClass,
+      compact ? 'size-6' : 'h-6 px-2 text-caption',
+      selected ? 'font-semibold' : null,
+    ]"
     :title="compact ? label : undefined"
     :aria-label="label"
   >
