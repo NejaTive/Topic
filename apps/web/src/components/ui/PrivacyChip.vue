@@ -6,9 +6,7 @@ export type PrivacyValue = 'private' | 'unlisted' | 'public';
 const props = withDefaults(
   defineProps<{
     privacy: PrivacyValue;
-    /** Mobile: icon-only 24×24; desktop: icon + label. */
     compact?: boolean;
-    /** Selected in a picker — denser fill, no outer ring. */
     selected?: boolean;
   }>(),
   {
@@ -17,26 +15,21 @@ const props = withDefaults(
   },
 );
 
-const label = computed(() => {
-  switch (props.privacy) {
-    case 'private':
-      return 'Приватный';
-    case 'unlisted':
-      return 'По ссылке';
-    case 'public':
-      return 'Публичный';
-  }
-});
+const LABELS: Record<PrivacyValue, string> = {
+  private: 'Приватный',
+  unlisted: 'По ссылке',
+  public: 'Публичный',
+};
+
+const label = computed(() => LABELS[props.privacy]);
 
 const toneClass = computed(() => {
-  switch (props.privacy) {
-    case 'private':
-      return props.selected ? 'bg-line-strong text-ink' : 'bg-surface-sunken text-muted';
-    case 'unlisted':
-      return props.selected ? 'bg-info-hover text-info' : 'bg-info-soft text-info';
-    case 'public':
-      return props.selected ? 'bg-accent-soft-hover text-accent' : 'bg-accent-soft text-accent';
-  }
+  const map: Record<PrivacyValue, string> = {
+    private: props.selected ? 'bg-line-strong text-ink' : 'bg-surface-sunken text-muted',
+    unlisted: props.selected ? 'bg-info-hover text-info' : 'bg-info-soft text-info',
+    public: props.selected ? 'bg-accent-soft-hover text-accent' : 'bg-accent-soft text-accent',
+  };
+  return map[props.privacy];
 });
 </script>
 
@@ -51,7 +44,6 @@ const toneClass = computed(() => {
     :title="compact ? label : undefined"
     :aria-label="label"
   >
-    <!-- Geometric placeholders (stage-2); final icon set TBD -->
     <svg
       v-if="privacy === 'private'"
       class="size-3.5 shrink-0"

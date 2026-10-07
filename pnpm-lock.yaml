@@ -114,6 +114,9 @@ importers:
       '@tanstack/vue-query':
         specifier: ^5.104.1
         version: 5.104.1(vue@3.5.43(typescript@5.9.3))
+      '@vue-dnd-kit/core':
+        specifier: ^2.4.7
+        version: 2.4.7(vue@3.5.43(typescript@5.9.3))
       openapi-fetch:
         specifier: ^0.17.0
         version: 0.17.0
@@ -2130,6 +2133,11 @@ packages:
 
   '@volar/typescript@2.4.28':
     resolution: {integrity: sha512-Ja6yvWrbis2QtN4ClAKreeUZPVYMARDYZl9LMEv1iQ1QdepB6wn0jTRxA9MftYmYa4DQ4k/DaSZpFPUfxl8giw==}
+
+  '@vue-dnd-kit/core@2.4.7':
+    resolution: {integrity: sha512-v477XFegqzoAPwkl5dcfds/ySyPdSdg0q5vlqXgAQdbUI5SmhN/pb4Sr8gBU23b+1qYB5KBF/B1JAvuVGUUQwA==}
+    peerDependencies:
+      vue: ^3.5.13
 
   '@vue/compiler-core@3.5.43':
     resolution: {integrity: sha512-zdiLhnbe1QQqgDT8xZMpNmyqZ3qlI+/Q/FHQco57Kwl/b05HhCzN6eVGN9QU9rbga4CrS0H5SYY8VGHZCt/1Hg==}
@@ -6510,6 +6518,10 @@ snapshots:
       '@volar/language-core': 2.4.28
       path-browserify: 1.0.1
       vscode-uri: 3.2.0
+
+  '@vue-dnd-kit/core@2.4.7(vue@3.5.43(typescript@5.9.3))':
+    dependencies:
+      vue: 3.5.43(typescript@5.9.3)
 
   '@vue/compiler-core@3.5.43':
     dependencies:

@@ -124,9 +124,7 @@ async function onSubmit() {
   <div class="min-h-dvh bg-bg">
     <AppNav />
 
-    <main
-      class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[640px] md:px-8 md:pb-10 md:pt-28"
-    >
+    <main class="mx-auto w-full max-w-91.5 px-4 pb-28 pt-6 md:max-w-160 md:px-8 md:pb-10 md:pt-28">
       <RouterLink
         :to="{ name: 'app-topic-detail', params: { id: topicId } }"
         class="w-fit text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
@@ -166,7 +164,7 @@ async function onSubmit() {
           {{ formError }}
         </p>
 
-        <AppButton type="submit" :loading="isSubmitting" class="w-full md:w-auto md:min-w-[200px]">
+        <AppButton type="submit" :loading="isSubmitting" class="w-full md:w-auto md:min-w-50">
           Добавить
         </AppButton>
       </form>

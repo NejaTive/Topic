@@ -89,7 +89,7 @@ async function onSubmit() {
 <template>
   <main class="flex min-h-dvh items-center justify-center bg-bg px-4 py-8">
     <div
-      class="flex w-full max-w-[358px] flex-col gap-3 rounded-lg border border-line bg-surface px-[25px] py-[29px] md:max-w-[440px]"
+      class="flex w-full max-w-89.5 flex-col gap-3 rounded-lg border border-line bg-surface px-6.25 py-7.25 md:max-w-110"
     >
       <RouterLink
         to="/"

@@ -143,7 +143,7 @@ function showCoverErrorDemo() {
 
     <section class="mt-10 space-y-2">
       <h2 class="text-title">RankRow · ranked (mobile 358)</h2>
-      <div class="flex max-w-[358px] flex-col gap-3">
+      <div class="flex max-w-89.5 flex-col gap-3">
         <RankRow :rank="1" title="Dune 2" :cover-url="sampleCover" />
         <RankRow :rank="2" title="Arrival" :cover-url="sampleCover" />
         <RankRow :rank="3" title="Blade Runner 2049" :cover-url="sampleCover" />
@@ -154,7 +154,7 @@ function showCoverErrorDemo() {
 
     <section class="mt-10 space-y-2">
       <h2 class="text-title">RankRow · inbox</h2>
-      <div class="flex max-w-[358px] flex-col gap-3">
+      <div class="flex max-w-89.5 flex-col gap-3">
         <RankRow mode="inbox" title="Ещё не оценён" :cover-url="sampleCover" />
         <RankRow mode="inbox" title="Без обложки" />
       </div>
@@ -181,7 +181,7 @@ function showCoverErrorDemo() {
       </div>
     </section>
 
-    <section class="mt-10 max-w-[960px] space-y-3">
+    <section class="mt-10 max-w-240 space-y-3">
       <h2 class="text-title">TopicRow · desktop (labeled chip)</h2>
       <TopicRow
         v-for="row in sampleRows"
@@ -193,7 +193,7 @@ function showCoverErrorDemo() {
       />
     </section>
 
-    <section class="mt-10 max-w-[358px] space-y-3">
+    <section class="mt-10 max-w-89.5 space-y-3">
       <h2 class="text-title">TopicRow · mobile (compact chip)</h2>
       <TopicRow
         v-for="row in sampleRows"
@@ -212,13 +212,13 @@ function showCoverErrorDemo() {
         Floating dock: bottom (M) / top (D). S09 share — Primary «Присоединиться»; error — «На
         главную» (S11/S12).
       </p>
-      <div class="max-w-[390px] rounded-lg border border-line bg-bg p-3">
+      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
         <GuestNav :fixed="false" placement="bottom" cta-mode="share" />
       </div>
-      <div class="max-w-[840px] rounded-lg border border-line bg-bg p-3">
+      <div class="max-w-210 rounded-lg border border-line bg-bg p-3">
         <GuestNav :fixed="false" placement="top" cta-mode="share" />
       </div>
-      <div class="max-w-[390px] rounded-lg border border-line bg-bg p-3">
+      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
         <GuestNav :fixed="false" placement="bottom" cta-mode="error" />
       </div>
     </section>
@@ -228,7 +228,7 @@ function showCoverErrorDemo() {
       <p class="text-body-sm text-muted">
         Fixed auto-dock на краях viewport. Ниже — inline bottom (M) и top (D).
       </p>
-      <div class="max-w-[390px] rounded-lg border border-line bg-bg p-3">
+      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
         <AppNav :fixed="false" placement="bottom" active="topics" />
       </div>
       <div class="rounded-lg border border-line bg-bg p-3">
@@ -238,7 +238,7 @@ function showCoverErrorDemo() {
 
     <section class="mt-10 space-y-4">
       <h2 class="text-title">EmptyState · With CTA</h2>
-      <div class="max-w-[720px]">
+      <div class="max-w-180">
         <EmptyState />
       </div>
     </section>

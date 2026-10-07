@@ -53,12 +53,12 @@ const shellClass = computed(() => {
   const base = 'mx-auto flex items-center rounded-lg border border-line bg-surface shadow-float';
   switch (props.placement) {
     case 'bottom':
-      return `${base} h-[68px] max-w-[366px] justify-around px-0.5`;
+      return `${base} h-17 max-w-91.5 justify-around px-0.5`;
     case 'top':
-      return `${base} h-16 max-w-[804px] justify-between px-6 lg:max-w-[1256px]`;
+      return `${base} h-16 max-w-201 justify-between px-6 lg:max-w-314`;
     case 'auto':
     default:
-      return `${base} h-[68px] max-w-[366px] justify-around px-0.5 md:h-16 md:max-w-[804px] md:justify-between md:px-6 lg:max-w-[1256px]`;
+      return `${base} h-17 max-w-91.5 justify-around px-0.5 md:h-16 md:max-w-201 md:justify-between md:px-6 lg:max-w-314`;
   }
 });
 

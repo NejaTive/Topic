@@ -8,3 +8,42 @@
     @apply bg-bg text-ink font-sans antialiased;
   }
 }
+
+@layer components {
+  .rank-dnd-list {
+    position: relative;
+  }
+
+  .rank-dnd-item {
+    width: 100%;
+  }
+
+  /* Вне потока, но в DOM — иначе dnd-kit теряет entity */
+  .rank-dnd-source-collapsed {
+    position: absolute;
+    width: 0;
+    height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* contents: закрытый слот не участвует в flex gap */
+  .rank-dnd-drop-slot:not(.is-open) {
+    display: contents;
+  }
+
+  .rank-dnd-drop-slot.is-open {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 74px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md, 8px);
+    border: 1px dashed var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    pointer-events: none;
+  }
+}

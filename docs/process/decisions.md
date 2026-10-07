@@ -453,3 +453,27 @@
 - Справа на RankRow (код + Figma UI-Kit): **`grab-zone`** ~44px на всю высоту карточки — DnD только отсюда (`cursor-grab`); тело карточки — клик в деталку (`cursor-pointer`).
 - Визуал зоны: fill `color/surface-sunken`, левый edge `color/line`, правые углы `radius/md`; Drag — fill `color/accent/soft`; Hover-карточки — fill зоны `color/line` (контраст к sunken-карточке).
 - Figma: masters `Rank row MOBILE` (`35:614`) и `Rank row DESKTOP` (`34:1561`), все варианты с handle; **NoDragable** без зоны. Instances на S05 подтягиваются из masters.
+
+### DnD — `@vue-dnd-kit/core` (вариант B)
+
+- Библиотека: **`@vue-dnd-kit/core`** (согласие владельца; раньше — нативный Pointer DnD).
+- Разделение: **`RankRow`** — только UI; **`RankRowDraggable`** — `makeDraggable` + handle `[data-slot=drag-handle]`; S05 — `makeDroppable` + `suggestSort`.
+- `DnDProvider` на корне (`App.vue`), чтобы inject работал у потомков.
+- Live-gap: source схлопывается, щель по hover (без перестановки DOM во время drag).
+- ranked reorder → `reorder`; inbox→ranked → `rank` + при mid-insert ещё `reorder` (визуальная щель = позиция вставки; ранее «только в конец» ослаблено для UX gap).
+
+---
+
+## 08.10.2026
+
+### Комментарии в коде — минимум
+
+- По умолчанию **без** комментариев; оставлять только неочевидный why / инвариант / ограничение либы.
+- Не писать пересказ кода, историю дебага, навигационные HTML-комментарии «секция X».
+- Канон: `.cursor/rules/engineering/code-comments.mdc`.
+
+### Tailwind — suggestCanonicalClasses
+
+- В UI писать классы в канонической форме IntelliSense (`rem: 16`): px→шкала для spacing/leading/size, `h-(--token)`, `foo!` вместо `!foo`.
+- Шрифтовые `text-[Npx]` не заменять на spacing-`text-N`, если компилятор так не канонизирует (у нас `--text-*`).
+- Канон: `.cursor/rules/engineering/tailwind-canonical.mdc`.
