@@ -6,6 +6,7 @@
 
 - **VPS:** Ubuntu 22.04, Docker Compose.
 - **Edge:** Caddy (`topic-web`) на `:80` — SPA, `/api/*` → Nest, `/{S3_BUCKET}/*` → MinIO.
+- **Обложки:** same-origin `/{bucket}/{key}` (`S3_PUBLIC_URL=.` у api); не `127.0.0.1:9000` в браузере.
 - **Данные:** Postgres + MinIO на том же VPS (тома Docker).
 - **CI:** push в `main` → build/push образов в GHCR → SSH → `compose up`.
 - **Первый этап:** HTTP по IP, без TLS и без `Secure` cookie.
