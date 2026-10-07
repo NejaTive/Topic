@@ -35,12 +35,20 @@ export class StorageService implements OnModuleInit {
     });
   }
 
-  /** Публичный URL объекта: `{S3_PUBLIC_URL}/{bucket}/{key}` (path-style MinIO). */
+  /**
+   * Публичный URL обложки для браузера.
+   * Same-origin path `/{bucket}/{key}` (Caddy → MinIO); если S3_PUBLIC_URL задан —
+   * абсолютный `{S3_PUBLIC_URL}/{bucket}/{key}` (dev MinIO / будущий CDN).
+   */
   coverUrl(coverKey: string | null | undefined): string | null {
     if (!coverKey) {
       return null;
     }
-    return `${this.publicBaseUrl}/${this.bucket}/${coverKey}`;
+    const path = `/${this.bucket}/${coverKey}`;
+    if (!this.publicBaseUrl || this.publicBaseUrl === '.') {
+      return path;
+    }
+    return `${this.publicBaseUrl}${path}`;
   }
 
   /**

@@ -13,9 +13,11 @@
 		reverse_proxy api:3001
 	}
 
-	# path-style MinIO: {PUBLIC_BASE_URL}/{S3_BUCKET}/{key}
+	# path-style MinIO: /{S3_BUCKET}/{key}
 	handle /{$S3_BUCKET}/* {
-		reverse_proxy minio:9000
+		reverse_proxy minio:9000 {
+			header_up Host {http.reverse_proxy.upstream.hostport}
+		}
 	}
 
 	handle {
