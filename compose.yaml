@@ -1,0 +1,60 @@
+# Dev-инфра: Postgres + MinIO.
+# Официальные minio/minio и minio/mc с Docker Hub/Quay сняты (сент. 2026);
+# здесь — публичные community-сборки того же CE (тот же CLI/API/консоль).
+services:
+  postgres:
+    image: postgres:17-alpine
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-topic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-topic}
+      POSTGRES_DB: ${POSTGRES_DB:-topic}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-topic} -d ${POSTGRES_DB:-topic}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  minio:
+    image: coollabsio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - '127.0.0.1:${MINIO_API_PORT:-9000}:9000'
+      - '127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001'
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      # В образе есть mc; curl отсутствует
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  minio-init:
+    image: pgsty/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-topic-covers}
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - >
+        mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"
+        && mc mb "local/$${MINIO_BUCKET}" --ignore-existing
+        && mc anonymous set download "local/$${MINIO_BUCKET}"
+    restart: 'no'
+
+volumes:
+  postgres_data:
+  minio_data:

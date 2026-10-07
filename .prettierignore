@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+pnpm-lock.yaml
+docs/
+.cursor/
+apps/web/src/api/schema.d.ts
+apps/api/openapi.json
+apps/api/src/generated/

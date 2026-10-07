@@ -256,7 +256,7 @@
 - Отложено в реализации (продуктовые договорённости в stage-0/1 **не отменены**, вернуться явно; записи в `docs/backlog/ideas.md`):
   - ↑↓ / «переместить на позицию N» как альтернатива DnD (a11y);
   - UX «Топик изменился» + optimistic-проверка версии (до этого возможен тихий overwrite порядка).
-- Также не решено / позже: OG-превью (отдельный slice), **тесты** (владелец: делаем отдельно, не добавляем сейчас), prod-хостинг и prod-хранилище, rate-limit на auth, способ подключения токенов в Tailwind.
+- Также не решено / позже: OG-превью (отдельный slice), **тесты** (владелец: делаем отдельно, не добавляем сейчас), ~~prod-хостинг и prod-хранилище~~ (закрыто 08.10.2026), rate-limit на auth, способ подключения токенов в Tailwind.
 - ~~В `.cursor/rules/` стек не фиксируем (до отдельного OK).~~ — **отменено 05.10.2026:** владелец дал OK, стек зафиксирован в `.cursor/rules/engineering/tech-stack.mdc` (always-apply; docs остаются SoT). Архитектура/структура папок и дизайн-код-правила в rules по-прежнему не описываются.
   - Пометка к записи 03.10 («UI-язык, стек, архитектура, тесты, дизайн-код — в rules пока не описываем»): для **стека** устарело.
 
@@ -270,10 +270,10 @@
 Документ: [`stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md).
 
 - **Разделение SoT:** продукт и устойчивые решения — `docs/`; **задачи, статусы, AC исполнения** — **YouGile** (полный бэклог в markdown **не** зеркалим).
-- **История выполнения** задач с доски — текстовый лог [`docs/process/task-history.md`](task-history.md) (дописывать при «Готово» / согласованном «На проверке»).
+- **История выполнения** задач с доски — текстовый лог [`docs/process/task-history.md`](task-history.md) (пишет ревьюер при OK, до merge; см. 4e ниже).
 - **Структура репо (корень):** `docs/`, `apps/web/`, `apps/api/`; опционально `apps/web/docs`, `apps/api/docs`. Внутренняя архитектура приложений — через карточки YouGile, не заранее в stage-доках.
 - **YouGile:** компания создана; колонки/задачи — через **MCP** в отдельном чате. MCP: `https://yougile.com/data/ai/mcp`, `Authorization: Bearer …` — как на соседнем проекте; ключ **только локально**, не в репо.
-- **Agent-workflow** (детали rule/skill — фаза 4e): реализацию ведут **ИИ-агенты**. Поток: создание в **«Бэклог»** (вручную или агентом) → готовность → **«К работе»** → агент → **«В разработке»** → сдача → **«На проверке»** → проверка владельцем **или** агентом-ревьюером → **«Готово»**.
+- **Agent-workflow** — зафиксирован в фазе **4e** (см. ниже); канон в [`stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md).
 - Фаза **4a** (docs этапа 3/4 + task-history) — выполнена 05.10.2026; дальше **4b** — подключение MCP.
 
 ### YouGile — структура досок (4b–4c, старт)
@@ -290,9 +290,21 @@
 
 - На досках **Задачи** (Frontend `fb18e6e8-…`, Backend `d55d6a0a-…`):
   - **`Эпик`** (`string`): `Scaffold`, `Auth`, `Topics`, `Share`, `Page Error` (S11–S12).
-  - **`Errors`** (`string`, значение `Bug`) — только **баги**, не эпик экранов ошибок.
+  - **`Errors`** (`string`) — тип дефекта/правки (не эпик; **не** путать с эпиком Page Error). Одно значение на карточку:
+    - `Bug` — сломано поведение / контракт API;
+    - `UI` — визуал, отступы, токены, курсор, декоративные ссылки;
+    - `UX` — флоу / валидация «как ощущается», без «сломано напрочь»;
+    - `A11y` — доступность;
+    - `Perf` — производительность, лишние запросы;
+    - `Copy` — тексты / лейблы / сообщения (если не валить в UX).
 - S08 / S10 / S13 — вне MVP-среза, значений эпика нет.
 - «Первые эпики» как карточки-родители — не заводили; эпик = стикер на задачах (4d).
+
+### YouGile — Errors taxonomy (уточнение 07.10.2026)
+
+- Расширен список значений **Errors** (см. блок стикеров выше). Git-тип ветки (`fix/…`) ≠ эпик; при `fix` на карточке ставить подходящее **Errors**.
+- MCP `create_sticker` **не дописывает** values к существующему стикеру — создаёт дубликат (`Errors (2)` / `(3)`). Канон после ручной зачистки: один стикер **Errors** с полным набором на каждой доске; старые урезанные Errors — удалить в UI YouGile, новый переименовать в `Errors`.
+- **FRO-21:** Эпик `Auth`; Errors — `UX` (валидация) + временно `UI` на старом дубликате стикера до зачистки.
 
 ### Git-хостинг (отмена GitLab → GitHub)
 
@@ -302,13 +314,14 @@
 - Локальный `git` + remote — для push; MCP — issues/PR/repos из чата.
 - Remote: **https://github.com/NejaTive/Topic** (private); локальный `origin` — **SSH** (`git@github.com:NejaTive/Topic.git`).
 - Каталог **`.cursor/` целиком** — не в git (секреты MCP, локальные settings/rules для Cursor).
-- Сообщения **git commit** — на **русском**, формат `тип: суть` (`feat` / `fix` / `docs` / …); ветки — пока только **`main`**.
-- Правило агента: `.cursor/rules/collaboration/git.mdc` (always-apply); в `working-style.mdc` — ссылка + секрет-спросить.
+- Сообщения **git commit** — на **русском**; по задаче YouGile — `тип(ID): суть` (см. 4e / уточнение ниже); вне задачи — `тип: суть`.
+- ~~Ветки — пока только `main`.~~ — **отменено 05.10.2026 (4e):** база фич — `develop`; см. блок «Этап 4e» ниже.
+- Правило агента: `.cursor/rules/collaboration/git.mdc` (always-apply); в `working-style.mdc` — ссылка + политика `.env`.
 
 ### Share — продуктовые уточнения (нарезка 4d)
 
-- Guest chrome на S09: Primary **«Войти»** → `/login`; Ghost **«Присоединиться»** → `/` (орфография с «и»; в Figma опечатка «Присоедениться»).
-- Владелец на своём unlisted/public `/t/:shareId` остаётся на **S09** (preview как у гостя), без redirect на S05; CTA «Редактировать» на S09 не делаем в этом эпике.
+- ~~Guest chrome на S09: Primary «Войти» → `/login`; Ghost «Присоединиться» → `/`.~~ — **отменено 07.10.2026** (см. блок «S09 header»).
+- Владелец на своём unlisted/public `/t/:shareId` остаётся на **S09** (preview), без redirect на S05; CTA «Редактировать» на S09 не делаем в этом эпике.
 - Share API: **403** (private / недоступен) отдельно от **404** (нет / удалён) — под экраны S11 / S12.
 - Карточки YouGile: **BAC-13**, **FRO-18**, **FRO-19** (эпик Share); S11–S12 — эпик Page Error.
 
@@ -318,4 +331,159 @@
 - S11 subtitle: **«Ссылка недоступна»** (title «Нет доступа»).
 - S12: «Не найдено» / «Битая ссылка или топик удалён».
 - GuestNav error-mode: Primary «На главную» → `/`; catch-all неизвестных URL → S12; Share 403→S11, 404→S12.
-- **Нарезка MVP-среза hi-fi (Scaffold → Auth → Topics → Share → Page Error) в YouGile — завершена** (фаза 4d). Дальше — 4e (rule/skill agent-workflow).
+- **Нарезка MVP-среза hi-fi (Scaffold → Auth → Topics → Share → Page Error) в YouGile — завершена** (фаза 4d).
+
+### Этап 4e — agent-workflow (✅ 05.10.2026)
+
+Канон: [`stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md) §Agent-workflow.  
+Артефакты: `.cursor/rules/collaboration/yougile-agent-workflow.mdc`; skills `yougile-planner` / `yougile-executor` / `yougile-reviewer`; обновлены `git.mdc`, `working-style.mdc`, `tech-stack.mdc`, `task-history.md`.
+
+- **Колонки:** Бэклог → К работе → В разработке → На проверке → Готово.
+- **Планировщик:** Бэклог → К работе только если зависимости в Готово и контракт готов. Без числа / «возьми задачу» → **1** карточка; «возьми N» → до **N**; затем передача оркестратору.
+- ~~**Исполнитель (оркестратор):** один чат = одна задача~~ — **уточнено 05.10.2026** (см. блок ниже «Оркестратор + subagent»).
+- **Команда владельца:** «возьми задачу/N» / «сделай …» / «прогони пайплайн» → оркестратор доводит набор до Готово (или стопа).
+- **Ревью:** reviewer-subagent с пустым контекстом (handoff-пакет); чеклист в YouGile + ручной прогон; стек поднимать если есть; автотесты в репо пока нет.
+- **Возврат:** На проверке → В разработке; доработка через executor-subagent из того же оркестратора; цикл **макс. 3** на задачу.
+
+### Cleanup после ревью (уточнение 4e, 05.10.2026)
+
+- Reviewer-subagent после прогона (OK и FAIL) **подчищает за собой**: стоп поднятых `dev`-процессов; удаление временных логов/артефактов чеклиста (например `.review-*.log`); без коммита мусора.
+- Канон: skill `yougile-reviewer` §Cleanup; кратко — `yougile-agent-workflow.mdc`, `stage-4-brainstorm.md` §Ревью и DoD.
+
+### Оркестратор + subagent на задачу (уточнение 4e, 05.10.2026)
+
+- Родительский чат с владельцем = **оркестратор** (очередь, зависимости, цикл); может провести **несколько** задач подряд в одном диалоге.
+- **Одна задача = один executor-subagent** (пустой контекст + brief); реализация и PR через `gh` — в subagent.
+- «возьми задачу» → 1 в «К работе» → claim+работа первой; «возьми N» → N в «К работе», работа **последовательно** с первой; остальные ждут в очереди.
+- Executor’ов **не параллелить** по умолчанию (общий `develop`).
+- Канон: `yougile-agent-workflow.mdc`; skills `yougile-planner` / `yougile-executor` (режимы A/B).
+
+### Agent / personal stores
+
+- Создание и обновление файлов в **agent store** и **personal store** (вне репо Topic) — **без спроса** у владельца; штатная фиксация решений по `persist-decisions.mdc`.
+- **Git (пересмотр):** ~~commit/push только по запросу~~ и ~~только main~~ отменены для исполнения карточек. База — **`develop`** (владелец создаёт вручную); ветка `feat/<ID>`; PR → `develop`; ревьюер мержит и **удаляет** ветку; в `main` агенты не пушат.
+- **Коммиты по задаче:** `тип(ID): краткая суть` (пример: `feat(BAC-1): …`). Вне карточки — `тип: суть`.
+- **PR по задаче:** в описании обязательно ссылка на карточку YouGile + краткий summary сделанного (шаблон в `git.mdc`).
+- **task-history:** пишет ревьюер при OK: запись → commit на feat → merge PR → Готово.
+- **`.env`:** локальные дефолты из `.env.example` без спроса; прод-секреты и коммит `.env` — спросить.
+- **Баги (`Errors=Bug`):** тот же флоу; отдельный приоритет не фиксируем (стикер на будущее).
+- **Отложено:** ревьюер пишет автотесты — [`docs/backlog/ideas.md`](../backlog/ideas.md).
+
+---
+
+## 06.10.2026
+
+### Dev-образы MinIO (BAC-5)
+
+- В `compose.yaml` для MinIO API/консоли и `mc` (init бакета) — **community-образы** `coollabsio/minio` + `pgsty/mc`: официальные `minio/minio` и `minio/mc` с осени 2025–2026 не тянутся анонимно с Docker Hub/Quay.
+- S3-совместимость и роль «MinIO в dev» из стека **сохранены**; образы задокументированы в compose/README.
+- При смене политики pull официальных образов — можно вернуться на `minio/*` отдельным PR.
+
+### Длительность задач YouGile (agent-workflow)
+
+- В отчёте оркестратора и в [`task-history.md`](task-history.md) фиксируем **wall-clock** с разбивкой: **реализация** (сумма прогонов executor) · **ревью** (сумма прогонов reviewer) · **всего**.
+- Планировщик в длительность карточки не входит. Формат минут: `~12 мин` / `1 ч 05 мин`.
+- Канон: skills `yougile-executor` / `yougile-reviewer`; `yougile-agent-workflow.mdc`; stage-4 §Ревью и DoD.
+
+---
+
+## 07.10.2026
+
+### Figma MCP — фиксированный канал
+
+- В форке TalkToFigma канал **всегда** `figma-mcp` (рандомный channelId отменён).
+- Ручной минимум владельца: Figma Desktop → `bun socket` в `D:/mcp/cursor-talk-to-figma-mcp` → Connect в локальном плагине.
+- Агент: `join_channel({ channel: "figma-mcp" })` без спроса; при ошибке — проверить три шага выше, не просить новый channelId.
+- Rules: `.cursor/rules/design/figma-mcp-workflow.mdc`, `figma-mcp-limits.mdc`.
+
+### task-history — ретрооценки длительности
+
+- Пропуски поля **Длительность** в старых записях можно закрывать ретрооценкой (пометка в Заметках), чтобы сводки по доске не ломались.
+- 07.10.2026 дополнены: BAC-1 (~4·~3·~7), BAC-4 (~4·~3·~7), BAC-5 (~6·~4·~10).
+
+### task-history — формат записи (уточнение)
+
+- Порядок полей: YouGile → Итог → Репо → Заметки (опц.) → **Доработка после ревью** → **Длительность** (в конце).
+- **Доработка после ревью:** `нет` или `да (цикл N/3; …)` — был ли FAIL-возврат в «В разработке» до финального OK.
+- Канон: [`task-history.md`](task-history.md); skill `yougile-reviewer`.
+
+### Skill «запуск проекта»
+
+- Project skill: `.cursor/skills/engineering/start-project/SKILL.md`.
+- Skills раскладываем по секциям как rules: `collaboration/` (YouGile), `engineering/` (dev/стек).
+- Поднимает локальный стек Topic (infra → migrate deploy → `pnpm dev`); профили `full` / `infra` / `api` / `web`.
+- Отчёт агента: markdown **вне** code fence (кликабельные ссылки); секции Infra / API / Web с таблицами + dev-креды; **длительность** старта (всего + по сервисам), не часы; профиль (`full`/…) в отчёт не писать.
+- Остановка — зеркальный каркас («остановлен» + shutdown ~Xs); только по просьбе владельца или cleanup вызывающего skill (ревьюер).
+- Канон: `.cursor/skills/engineering/start-project/SKILL.md`.
+
+### Оценка объёма при обсуждении задачи
+
+- Когда идёт **обсуждение** задачи / плана / прогона (ещё до «делай»), агент **всегда** даёт краткую **оценку объёма** wall-clock (диапазон минут/часов), с оговоркой предпосылок (живой стек, чистая БД и т.п.).
+- Цель — калибровка ожидания владельца, не SLA. Формат как в планах: отдельный блок «Оценка объёма» + одна строка.
+- Канон: `.cursor/rules/collaboration/working-style.mdc`.
+
+### Auth — валидация форм
+
+- Сообщения class-validator в auth DTO — **на русском** (без префикса поля вроде `email:`).
+- На фронте login/register: сначала клиентская проверка (`apps/web/src/lib/auth-validation.ts`), запрос к API только если локально ок; бэкенд — дополнительная проверка.
+- Тексты ошибок клиента зеркалят правила LoginDto / RegisterDto.
+
+### Skill yougile-manual-close
+
+- Project skill: `.cursor/skills/collaboration/yougile-manual-close/SKILL.md`; **только ручной** вызов (`disable-model-invocation`).
+- Когда владелец уже написал/поправил код и прогнал вручную: анализ diff → карточка YouGile (эпик из стикера; новый эпик — только если текущие не подходят) → ветка **`тип/ID`** (`feat` / `fix` / `style` / …) от текущего HEAD → сначала запись в `task-history` → **один** коммит (код + история) → PR → `develop` → merge + удаление ветки → **Готово**.
+- В **Длительность** писать дословно: `ручное изменение`. Amend feature-ветки после `gh pr create` (чтобы вписать PR в тот же коммит) — разрешён этим skill.
+- Не путать с пайплайном «бери задачи» (planner → executor → reviewer).
+
+### Форматирование после задач
+
+- После любой задачи с правками в репо — **до коммита** `pnpm run format`; правки Prettier — в тот же коммит.
+- Канон: `.cursor/rules/collaboration/working-style.mdc`; skills `yougile-executor` / `yougile-manual-close` / `yougile-reviewer`.
+
+### S09 header — два состояния по сессии
+
+- На `/t/:shareId` хедер зависит только от авторизации:
+  - **гость** — `GuestNav` `ctaMode=share`: одна Primary **«Присоединиться»** → `/` (лендинг); без «Войти».
+  - **авторизованный** — обычный `AppNav` (как в app).
+- Орфография CTA: **«Присоединиться»** (с «и»; в Figma бывает опечатка «Присоедениться»).
+- Без redirect владельца на S05; preview share остаётся на S09.
+
+### Rank row — зона grab
+
+- Справа на RankRow (код + Figma UI-Kit): **`grab-zone`** ~44px на всю высоту карточки — DnD только отсюда (`cursor-grab`); тело карточки — клик в деталку (`cursor-pointer`).
+- Визуал зоны: fill `color/surface-sunken`, левый edge `color/line`, правые углы `radius/md`; Drag — fill `color/accent/soft`; Hover-карточки — fill зоны `color/line` (контраст к sunken-карточке).
+- Figma: masters `Rank row MOBILE` (`35:614`) и `Rank row DESKTOP` (`34:1561`), все варианты с handle; **NoDragable** без зоны. Instances на S05 подтягиваются из masters.
+
+### DnD — `@vue-dnd-kit/core` (вариант B)
+
+- Библиотека: **`@vue-dnd-kit/core`** (согласие владельца; раньше — нативный Pointer DnD).
+- Разделение: **`RankRow`** — только UI; **`RankRowDraggable`** — `makeDraggable` + handle `[data-slot=drag-handle]`; S05 — `makeDroppable` + `suggestSort`.
+- `DnDProvider` на корне (`App.vue`), чтобы inject работал у потомков.
+- Live-gap: source схлопывается, щель по hover (без перестановки DOM во время drag).
+- ranked reorder → `reorder`; inbox→ranked → `rank` + при mid-insert ещё `reorder` (визуальная щель = позиция вставки; ранее «только в конец» ослаблено для UX gap).
+
+---
+
+## 08.10.2026
+
+### Комментарии в коде — минимум
+
+- По умолчанию **без** комментариев; оставлять только неочевидный why / инвариант / ограничение либы.
+- Не писать пересказ кода, историю дебага, навигационные HTML-комментарии «секция X».
+- Канон: `.cursor/rules/engineering/code-comments.mdc`.
+
+### Tailwind — suggestCanonicalClasses
+
+- В UI писать классы в канонической форме IntelliSense (`rem: 16`): px→шкала для spacing/leading/size, `h-(--token)`, `foo!` вместо `!foo`.
+- Шрифтовые `text-[Npx]` не заменять на spacing-`text-N`, если компилятор так не канонизирует (у нас `--text-*`).
+- Канон: `.cursor/rules/engineering/tailwind-canonical.mdc`.
+
+### Prod-хостинг и CI/CD (VPS)
+
+- **Хостинг:** VPS (PL), Ubuntu 22.04, Docker Compose в `/opt/topic`.
+- **Стек на сервере:** Caddy (образ `topic-web`: SPA + reverse proxy) + Nest (`topic-api`) + Postgres + MinIO (обложки на том же VPS).
+- **Сеть:** один origin по **HTTP/IP без TLS** на первом этапе; MinIO/Postgres наружу не публиковать.
+- **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
+- **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`).
+- **Версии (A):** annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit в `main` перед/сразу после выката; skill предлагает bump, владелец подтверждает.
+- **Отложено (B и прочее):** `VERSION` / bump package.json / version в health·UI / теги GHCR `:X.Y.Z`; домен, TLS/`Secure` cookie, rate-limit auth, внешний object storage.

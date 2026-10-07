@@ -1,0 +1,26 @@
+{
+	auto_https off
+}
+
+:80 {
+	encode gzip
+
+	request_body {
+		max_size 6MB
+	}
+
+	handle /api/* {
+		reverse_proxy api:3001
+	}
+
+	# path-style MinIO: {PUBLIC_BASE_URL}/{S3_BUCKET}/{key}
+	handle /{$S3_BUCKET}/* {
+		reverse_proxy minio:9000
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}
