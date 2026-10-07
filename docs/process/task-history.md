@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 08.10.2026 — S05 — DnD рейтинга на @vue-dnd-kit (live-gap)
+
+- **YouGile:** FRO-24
+- **Итог:** RankRow UI + RankRowDraggable на `@vue-dnd-kit/core`; RankedDropZone с live-gap (FLIP), settle, optimistic update до закрытия щели; inbox→ranked mid-insert; Tailwind canonical; ESLint в preview/PrivacyChip.
+- **Репо:** `feat/FRO-24` / [PR #38](https://github.com/NejaTive/Topic/pull/38) / (merge в develop)
+- **Заметки:** manual-close; владелец прогнал DnD/live-gap/drop вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 07.10.2026 — Topics UI — S03/S05/RankRow по макетам и mobile DnD
 
 - **YouGile:** FRO-23

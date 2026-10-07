@@ -43,9 +43,7 @@ function onRetry() {
     <AppNav v-if="isAuthed" />
     <GuestNav v-else cta-mode="share" />
 
-    <main
-      class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[804px] md:px-0 md:pb-10 md:pt-28"
-    >
+    <main class="mx-auto w-full max-w-91.5 px-4 pb-28 pt-6 md:max-w-201 md:px-0 md:pb-10 md:pt-28">
       <p v-if="shareQuery.isPending.value" class="text-body text-muted" role="status">Загрузка…</p>
 
       <div
@@ -74,7 +72,7 @@ function onRetry() {
           <span class="text-label font-semibold text-muted"> @{{ share.ownerNick }} </span>
         </div>
 
-        <h1 class="mt-2 text-h1 text-ink md:text-[32px] md:leading-[41px]">
+        <h1 class="mt-2 text-h1 text-ink md:text-[32px] md:leading-10.25">
           {{ share.title }}
         </h1>
 
@@ -85,7 +83,7 @@ function onRetry() {
         <ul v-else class="mt-8 flex list-none flex-col gap-3 p-0 md:mt-10" aria-label="Рейтинг">
           <li v-for="item in rankedItems" :key="item.id">
             <RankRow
-              class="!max-w-none w-full"
+              class="max-w-none! w-full"
               mode="ranked"
               readonly
               :show-drag-handle="false"

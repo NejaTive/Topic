@@ -29,8 +29,8 @@ const isInteractive = computed(() => !props.disabled && !props.loading);
 
 const sizeClass = computed(() =>
   props.size === 'sm'
-    ? 'h-[var(--size-control-sm)] px-3 text-body-sm'
-    : 'h-[var(--size-control-md)] px-6 text-label',
+    ? 'h-(--size-control-sm) px-3 text-body-sm'
+    : 'h-(--size-control-md) px-6 text-label',
 );
 
 const variantClass = computed(() => {

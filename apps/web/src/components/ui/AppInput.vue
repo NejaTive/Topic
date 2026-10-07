@@ -37,7 +37,7 @@ const isFilled = computed(() => model.value.length > 0);
 
 const fieldClass = computed(() => {
   const base = [
-    'h-[var(--size-control-md)] w-full rounded-md border bg-surface px-3 text-body text-ink',
+    'h-(--size-control-md) w-full rounded-md border bg-surface px-3 text-body text-ink',
     'placeholder:text-subtle',
     'transition-colors outline-none',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',

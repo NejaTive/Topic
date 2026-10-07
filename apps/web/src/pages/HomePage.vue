@@ -8,11 +8,11 @@ const router = useRouter();
 <template>
   <main class="flex min-h-dvh flex-col items-center justify-center bg-bg px-9 py-8 md:px-8">
     <div
-      class="flex w-full max-w-[320px] flex-col items-center gap-4 text-center md:max-w-none md:gap-5"
+      class="flex w-full max-w-80 flex-col items-center gap-4 text-center md:max-w-none md:gap-5"
     >
-      <h1 class="text-display text-ink md:text-[48px] md:leading-[61px]">Topic</h1>
+      <h1 class="text-display text-ink md:text-[48px] md:leading-15.25">Topic</h1>
 
-      <p class="text-[18px] leading-[23px] font-medium text-ink md:text-h2">
+      <p class="text-[18px] leading-5.75 font-medium text-ink md:text-h2">
         <span class="md:hidden">Личные рейтинги.<br />Не звёзды — порядок.</span>
         <span class="hidden md:inline">Личные рейтинги. Не звёзды — порядок.</span>
       </p>

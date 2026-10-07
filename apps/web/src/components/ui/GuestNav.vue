@@ -89,12 +89,12 @@ const shellClass = computed(() => {
     'mx-auto flex h-16 items-center rounded-lg border border-line bg-surface shadow-float justify-between gap-2 px-3 md:gap-3 md:px-4';
   switch (props.placement) {
     case 'bottom':
-      return `${base} max-w-[366px]`;
+      return `${base} max-w-91.5`;
     case 'top':
-      return `${base} max-w-[804px] lg:max-w-[1256px]`;
+      return `${base} max-w-201 lg:max-w-314`;
     case 'auto':
     default:
-      return `${base} max-w-[366px] md:max-w-[804px] lg:max-w-[1256px]`;
+      return `${base} max-w-91.5 md:max-w-201 lg:max-w-314`;
   }
 });
 

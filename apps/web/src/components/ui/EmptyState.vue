@@ -24,7 +24,7 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="flex w-full flex-col items-center gap-3 rounded-lg border border-line bg-surface px-8 py-[52px] text-center"
+    class="flex w-full flex-col items-center gap-3 rounded-lg border border-line bg-surface px-8 py-13 text-center"
     role="status"
   >
     <div
@@ -33,11 +33,11 @@ const emit = defineEmits<{
     >
       <span class="h-1 w-7 rounded-sm bg-accent" />
       <span class="h-1 w-7 rounded-sm bg-subtle" />
-      <span class="h-1 w-[18px] rounded-sm bg-subtle" />
+      <span class="h-1 w-4.5 rounded-sm bg-subtle" />
     </div>
 
     <p class="text-title text-ink">{{ title }}</p>
-    <p class="max-w-[320px] text-body-sm text-muted">{{ description }}</p>
+    <p class="max-w-80 text-body-sm text-muted">{{ description }}</p>
 
     <AppButton v-if="showCta" @click="emit('create', $event)">
       {{ ctaLabel }}

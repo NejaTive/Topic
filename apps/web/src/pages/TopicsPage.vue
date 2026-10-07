@@ -47,7 +47,7 @@ function onRetry() {
     <AppNav />
 
     <main
-      class="mx-auto flex w-full max-w-[366px] flex-1 flex-col px-4 pb-28 pt-6 md:max-w-[960px] md:px-0 md:pb-10 md:pt-28"
+      class="mx-auto flex w-full max-w-91.5 flex-1 flex-col px-4 pb-28 pt-6 md:max-w-240 md:px-0 md:pb-10 md:pt-28"
     >
       <header class="flex items-center justify-between gap-3">
         <h1 class="text-h1 text-ink">Мои топики</h1>
@@ -72,7 +72,7 @@ function onRetry() {
 
       <!-- Empty: вертикально по центру оставшегося viewport (Figma empty-slot) -->
       <div v-else-if="isEmpty" class="flex flex-1 flex-col items-center justify-center py-10">
-        <EmptyState class="w-full max-w-[338px]" @create="goCreate" />
+        <EmptyState class="w-full max-w-84.5" @create="goCreate" />
       </div>
 
       <ul v-else class="mt-6 flex list-none flex-col gap-3 p-0 md:mt-4" aria-label="Список топиков">
@@ -92,9 +92,9 @@ function onRetry() {
     <!-- M List: primary CTA над dock (не icon-FAB) -->
     <div
       v-if="showCreateCta"
-      class="pointer-events-none fixed inset-x-0 bottom-[calc(0.75rem+68px+12px)] z-30 flex justify-center px-4 md:hidden"
+      class="pointer-events-none fixed inset-x-0 bottom-23 z-30 flex justify-center px-4 md:hidden"
     >
-      <AppButton class="pointer-events-auto min-w-[160px] shadow-float" @click="goCreate">
+      <AppButton class="pointer-events-auto min-w-40 shadow-float" @click="goCreate">
         Создать топик
       </AppButton>
     </div>

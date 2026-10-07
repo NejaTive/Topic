@@ -1,34 +1,43 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { type IDragEvent } from '@vue-dnd-kit/core';
+import { useQueryClient } from '@tanstack/vue-query';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import { ItemsApiError } from '@/api/items';
+import { ItemsApiError, type ItemDto } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
 import {
   AppButton,
   AppNav,
   PrivacyChip,
-  RankRow,
+  RankedDropZone,
+  RankRowDraggable,
   type PrivacyValue,
-  type RankRowDragPoint,
 } from '@/components/ui';
 import {
+  applyOptimisticInboxToRank,
   useDeleteTopicMutation,
   useRankItemMutation,
   useReorderItemsMutation,
   useUpdateTopicPrivacyMutation,
 } from '@/composables/useTopicMutations';
+import { useRankedLiveGap } from '@/composables/useRankedLiveGap';
 import { useTopicItemsQuery } from '@/composables/useTopicItemsQuery';
 import { useTopicQuery } from '@/composables/useTopicQuery';
+import { playDropSettleAnimation } from '@/lib/dnd-drop-settle';
+import { queryKeys } from '@/query/keys';
 
 const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
 
-type ActiveDrag = { source: 'ranked' | 'inbox'; itemId: string };
+/** Стабильные пустые refs — identity для suggestSort. */
+const EMPTY_INBOX: ItemDto[] = [];
+const EMPTY_RANKED: ItemDto[] = [];
 
 const route = useRoute();
 const router = useRouter();
 
 const topicId = computed(() => String(route.params.id ?? ''));
 
+const queryClient = useQueryClient();
 const topicQuery = useTopicQuery(topicId);
 const itemsQuery = useTopicItemsQuery(topicId);
 const updatePrivacy = useUpdateTopicPrivacyMutation(() => topicId.value);
@@ -39,13 +48,7 @@ const reorderMut = useReorderItemsMutation(() => topicId.value);
 const privacyOpen = ref(false);
 const actionError = ref('');
 const copyFeedback = ref('');
-const draggingId = ref<string | null>(null);
-const rankedDropActive = ref(false);
-const activeDrag = ref<ActiveDrag | null>(null);
-const rankedSectionRef = ref<HTMLElement | null>(null);
-const rankedListRef = ref<HTMLElement | null>(null);
 
-/** Mobile chip compact for meta? Figma S05 meta uses labeled chip even on M. */
 const isMdUp = ref(false);
 
 function syncViewport() {
@@ -59,12 +62,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', syncViewport);
-  unlockScrollForDrag();
 });
 
 const topic = computed(() => topicQuery.data.value);
-const inbox = computed(() => itemsQuery.data.value?.inbox ?? []);
-const ranked = computed(() => itemsQuery.data.value?.ranked ?? []);
+const inbox = computed(() => itemsQuery.data.value?.inbox ?? EMPTY_INBOX);
+const ranked = computed(() => itemsQuery.data.value?.ranked ?? EMPTY_RANKED);
+
+const rankedGap = useRankedLiveGap(ranked, inbox);
 
 const isInboxOnly = computed(
   () => itemsQuery.isSuccess.value && inbox.value.length > 0 && ranked.value.length === 0,
@@ -143,102 +147,67 @@ async function onDeleteTopic() {
   }
 }
 
-async function onToRank(itemId: string) {
-  clearActionError();
-  try {
-    await rankItemMut.mutateAsync(itemId);
-  } catch (err) {
-    applyApiError(err, 'Не удалось перенести в рейтинг');
+async function onRankedDrop(e: IDragEvent) {
+  const dragged = e.draggedItems[0];
+  if (!dragged) return;
+
+  const meta = dragged.data as { id?: string; mode?: 'ranked' | 'inbox' } | undefined;
+  const itemId = meta?.id ?? (dragged.item as ItemDto | undefined)?.id;
+  if (!itemId) return;
+
+  const fromInbox = meta?.mode === 'inbox' || dragged.items === inbox.value;
+  const inboxInsertAt = rankedGap.peekInsertAt();
+
+  let nextIds: string[] | null = null;
+  if (!fromInbox) {
+    const result = e.helpers.suggestSort('vertical');
+    if (result) {
+      nextIds = (result.targetItems as ItemDto[]).map((row) => row.id);
+    }
   }
-}
 
-/** Slot index 0…N by pointer Y relative to ranked `<li>` midpoints. */
-function dropIndexFromY(clientY: number, listEl: HTMLElement): number {
-  const rows = [...listEl.querySelectorAll(':scope > li')];
-  for (let i = 0; i < rows.length; i++) {
-    const rect = rows[i]!.getBoundingClientRect();
-    if (clientY < rect.top + rect.height / 2) return i;
-  }
-  return rows.length;
-}
+  await playDropSettleAnimation(e);
 
-function moveId(ids: string[], itemId: string, toIndex: number): string[] {
-  const fromIndex = ids.indexOf(itemId);
-  if (fromIndex < 0) return ids;
-  const next = [...ids];
-  next.splice(fromIndex, 1);
-  const adjusted = fromIndex < toIndex ? toIndex - 1 : toIndex;
-  next.splice(adjusted, 0, itemId);
-  return next;
-}
+  // Optimistic в кэш, потом reset щели — иначе мигает пустое место.
+  if (fromInbox) {
+    const prevIds = ranked.value.map((row) => row.id);
+    const at = Math.min(Math.max(0, inboxInsertAt ?? prevIds.length), prevIds.length);
+    const ordered = [...prevIds];
+    ordered.splice(at, 0, itemId);
+    const previous = applyOptimisticInboxToRank(queryClient, topicId.value, itemId, at);
+    rankedGap.reset();
+    await nextTick();
 
-function pointInRect(x: number, y: number, rect: DOMRect): boolean {
-  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-}
-
-function isOverRanked(point: RankRowDragPoint): boolean {
-  const el = rankedSectionRef.value;
-  if (!el) return false;
-  return pointInRect(point.clientX, point.clientY, el.getBoundingClientRect());
-}
-
-function lockScrollForDrag() {
-  document.body.style.overflow = 'hidden';
-  document.body.style.touchAction = 'none';
-}
-
-function unlockScrollForDrag() {
-  document.body.style.overflow = '';
-  document.body.style.touchAction = '';
-}
-
-function onRowDragBegin(source: ActiveDrag['source'], itemId: string) {
-  activeDrag.value = { source, itemId };
-  draggingId.value = itemId;
-  rankedDropActive.value = true;
-  lockScrollForDrag();
-  clearActionError();
-}
-
-function onRowDragMove(point: RankRowDragPoint) {
-  if (!activeDrag.value) return;
-  rankedDropActive.value = isOverRanked(point);
-}
-
-function onRowDragCancel() {
-  activeDrag.value = null;
-  draggingId.value = null;
-  rankedDropActive.value = false;
-  unlockScrollForDrag();
-}
-
-async function onRowDragFinish(point: RankRowDragPoint) {
-  const drag = activeDrag.value;
-  activeDrag.value = null;
-  draggingId.value = null;
-  rankedDropActive.value = false;
-  unlockScrollForDrag();
-  if (!drag) return;
-
-  if (!isOverRanked(point)) return;
-
-  if (drag.source === 'inbox') {
-    // Без S08: inbox → только в конец ranked (не mid-insert).
-    await onToRank(drag.itemId);
+    clearActionError();
+    try {
+      await rankItemMut.mutateAsync(itemId);
+      if (at < prevIds.length) {
+        await reorderMut.mutateAsync(ordered);
+      }
+    } catch (err) {
+      if (previous) {
+        queryClient.setQueryData(queryKeys.topics.items(topicId.value), previous);
+      }
+      applyApiError(err, 'Не удалось перенести в рейтинг');
+    }
     return;
   }
 
-  const currentIds = ranked.value.map((item) => item.id);
-  if (!currentIds.includes(drag.itemId)) return;
-
-  const listEl = rankedListRef.value;
-  const toIndex = listEl ? dropIndexFromY(point.clientY, listEl) : currentIds.length;
-  const nextIds = moveId(currentIds, drag.itemId, toIndex);
-  if (nextIds.join(',') === currentIds.join(',')) return;
+  if (!nextIds?.length) {
+    rankedGap.reset();
+    return;
+  }
+  if (nextIds.join(',') === ranked.value.map((row) => row.id).join(',')) {
+    rankedGap.reset();
+    return;
+  }
 
   clearActionError();
   try {
-    await reorderMut.mutateAsync(nextIds);
+    const pending = reorderMut.mutateAsync(nextIds);
+    rankedGap.reset();
+    await nextTick();
+    await pending;
   } catch (err) {
     applyApiError(err, 'Не удалось сохранить порядок');
   }
@@ -268,9 +237,7 @@ function onRetry() {
   <div class="min-h-dvh bg-bg">
     <AppNav />
 
-    <main
-      class="mx-auto w-full max-w-[366px] px-4 pb-28 pt-6 md:max-w-[1280px] md:px-10 md:pb-10 md:pt-28"
-    >
+    <main class="mx-auto w-full max-w-91.5 px-4 pb-28 pt-6 md:max-w-7xl md:px-10 md:pb-10 md:pt-28">
       <RouterLink
         to="/app/topics"
         class="w-fit text-body-sm font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
@@ -307,7 +274,6 @@ function onRetry() {
           {{ topic.title }}
         </h1>
 
-        <!-- Meta: privacy (+ copy unlisted) | delete — Figma SPACE_BETWEEN -->
         <div class="mt-3 flex items-center justify-between gap-3 md:mt-4">
           <div class="flex min-w-0 items-center gap-2">
             <button
@@ -322,7 +288,6 @@ function onRetry() {
               <PrivacyChip :privacy="topic.privacy" :selected="privacyOpen" />
             </button>
 
-            <!-- Mobile Unlisted: icon copy 24 -->
             <button
               v-if="isUnlisted && !isMdUp"
               type="button"
@@ -349,7 +314,6 @@ function onRetry() {
               </svg>
             </button>
 
-            <!-- Desktop Unlisted: ghost «Скопировать ссылку» -->
             <AppButton
               v-if="isUnlisted && isMdUp"
               variant="ghost"
@@ -399,11 +363,9 @@ function onRetry() {
           {{ actionError }}
         </p>
 
-        <!-- Lists: mobile stack / desktop 2 колонки-панели (Figma col-inbox | col-ranked) -->
         <div
           class="mt-8 flex flex-col gap-8 md:mt-6 md:grid md:grid-cols-2 md:items-stretch md:gap-6"
         >
-          <!-- Inbox column -->
           <section
             class="md:rounded-lg md:border md:border-line md:bg-surface md:p-5"
             aria-labelledby="s05-inbox-heading"
@@ -414,22 +376,40 @@ function onRetry() {
             >
               Ещё не оценены
             </h2>
-            <ul class="mt-3 flex list-none flex-col gap-3 p-0" aria-label="Ещё не оценены">
-              <li v-for="item in inbox" :key="item.id">
-                <RankRow
-                  class="!max-w-none w-full"
-                  mode="inbox"
-                  drag-enabled
-                  :dragging="draggingId === item.id"
-                  :title="item.title"
-                  :cover-url="item.coverUrl ?? undefined"
-                  @click="goItem(item.id)"
-                  @drag-begin="onRowDragBegin('inbox', item.id)"
-                  @drag-move="onRowDragMove"
-                  @drag-finish="onRowDragFinish"
-                  @drag-cancel="onRowDragCancel"
+            <ul
+              class="rank-dnd-list mt-3 flex list-none flex-col gap-3 p-0"
+              aria-label="Ещё не оценены"
+            >
+              <template v-for="(item, index) in inbox" :key="item.id">
+                <li
+                  class="rank-dnd-drop-slot"
+                  :class="{ 'is-open': rankedGap.showInboxSpacerBefore(index, item.id) }"
+                  aria-hidden="true"
                 />
-              </li>
+                <li
+                  class="rank-dnd-item"
+                  :class="{ 'rank-dnd-source-collapsed': rankedGap.isSource(item.id) }"
+                >
+                  <RankRowDraggable
+                    mode="inbox"
+                    :index="index"
+                    :items="inbox"
+                    :item-id="item.id"
+                    :title="item.title"
+                    :cover-url="item.coverUrl ?? undefined"
+                    @click="goItem(item.id)"
+                    @drag-start="rankedGap.onDragStart"
+                    @drag-move="rankedGap.onDragMove"
+                    @drag-end="rankedGap.onDragEndOrCancel"
+                    @drag-cancel="rankedGap.onDragEndOrCancel"
+                  />
+                </li>
+              </template>
+              <li
+                class="rank-dnd-drop-slot"
+                :class="{ 'is-open': rankedGap.showInboxEndSpacer() }"
+                aria-hidden="true"
+              />
             </ul>
             <p v-if="inbox.length === 0" class="mt-3 text-body-sm text-muted">Пока пусто</p>
             <button
@@ -441,12 +421,10 @@ function onRetry() {
             </button>
           </section>
 
-          <!-- Ranked column (drop target: reorder + inbox→end) -->
-          <section
-            ref="rankedSectionRef"
-            class="md:rounded-lg md:border md:border-line md:bg-surface md:p-5"
+          <RankedDropZone
+            :items="ranked"
+            :on-drop-event="onRankedDrop"
             aria-labelledby="s05-rank-heading"
-            :class="rankedDropActive ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : null"
           >
             <h2
               id="s05-rank-heading"
@@ -457,33 +435,56 @@ function onRetry() {
             <p v-if="isInboxOnly" class="mt-3 text-body-sm text-muted">
               Перенесите в рейтинг, когда будете готовы
             </p>
+            <div
+              v-if="isInboxOnly"
+              class="rank-dnd-drop-slot"
+              :class="{ 'is-open mt-3': rankedGap.showEndSpacer() }"
+              :data-rank-drop-slot="rankedGap.showEndSpacer() ? '' : undefined"
+              aria-hidden="true"
+            />
             <ul
-              v-else
-              ref="rankedListRef"
-              class="mt-3 flex list-none flex-col gap-3 p-0"
+              v-if="!isInboxOnly"
+              class="rank-dnd-list mt-3 flex list-none flex-col gap-3 p-0"
               aria-label="Рейтинг"
             >
-              <li v-for="item in ranked" :key="item.id">
-                <RankRow
-                  class="!max-w-none w-full"
-                  mode="ranked"
-                  drag-enabled
-                  :dragging="draggingId === item.id"
-                  :rank="item.rankPosition ?? undefined"
-                  :title="item.title"
-                  :cover-url="item.coverUrl ?? undefined"
-                  @click="goItem(item.id)"
-                  @drag-begin="onRowDragBegin('ranked', item.id)"
-                  @drag-move="onRowDragMove"
-                  @drag-finish="onRowDragFinish"
-                  @drag-cancel="onRowDragCancel"
+              <template v-for="(item, index) in ranked" :key="item.id">
+                <li
+                  class="rank-dnd-drop-slot"
+                  :class="{ 'is-open': rankedGap.showSpacerBefore(index, item.id) }"
+                  :data-rank-drop-slot="rankedGap.showSpacerBefore(index, item.id) ? '' : undefined"
+                  aria-hidden="true"
                 />
-              </li>
+                <li
+                  class="rank-dnd-item"
+                  :class="{ 'rank-dnd-source-collapsed': rankedGap.isSource(item.id) }"
+                >
+                  <RankRowDraggable
+                    mode="ranked"
+                    :index="index"
+                    :items="ranked"
+                    :item-id="item.id"
+                    :rank="item.rankPosition ?? undefined"
+                    :title="item.title"
+                    :cover-url="item.coverUrl ?? undefined"
+                    @click="goItem(item.id)"
+                    @drag-start="rankedGap.onDragStart"
+                    @drag-move="rankedGap.onDragMove"
+                    @drag-end="rankedGap.onDragEndOrCancel"
+                    @drag-cancel="rankedGap.onDragEndOrCancel"
+                  />
+                </li>
+              </template>
+              <li
+                class="rank-dnd-drop-slot"
+                :class="{ 'is-open': rankedGap.showEndSpacer() }"
+                :data-rank-drop-slot="rankedGap.showEndSpacer() ? '' : undefined"
+                aria-hidden="true"
+              />
             </ul>
             <p v-if="ranked.length === 0 && !isInboxOnly" class="mt-3 text-body-sm text-muted">
               Пока пусто
             </p>
-          </section>
+          </RankedDropZone>
         </div>
       </template>
     </main>
