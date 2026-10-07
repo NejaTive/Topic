@@ -372,3 +372,14 @@
 - В отчёте оркестратора и в [`task-history.md`](task-history.md) фиксируем **wall-clock** с разбивкой: **реализация** (сумма прогонов executor) · **ревью** (сумма прогонов reviewer) · **всего**.
 - Планировщик в длительность карточки не входит. Формат минут: `~12 мин` / `1 ч 05 мин`.
 - Канон: skills `yougile-executor` / `yougile-reviewer`; `yougile-agent-workflow.mdc`; stage-4 §Ревью и DoD.
+
+---
+
+## 07.10.2026
+
+### Figma MCP — фиксированный канал
+
+- В форке TalkToFigma канал **всегда** `figma-mcp` (рандомный channelId отменён).
+- Ручной минимум владельца: Figma Desktop → `bun socket` в `D:/mcp/cursor-talk-to-figma-mcp` → Connect в локальном плагине.
+- Агент: `join_channel({ channel: "figma-mcp" })` без спроса; при ошибке — проверить три шага выше, не просить новый channelId.
+- Rules: `.cursor/rules/design/figma-mcp-workflow.mdc`, `figma-mcp-limits.mdc`.
