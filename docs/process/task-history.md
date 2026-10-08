@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 08.10.2026 — S05 — убрать accent-обводку RankedDropZone
+
+- **YouGile:** FRO-25
+- **Итог:** Убран drag-over highlight (`ring`/`isDragOver`) у зоны «Рейтинг»; droppable + live-gap остаются; highlight отложен в backlog. Зафиксировано: перед деплоем обязателен bump `version` в `package.json` (корень + apps).
+- **Репо:** `style/FRO-25` / [PR #42](https://github.com/NejaTive/Topic/pull/42) / (merge в develop)
+- **Заметки:** manual-close; владелец отключил фичу и подтвердил отложение.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 08.10.2026 — CI/CD деплой на VPS (Caddy + GHCR)
 
 - **YouGile:** BAC-14
