@@ -27,7 +27,6 @@ function errorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-/** GET /api/topics/:topicId/items — inbox + ranked (BAC-11). */
 export async function fetchTopicItems(topicId: string): Promise<ItemList> {
   const { data, error, response } = await apiClient.GET('/api/topics/{topicId}/items', {
     params: { path: { topicId } },
@@ -44,7 +43,6 @@ export async function fetchTopicItems(topicId: string): Promise<ItemList> {
   return data;
 }
 
-/** GET /api/topics/:topicId/items/:itemId — карточка элемента (S07). */
 export async function fetchItem(topicId: string, itemId: string): Promise<ItemDto> {
   const { data, error, response } = await apiClient.GET('/api/topics/{topicId}/items/{itemId}', {
     params: { path: { topicId, itemId } },
@@ -61,7 +59,6 @@ export async function fetchItem(topicId: string, itemId: string): Promise<ItemDt
   return data;
 }
 
-/** POST /api/topics/:topicId/items — создать в inbox (S06). */
 export async function createItem(topicId: string, body: CreateItemBody): Promise<ItemDto> {
   const { data, error, response } = await apiClient.POST('/api/topics/{topicId}/items', {
     params: { path: { topicId } },
@@ -82,7 +79,6 @@ export async function createItem(topicId: string, body: CreateItemBody): Promise
   return data;
 }
 
-/** PATCH /api/topics/:topicId/items/:itemId — правка title (S07). */
 export async function updateItem(
   topicId: string,
   itemId: string,
@@ -107,7 +103,6 @@ export async function updateItem(
   return data;
 }
 
-/** DELETE /api/topics/:topicId/items/:itemId. */
 export async function deleteItem(topicId: string, itemId: string): Promise<void> {
   const { error, response } = await apiClient.DELETE('/api/topics/{topicId}/items/{itemId}', {
     params: { path: { topicId, itemId } },
@@ -123,7 +118,6 @@ export async function deleteItem(topicId: string, itemId: string): Promise<void>
   }
 }
 
-/** POST /api/topics/:topicId/items/:itemId/rank — в конец ranked (BAC-11). */
 export async function rankItem(topicId: string, itemId: string): Promise<ItemDto> {
   const { data, error, response } = await apiClient.POST(
     '/api/topics/{topicId}/items/{itemId}/rank',
@@ -141,7 +135,6 @@ export async function rankItem(topicId: string, itemId: string): Promise<ItemDto
   return data;
 }
 
-/** POST /api/topics/:topicId/items/:itemId/unrank — обратно в inbox (BAC-11). */
 export async function unrankItem(topicId: string, itemId: string): Promise<ItemDto> {
   const { data, error, response } = await apiClient.POST(
     '/api/topics/{topicId}/items/{itemId}/unrank',
@@ -159,7 +152,6 @@ export async function unrankItem(topicId: string, itemId: string): Promise<ItemD
   return data;
 }
 
-/** POST /api/topics/:topicId/items/reorder — полная перестановка ranked (BAC-12). */
 export async function reorderItems(topicId: string, orderedItemIds: string[]): Promise<ItemList> {
   const { data, error, response } = await apiClient.POST('/api/topics/{topicId}/items/reorder', {
     params: { path: { topicId } },
@@ -195,7 +187,6 @@ function coverUploadError(error: unknown, status: number): ItemsApiError {
   return new ItemsApiError(errorMessage(error, 'Не удалось загрузить обложку'), status);
 }
 
-/** POST multipart cover ≤5 МБ (BAC-11). */
 export async function uploadItemCover(
   topicId: string,
   itemId: string,
@@ -205,7 +196,6 @@ export async function uploadItemCover(
     '/api/topics/{topicId}/items/{itemId}/cover',
     {
       params: { path: { topicId, itemId } },
-      // OpenAPI marks binary as string; runtime sends File via FormData.
       body: { file } as unknown as { file: string },
       bodySerializer(body) {
         const form = new FormData();
@@ -220,7 +210,6 @@ export async function uploadItemCover(
   return data;
 }
 
-/** DELETE cover of item. */
 export async function deleteItemCover(topicId: string, itemId: string): Promise<ItemDto> {
   const { data, error, response } = await apiClient.DELETE(
     '/api/topics/{topicId}/items/{itemId}/cover',

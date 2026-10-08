@@ -1,5 +1,4 @@
 <script lang="ts">
-/** Title-hint chips on S04 (Фильмы / …) — emit label into title field; no presetKey. */
 export const MAIN_CHIP_LABELS = [
   'Фильмы',
   'Сериалы',
@@ -56,25 +55,26 @@ export const MAIN_CHIP_LABELS = [
   'Кроссовки',
   'Парфюм',
 ] as const;
-export type MainChipLabel = (typeof MAIN_CHIP_LABELS)[number];
+export type TMainChipLabel = (typeof MAIN_CHIP_LABELS)[number];
 </script>
 
 <script setup lang="ts">
-withDefaults(
-  defineProps<{
-    label: string;
-    selected?: boolean;
-    disabled?: boolean;
-  }>(),
-  {
-    selected: false,
-    disabled: false,
-  },
-);
+interface TMainChipProps {
+  label: string;
+  selected?: boolean;
+  disabled?: boolean;
+}
 
-const emit = defineEmits<{
-  select: [label: string];
-}>();
+interface TMainChipEmits {
+  (e: 'select', label: string): void;
+}
+
+withDefaults(defineProps<TMainChipProps>(), {
+  selected: false,
+  disabled: false,
+});
+
+const emit = defineEmits<TMainChipEmits>();
 </script>
 
 <template>

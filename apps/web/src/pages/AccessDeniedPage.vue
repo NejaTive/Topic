@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ErrorStateView from '@/components/ErrorStateView.vue';
+import { ErrorStateView } from '@/components/layout';
 </script>
 
 <template>

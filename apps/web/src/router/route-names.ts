@@ -1,0 +1,16 @@
+export enum RouteName {
+  Root = '/',
+  Home = 'home',
+  Login = 'login',
+  Register = 'register',
+  ShareView = 'share-view',
+  ShareForbidden = 'share-forbidden',
+  ShareNotFound = 'share-not-found',
+  AppTopics = 'app-topics',
+  AppTopicCreate = 'app-topic-create',
+  AppTopicItemCreate = 'app-topic-item-create',
+  AppTopicItemDetail = 'app-topic-item-detail',
+  AppTopicDetail = 'app-topic-detail',
+  DevUiKit = 'dev-ui-kit',
+  NotFound = 'not-found',
+}

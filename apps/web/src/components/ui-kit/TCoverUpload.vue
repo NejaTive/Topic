@@ -1,30 +1,28 @@
 <script lang="ts">
-/** UI copy + client check; server multipart limit is 5 MB (BAC-11). */
 export const COVER_MAX_BYTES = 5 * 1024 * 1024;
 </script>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 
-const props = withDefaults(
-  defineProps<{
-    /** Object URL or remote cover preview. */
-    previewUrl?: string | null;
-    error?: string | null;
-    disabled?: boolean;
-  }>(),
-  {
-    previewUrl: null,
-    error: null,
-    disabled: false,
-  },
-);
+interface TCoverUploadProps {
+  previewUrl?: string | null;
+  error?: string | null;
+  disabled?: boolean;
+}
 
-const emit = defineEmits<{
-  /** Selected file for multipart upload (caller → BAC-11). */
-  file: [file: File];
-  clear: [];
-}>();
+interface TCoverUploadEmits {
+  (e: 'file', file: File): void;
+  (e: 'clear'): void;
+}
+
+const props = withDefaults(defineProps<TCoverUploadProps>(), {
+  previewUrl: null,
+  error: null,
+  disabled: false,
+});
+
+const emit = defineEmits<TCoverUploadEmits>();
 
 const inputRef = ref<HTMLInputElement | null>(null);
 const isHover = ref(false);

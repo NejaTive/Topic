@@ -1,32 +1,29 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import PrivacyChip from './PrivacyChip.vue';
-import type { PrivacyValue } from './PrivacyChip.vue';
+import TPrivacyChip from './TPrivacyChip.vue';
+import type { PrivacyValue } from './TPrivacyChip.vue';
 
-const props = withDefaults(
-  defineProps<{
-    title: string;
-    /** Secondary line: last-edited (Figma: «обновлён вчера»). */
-    meta: string;
-    privacy: PrivacyValue;
-    /** Mobile list: icon-only privacy chip. */
-    compactPrivacy?: boolean;
-    /** Up to 3 cover thumbs (32×40); missing → placeholder. */
-    covers?: Array<string | null | undefined>;
-    href?: string;
-  }>(),
-  {
-    compactPrivacy: false,
-    covers: () => [],
-    href: undefined,
-  },
-);
+interface TTopicRowProps {
+  title: string;
+  meta: string;
+  privacy: PrivacyValue;
+  compactPrivacy?: boolean;
+  covers?: Array<string | null | undefined>;
+  href?: string;
+}
 
-const emit = defineEmits<{
-  click: [event: MouseEvent];
-}>();
+interface TTopicRowEmits {
+  (e: 'click', event: MouseEvent): void;
+}
 
-/** Figma Topic row: всегда 3 слота 32×40, gap 4. */
+const props = withDefaults(defineProps<TTopicRowProps>(), {
+  compactPrivacy: false,
+  covers: () => [],
+  href: undefined,
+});
+
+const emit = defineEmits<TTopicRowEmits>();
+
 const coverSlots = computed(() => {
   const src = props.covers.slice(0, 3);
   return Array.from({ length: 3 }, (_, i) => src[i] ?? null);
@@ -36,7 +33,6 @@ const placeholderTone = ['bg-surface-sunken', 'bg-line', 'bg-subtle'] as const;
 </script>
 
 <template>
-  <!-- Figma B · DS row: surface + line, radius 8, h≈80, covers | text | privacy -->
   <component
     :is="href ? 'a' : 'button'"
     :href="href"
@@ -60,6 +56,6 @@ const placeholderTone = ['bg-surface-sunken', 'bg-line', 'bg-subtle'] as const;
       <p class="mt-0.5 truncate text-caption font-normal text-muted">{{ meta }}</p>
     </div>
 
-    <PrivacyChip class="shrink-0" :privacy="privacy" :compact="compactPrivacy" />
+    <TPrivacyChip class="shrink-0" :privacy="privacy" :compact="compactPrivacy" />
   </component>
 </template>

@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 09.10.2026 — AuthLayout/MainLayout + декомпозиция components (ui-kit T*)
+
+- **YouGile:** FRO-26
+- **Итог:** AuthLayout/MainLayout, RouteName, lazy pages; ContentPageWrapper на create/detail/share; `components` → `ui-kit` / `layout` / `topic` с префиксом `T*` и именованными Props/Emits.
+- **Репо:** `refactor/FRO-26` / [PR #44](https://github.com/NejaTive/Topic/pull/44) / (merge в develop)
+- **Заметки:** manual-close; typecheck web OK.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 08.10.2026 — S05 — убрать accent-обводку RankedDropZone
 
 - **YouGile:** FRO-25

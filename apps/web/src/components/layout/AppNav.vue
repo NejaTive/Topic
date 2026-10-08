@@ -3,32 +3,26 @@ import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
 export type AppNavPlacement = 'auto' | 'bottom' | 'top';
-/** Override for UI-Kit samples (`fixed=false`); в продукте active берётся из роута. */
 export type AppNavActive = 'feed' | 'topics' | 'profile';
 
-const props = withDefaults(
-  defineProps<{
-    /** auto: bottom below md, top from md up (floating dock). */
-    placement?: AppNavPlacement;
-    /** Только для витрины (`fixed=false`). Иначе «Мои топики» active на `/app/topics*`. */
-    active?: AppNavActive;
-    topicsTo?: string;
-    brandTo?: string;
-    /** false — relative shell for UI-Kit samples (not viewport-fixed). */
-    fixed?: boolean;
-  }>(),
-  {
-    placement: 'auto',
-    active: undefined,
-    topicsTo: '/app/topics',
-    brandTo: '/app/topics',
-    fixed: true,
-  },
-);
+interface AppNavProps {
+  placement?: AppNavPlacement;
+  active?: AppNavActive;
+  topicsTo?: string;
+  brandTo?: string;
+  fixed?: boolean;
+}
+
+const props = withDefaults(defineProps<AppNavProps>(), {
+  placement: 'auto',
+  active: undefined,
+  topicsTo: '/app/topics',
+  brandTo: '/app/topics',
+  fixed: true,
+});
 
 const route = useRoute();
 
-/** Подсветка только на экранах топиков (`/app/topics` и вложенные). */
 const isTopics = computed(() => {
   if (route.path.startsWith('/app/topics')) return true;
   return !props.fixed && props.active === 'topics';
@@ -79,7 +73,6 @@ const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subt
 <template>
   <nav :class="rootClass" aria-label="Основная навигация">
     <div :class="shellClass">
-      <!-- Mobile floating dock: Лента | Мои топики | Профиль -->
       <div
         v-if="showMobileChrome"
         class="flex w-full items-center justify-around"
@@ -165,7 +158,6 @@ const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subt
         </button>
       </div>
 
-      <!-- Desktop floating dock: Topic | Лента · Мои топики | Профиль -->
       <div
         v-if="showDesktopChrome"
         class="w-full items-center justify-between"

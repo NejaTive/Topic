@@ -1,35 +1,33 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue';
 
-export type AppInputType = 'text' | 'password' | 'email';
+export type TInputType = 'text' | 'password' | 'email';
 
-const props = withDefaults(
-  defineProps<{
-    label: string;
-    type?: AppInputType;
-    error?: string;
-    /** Error border without message (e.g. login 401 on email). */
-    invalid?: boolean;
-    disabled?: boolean;
-    placeholder?: string;
-    autocomplete?: string;
-    id?: string;
-  }>(),
-  {
-    type: 'text',
-    error: '',
-    invalid: false,
-    disabled: false,
-    placeholder: '',
-    autocomplete: undefined,
-    id: undefined,
-  },
-);
+interface TInputProps {
+  label: string;
+  type?: TInputType;
+  error?: string;
+  invalid?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  autocomplete?: string;
+  id?: string;
+}
+
+const props = withDefaults(defineProps<TInputProps>(), {
+  type: 'text',
+  error: '',
+  invalid: false,
+  disabled: false,
+  placeholder: '',
+  autocomplete: undefined,
+  id: undefined,
+});
 
 const model = defineModel<string>({ default: '' });
 
 const autoId = useId();
-const inputId = computed(() => props.id ?? `app-input-${autoId}`);
+const inputId = computed(() => props.id ?? `t-input-${autoId}`);
 const errorId = computed(() => `${inputId.value}-error`);
 
 const hasError = computed(() => Boolean(props.error) || props.invalid);

@@ -3,7 +3,6 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { fetchShare } from '@/api/share';
 import { queryKeys } from '@/query/keys';
 
-/** GET /api/t/:shareId → S09 share-view. */
 export function useShareQuery(shareId: MaybeRefOrGetter<string>) {
   const id = computed(() => toValue(shareId));
 
