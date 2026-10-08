@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { AppNav, GuestNav } from '@/components/layout';
 import {
-  AppButton,
-  AppInput,
-  AppNav,
-  GuestNav,
-  CoverUpload,
-  EmptyState,
-  MainChip,
+  TButton,
+  TInput,
+  TCoverUpload,
+  TEmptyState,
+  TMainChip,
   MAIN_CHIP_LABELS,
-  PrivacyChip,
-  RankRow,
-  TopicRow,
+  TPrivacyChip,
+  TRankRow,
+  TTopicRow,
   type PrivacyValue,
-} from '@/components/ui';
+} from '@/components/ui-kit';
 
 const email = ref('');
 const password = ref('secret');
@@ -107,9 +106,9 @@ function showCoverErrorDemo() {
     <AppNav />
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">MainChip · подсказки S04</h2>
+      <h2 class="text-title">TMainChip · подсказки S04</h2>
       <div class="flex flex-wrap gap-2">
-        <MainChip
+        <TMainChip
           v-for="label in MAIN_CHIP_LABELS"
           :key="label"
           :label="label"
@@ -124,66 +123,64 @@ function showCoverErrorDemo() {
     </section>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">CoverUpload · 144×192</h2>
+      <h2 class="text-title">TCoverUpload · 144×192</h2>
       <div class="flex flex-wrap items-start gap-6">
-        <CoverUpload
+        <TCoverUpload
           :preview-url="coverPreview"
           :error="coverError"
           @file="onCoverFile"
           @clear="onCoverClear"
         />
         <div class="space-y-2">
-          <AppButton size="sm" variant="secondary" @click="showCoverErrorDemo">
-            Demo error
-          </AppButton>
-          <AppButton size="sm" variant="ghost" @click="onCoverClear">Reset</AppButton>
+          <TButton size="sm" variant="secondary" @click="showCoverErrorDemo"> Demo error </TButton>
+          <TButton size="sm" variant="ghost" @click="onCoverClear">Reset</TButton>
         </div>
       </div>
     </section>
 
     <section class="mt-10 space-y-2">
-      <h2 class="text-title">RankRow · ranked (mobile 358)</h2>
+      <h2 class="text-title">TRankRow · ranked (mobile 358)</h2>
       <div class="flex max-w-89.5 flex-col gap-3">
-        <RankRow :rank="1" title="Dune 2" :cover-url="sampleCover" />
-        <RankRow :rank="2" title="Arrival" :cover-url="sampleCover" />
-        <RankRow :rank="3" title="Blade Runner 2049" :cover-url="sampleCover" />
-        <RankRow :rank="4" title="Interstellar" />
-        <RankRow :rank="5" title="Dragging sample" :cover-url="sampleCover" dragging />
+        <TRankRow :rank="1" title="Dune 2" :cover-url="sampleCover" />
+        <TRankRow :rank="2" title="Arrival" :cover-url="sampleCover" />
+        <TRankRow :rank="3" title="Blade Runner 2049" :cover-url="sampleCover" />
+        <TRankRow :rank="4" title="Interstellar" />
+        <TRankRow :rank="5" title="Dragging sample" :cover-url="sampleCover" dragging />
       </div>
     </section>
 
     <section class="mt-10 space-y-2">
-      <h2 class="text-title">RankRow · inbox</h2>
+      <h2 class="text-title">TRankRow · inbox</h2>
       <div class="flex max-w-89.5 flex-col gap-3">
-        <RankRow mode="inbox" title="Ещё не оценён" :cover-url="sampleCover" />
-        <RankRow mode="inbox" title="Без обложки" />
+        <TRankRow mode="inbox" title="Ещё не оценён" :cover-url="sampleCover" />
+        <TRankRow mode="inbox" title="Без обложки" />
       </div>
     </section>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">PrivacyChip</h2>
+      <h2 class="text-title">TPrivacyChip</h2>
       <div class="flex flex-wrap items-center gap-3">
-        <PrivacyChip privacy="private" />
-        <PrivacyChip privacy="unlisted" />
-        <PrivacyChip privacy="public" />
+        <TPrivacyChip privacy="private" />
+        <TPrivacyChip privacy="unlisted" />
+        <TPrivacyChip privacy="public" />
       </div>
       <p class="text-caption text-muted">selected</p>
       <div class="flex flex-wrap items-center gap-3">
-        <PrivacyChip privacy="private" selected />
-        <PrivacyChip privacy="unlisted" selected />
-        <PrivacyChip privacy="public" selected />
+        <TPrivacyChip privacy="private" selected />
+        <TPrivacyChip privacy="unlisted" selected />
+        <TPrivacyChip privacy="public" selected />
       </div>
       <p class="text-caption text-muted">compact (mobile icon-only)</p>
       <div class="flex flex-wrap items-center gap-3">
-        <PrivacyChip privacy="private" compact />
-        <PrivacyChip privacy="unlisted" compact />
-        <PrivacyChip privacy="public" compact />
+        <TPrivacyChip privacy="private" compact />
+        <TPrivacyChip privacy="unlisted" compact />
+        <TPrivacyChip privacy="public" compact />
       </div>
     </section>
 
     <section class="mt-10 max-w-240 space-y-3">
-      <h2 class="text-title">TopicRow · desktop (labeled chip)</h2>
-      <TopicRow
+      <h2 class="text-title">TTopicRow · desktop (labeled chip)</h2>
+      <TTopicRow
         v-for="row in sampleRows"
         :key="row.title"
         :title="row.title"
@@ -194,8 +191,8 @@ function showCoverErrorDemo() {
     </section>
 
     <section class="mt-10 max-w-89.5 space-y-3">
-      <h2 class="text-title">TopicRow · mobile (compact chip)</h2>
-      <TopicRow
+      <h2 class="text-title">TTopicRow · mobile (compact chip)</h2>
+      <TTopicRow
         v-for="row in sampleRows"
         :key="`m-${row.title}`"
         :title="row.title"
@@ -237,49 +234,49 @@ function showCoverErrorDemo() {
     </section>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">EmptyState · With CTA</h2>
+      <h2 class="text-title">TEmptyState · With CTA</h2>
       <div class="max-w-180">
-        <EmptyState />
+        <TEmptyState />
       </div>
     </section>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">AppButton · md (44)</h2>
+      <h2 class="text-title">TButton · md (44)</h2>
       <div class="flex flex-wrap gap-3">
-        <AppButton>Primary</AppButton>
-        <AppButton variant="secondary">Secondary</AppButton>
-        <AppButton variant="ghost">Ghost</AppButton>
-        <AppButton variant="danger-ghost">Danger ghost</AppButton>
+        <TButton>Primary</TButton>
+        <TButton variant="secondary">Secondary</TButton>
+        <TButton variant="ghost">Ghost</TButton>
+        <TButton variant="danger-ghost">Danger ghost</TButton>
       </div>
       <div class="flex flex-wrap gap-3">
-        <AppButton disabled>Primary disabled</AppButton>
-        <AppButton variant="secondary" disabled>Secondary disabled</AppButton>
-        <AppButton variant="ghost" disabled>Ghost disabled</AppButton>
-        <AppButton variant="danger-ghost" disabled>Danger disabled</AppButton>
+        <TButton disabled>Primary disabled</TButton>
+        <TButton variant="secondary" disabled>Secondary disabled</TButton>
+        <TButton variant="ghost" disabled>Ghost disabled</TButton>
+        <TButton variant="danger-ghost" disabled>Danger disabled</TButton>
       </div>
       <div class="flex flex-wrap gap-3">
-        <AppButton :loading="loading" @click="toggleLoading">
+        <TButton :loading="loading" @click="toggleLoading">
           {{ loading ? 'Loading…' : 'Primary loading' }}
-        </AppButton>
+        </TButton>
       </div>
     </section>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">AppButton · sm (32)</h2>
+      <h2 class="text-title">TButton · sm (32)</h2>
       <div class="flex flex-wrap gap-3">
-        <AppButton size="sm">Primary</AppButton>
-        <AppButton size="sm" variant="secondary">Secondary</AppButton>
-        <AppButton size="sm" variant="ghost">Ghost</AppButton>
-        <AppButton size="sm" variant="danger-ghost">Danger ghost</AppButton>
+        <TButton size="sm">Primary</TButton>
+        <TButton size="sm" variant="secondary">Secondary</TButton>
+        <TButton size="sm" variant="ghost">Ghost</TButton>
+        <TButton size="sm" variant="danger-ghost">Danger ghost</TButton>
       </div>
     </section>
 
     <section class="mt-10 max-w-sm space-y-5">
-      <h2 class="text-title">AppInput</h2>
-      <AppInput v-model="email" label="Email" type="email" placeholder="you@example.com" />
-      <AppInput v-model="password" label="Пароль" type="password" />
-      <AppInput v-model="errorEmail" label="С ошибкой" type="email" error="Некорректный email" />
-      <AppInput model-value="Disabled" label="Disabled" disabled />
+      <h2 class="text-title">TInput</h2>
+      <TInput v-model="email" label="Email" type="email" placeholder="you@example.com" />
+      <TInput v-model="password" label="Пароль" type="password" />
+      <TInput v-model="errorEmail" label="С ошибкой" type="email" error="Некорректный email" />
+      <TInput model-value="Disabled" label="Disabled" disabled />
     </section>
   </main>
 </template>

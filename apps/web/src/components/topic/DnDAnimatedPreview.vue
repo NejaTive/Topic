@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { DragPreview } from '@vue-dnd-kit/core';
 
-/** Снимок своего RankRow из dnd-kit — не сырой user HTML. */
 function bindPreviewHtml(el: unknown, html: string | undefined) {
   if (!(el instanceof HTMLElement) || !html) return;
   if (el.innerHTML !== html) el.innerHTML = html;

@@ -1,10 +1,9 @@
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/vue-query';
 import { rankItem, reorderItems, type ItemDto, type ItemList } from '@/api/items';
 import { deleteTopic, updateTopic, type TopicDetail } from '@/api/topics';
-import type { PrivacyValue } from '@/components/ui';
+import type { PrivacyValue } from '@/components/ui-kit';
 import { queryKeys } from '@/query/keys';
 
-/** Optimistic reorder до reset drop-slot. */
 export function applyOptimisticReorder(
   queryClient: QueryClient,
   topicId: string,
@@ -30,7 +29,6 @@ export function applyOptimisticReorder(
   return previous;
 }
 
-/** Optimistic inbox → ranked на insertAt. */
 export function applyOptimisticInboxToRank(
   queryClient: QueryClient,
   topicId: string,
@@ -95,7 +93,6 @@ export function useRankItemMutation(topicId: () => string) {
         void queryClient.invalidateQueries({ queryKey: key });
         return;
       }
-      // Без invalidate items — иначе mid-insert мигнёт в конец до reorder.
       const inbox = prev.inbox.filter((row) => row.id !== item.id);
       const idx = prev.ranked.findIndex((row) => row.id === item.id);
       const ranked =

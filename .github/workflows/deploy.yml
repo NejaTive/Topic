@@ -99,14 +99,16 @@ jobs:
             docker compose -f compose.prod.yaml pull
             docker compose -f compose.prod.yaml up -d --remove-orphans
             docker image prune -f
-            port="${HTTP_PORT:-80}"
-            for i in $(seq 1 20); do
-              if curl -fsS "http://127.0.0.1:${port}/api/health" >/dev/null; then
+            host="${PUBLIC_HOST:?PUBLIC_HOST missing in .env}"
+            https_port="${HTTPS_PORT:-443}"
+            for i in $(seq 1 40); do
+              if curl -fsS --resolve "${host}:${https_port}:127.0.0.1" \
+                "https://${host}:${https_port}/api/health" >/dev/null; then
                 echo "health ok"
                 exit 0
               fi
               sleep 3
             done
             echo "health check failed" >&2
-            docker compose -f compose.prod.yaml logs --tail=100
+            docker compose -f compose.prod.yaml logs --tail=100 web api
             exit 1

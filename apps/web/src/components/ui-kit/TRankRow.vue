@@ -1,32 +1,34 @@
 <script lang="ts">
-export type RankRowMode = 'ranked' | 'inbox';
+export type TRankRowMode = 'ranked' | 'inbox';
 </script>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const props = withDefaults(
-  defineProps<{
-    title: string;
-    /** 1-based; top-3 — accent */
-    rank?: number;
-    coverUrl?: string;
-    mode?: RankRowMode;
-    dragging?: boolean;
-    dragEnabled?: boolean;
-    showDragHandle?: boolean;
-    readonly?: boolean;
-  }>(),
-  {
-    rank: undefined,
-    coverUrl: undefined,
-    mode: 'ranked',
-    dragging: false,
-    dragEnabled: false,
-    showDragHandle: undefined,
-    readonly: false,
-  },
-);
+interface TRankRowProps {
+  title: string;
+  rank?: number;
+  coverUrl?: string;
+  mode?: TRankRowMode;
+  dragging?: boolean;
+  dragEnabled?: boolean;
+  showDragHandle?: boolean;
+  readonly?: boolean;
+}
+
+interface TRankRowEmits {
+  (e: 'click', event: MouseEvent): void;
+}
+
+const props = withDefaults(defineProps<TRankRowProps>(), {
+  rank: undefined,
+  coverUrl: undefined,
+  mode: 'ranked',
+  dragging: false,
+  dragEnabled: false,
+  showDragHandle: undefined,
+  readonly: false,
+});
 
 const showHandle = computed(() => {
   if (props.showDragHandle === false) return false;
@@ -34,9 +36,7 @@ const showHandle = computed(() => {
   return true;
 });
 
-const emit = defineEmits<{
-  click: [event: MouseEvent];
-}>();
+const emit = defineEmits<TRankRowEmits>();
 
 const isTopThree = computed(
   () => props.mode === 'ranked' && props.rank != null && props.rank >= 1 && props.rank <= 3,

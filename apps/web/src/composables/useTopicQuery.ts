@@ -3,7 +3,6 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { fetchTopic } from '@/api/topics';
 import { queryKeys } from '@/query/keys';
 
-/** GET /api/topics/:id → S05 meta. */
 export function useTopicQuery(topicId: MaybeRefOrGetter<string>) {
   const id = computed(() => toValue(topicId));
 

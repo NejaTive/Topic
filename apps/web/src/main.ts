@@ -16,7 +16,6 @@ app.use(pinia);
 app.use(VueQueryPlugin, { queryClient });
 app.use(router);
 
-/** Базовый 401 → guest (без refresh / сложных interceptors). */
 apiClient.use({
   async onResponse({ response }) {
     if (response.status !== 401) return;

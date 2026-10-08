@@ -4,11 +4,9 @@ import { queryKeys } from '@/query/keys';
 
 export type CreateTopicInput = {
   title: string;
-  /** Если не передано — API default unlisted (клиент тоже шлёт unlisted). */
   privacy?: CreateTopicBody['privacy'];
 };
 
-/** POST /api/topics → invalidate list. */
 export function useCreateTopicMutation() {
   const queryClient = useQueryClient();
 

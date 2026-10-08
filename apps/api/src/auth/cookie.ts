@@ -1,8 +1,9 @@
 import type { Request, Response } from 'express';
 import {
   SESSION_COOKIE_NAME,
-  SESSION_COOKIE_OPTIONS,
   SESSION_MAX_AGE_SECONDS,
+  sessionCookieOptions,
+  sessionCookieSecure,
 } from './auth.constants';
 
 /** Парсинг Cookie header без cookie-parser. */
@@ -28,7 +29,7 @@ export function readCookie(req: Request, name: string): string | undefined {
 }
 
 export function setSessionCookie(res: Response, token: string): void {
-  res.cookie(SESSION_COOKIE_NAME, token, SESSION_COOKIE_OPTIONS);
+  res.cookie(SESSION_COOKIE_NAME, token, sessionCookieOptions());
 }
 
 export function clearSessionCookie(res: Response): void {
@@ -36,6 +37,7 @@ export function clearSessionCookie(res: Response): void {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
+    secure: sessionCookieSecure(),
     maxAge: 0,
   });
 }

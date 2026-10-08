@@ -3,17 +3,16 @@ import { computed } from 'vue';
 
 export type PrivacyValue = 'private' | 'unlisted' | 'public';
 
-const props = withDefaults(
-  defineProps<{
-    privacy: PrivacyValue;
-    compact?: boolean;
-    selected?: boolean;
-  }>(),
-  {
-    compact: false,
-    selected: false,
-  },
-);
+interface TPrivacyChipProps {
+  privacy: PrivacyValue;
+  compact?: boolean;
+  selected?: boolean;
+}
+
+const props = withDefaults(defineProps<TPrivacyChipProps>(), {
+  compact: false,
+  selected: false,
+});
 
 const LABELS: Record<PrivacyValue, string> = {
   private: 'Приватный',

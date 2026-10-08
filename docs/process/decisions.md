@@ -470,6 +470,7 @@
 
 - По умолчанию **без** комментариев; оставлять только неочевидный why / инвариант / ограничение либы.
 - Не писать пересказ кода, историю дебага, навигационные HTML-комментарии «секция X».
+- **В `<style>` / CSS / SCSS** — без комментариев (в т.ч. «перевод» в Tailwind вроде `// max-w-91.5`).
 - Канон: `.cursor/rules/engineering/code-comments.mdc`.
 
 ### Tailwind — suggestCanonicalClasses
@@ -482,11 +483,13 @@
 
 - **Хостинг:** VPS (PL), Ubuntu 22.04, Docker Compose в `/opt/topic`.
 - **Стек на сервере:** Caddy (образ `topic-web`: SPA + reverse proxy) + Nest (`topic-api`) + Postgres + MinIO (обложки на том же VPS).
-- **Сеть:** один origin по **HTTP/IP без TLS** на первом этапе; MinIO/Postgres наружу не публиковать.
+- **Сеть (было):** один origin по **HTTP/IP без TLS** на первом этапе; MinIO/Postgres наружу не публиковать.
+- **Сеть (с 09.10.2026):** HTTPS на IP без покупки домена — см. ниже «Prod TLS на IP».
 - **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
 - **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`).
 - **Версии:** перед каждым promote `develop`→`main` (skill `publish-prod`) **обязательно** выставить semver в корневом `package.json` (`version`) и синхронизировать `apps/api` / `apps/web` с тем же номером; после merge в `main` — annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit. Skill предлагает bump, владелец подтверждает (или задаёт номер / «следующая» в команде).
-- **Отложено (остаток B и прочее):** файл `VERSION` / version в health·UI / теги образов GHCR `:X.Y.Z`; домен, TLS/`Secure` cookie, rate-limit auth, внешний object storage.
+- **Отложено (остаток B и прочее):** файл `VERSION` / version в health·UI / теги образов GHCR `:X.Y.Z`; **купленный** домен; rate-limit auth, внешний object storage.
+- **Снято с отложенного (09.10.2026):** TLS + `Secure` cookie — путь **A** (HTTPS на IP), см. «Prod TLS на IP».
 - **Отмена (частично):** ранее (тот же день) откладывали bump `package.json` — **снято** 08.10.2026 по решению владельца.
 
 ### S05 — accent-обводка RankedDropZone (drag-over)
@@ -495,3 +498,62 @@
 - Сейчас: `RankedDropZone` остаётся droppable без accent-обводки; feedback — live-gap / spacer.
 - Вернуться явно; на мобилке inset-ring без padding ломался (карточки перекрывали обводку) — при возврате: outer outline/ring или padding ≥ толщины ring.
 - См. `docs/backlog/ideas.md`.
+
+### Vue UI — Tailwind vs SCSS (`пересматриваем`)
+
+- **`apps/web/src/components/ui-kit/**`:** стили **только SCSS** (`<style lang="scss" scoped>`), без Tailwind-утилит в template.
+- Страницы / layouts: короткие наборы — Tailwind в template; длинные «простыни» — SCSS.
+- В `<style>` / SCSS размеры и отступы — в **`px`**, не `rem` (база `1rem = 16px`, как у Tailwind canonical).
+- Не писать лишние CSS/утилиты без нужды в текущем layout (например `flex: 1` / `width: 100%` без flex-родителя / без эффекта).
+- **Отмена:** запрет SCSS из стека этапа 3 / `tech-stack.mdc` — снят 08.10.2026 по явному «пересматриваем».
+- Глобальные SCSS-части / отказ от Tailwind на страницах — по-прежнему нет без отдельного пересмотра.
+- Миграция старых UI (AppButton и т.д.) на SCSS — отдельно; новые UI — сразу SCSS.
+- Канон: `.cursor/rules/engineering/vue-scss.mdc`.
+
+### Vue SFC — props / emits interfaces
+
+- Props и emits — именованные `interface`: `ComponentNameProps` / `ComponentNameEmits` (не анонимные generic у `defineProps` / `defineEmits`).
+- Emits — call-signature: `(e: 'event', …): void`.
+- Канон: `.cursor/rules/engineering/vue-sfc-api.mdc`.
+
+### VueUse — брейкпоинты Tailwind
+
+- Добавлен **`@vueuse/core`** в `apps/web` (08.10.2026): JS media queries через `useBreakpoints(breakpointsTailwind)`.
+- **Впредь** для JS-брейкпоинтов — только `useTailwindBreakpoints()` (`apps/web/src/composables/useTailwindBreakpoints.ts`).
+- Запрещено: ручной `matchMedia` + `resize`; прямой `useBreakpoints`/`breakpointsTailwind` вне обёртки; Vuetify `useDisplay`.
+- Чистый CSS/`md:` в template — без VueUse.
+- Канон: `.cursor/rules/engineering/vue-breakpoints.mdc`.
+
+### Vue Router — RouteName enum
+
+- Имена маршрутов — `enum RouteName` в `apps/web/src/router/route-names.ts`.
+- Не использовать строковые литералы имён (`'app-topics'`) в router/навигации.
+- Канон: `.cursor/rules/engineering/vue-route-names.mdc`.
+
+---
+
+## 09.10.2026
+
+### Frontend — структура `components/`
+
+- `apps/web/src/components/ui` → **`ui-kit/`** — переиспользуемый DS без бизнес-логики (нет `@/api/*`, нет жёсткой привязки к app-routes).
+- **`layout/`** — chrome и page shells: `AppNav`, `GuestNav`, `ContentPageWrapper`, `ErrorStateView`.
+- **`topic/`** — DnD/ранги с `ItemDto`: `RankRowDraggable`, `RankedDropZone`, `DnDAnimatedPreview`.
+- Импорты: `@/components/ui-kit`, `@/components/layout`, `@/components/topic` (barrels `index.ts`).
+- Правило «только SCSS» относится к **`components/ui-kit/**`** (бывший `ui/**`).
+
+### Frontend — именование ui-kit (`T` = Topic)
+
+- Компоненты в `ui-kit/` — шаблон **`TComponentName`**: `TButton`, `TInput`, `TError`, `TLoader`, `TEmptyState`, `TMainChip`, `TPrivacyChip`, `TCoverUpload`, `TRankRow`, `TTopicRow` (`App*` → `T*` без `App`).
+- Связанные типы: `TButtonVariant` / `TButtonSize` / `TInputType` / `TRankRowMode` / `TMainChipLabel`; доменный `PrivacyValue` без префикса.
+- Layout/topic компоненты префикс `T` не получают.
+
+### Prod TLS на IP (вариант A)
+
+- **Решение владельца:** HTTPS на проде **без покупки домена** — сертификат Let's Encrypt **на публичный IPv4** (short-lived ~6 суток), не бесплатный hostname (DuckDNS и т.п.).
+- **Prod IP / ACME:** `PUBLIC_HOST=31.76.22.106`, `PUBLIC_BASE_URL=https://31.76.22.106`, `ACME_EMAIL=nejative@yandex.ru`.
+- **Edge:** Caddy 2.11 в `topic-web`: site `{$PUBLIC_HOST}`, `tls { issuer acme { profile shortlived } }`, `default_sni`, порты **80 + 443**, тома `caddy_data` / `caddy_config`.
+- **App:** `PUBLIC_BASE_URL=https://…` → session cookie **`Secure`** (и clearCookie в том же духе).
+- **Владелец на VPS:** открыть **443** (ufw/панель), обновить `.env`, smoke `https://31.76.22.106/` (логин, обложки, share).
+- **Отложено по-прежнему:** купленный домен; при появлении домена — обычный LE на имя (не shortlived-IP).
+- Канон: `docs/process/deploy.md`, `tech-stack.mdc`, stage-3 строка деплоя.

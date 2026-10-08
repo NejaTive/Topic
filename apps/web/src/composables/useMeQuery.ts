@@ -3,7 +3,6 @@ import { fetchMe } from '@/api/auth';
 import { queryKeys } from '@/query/keys';
 import { useSessionStore } from '@/stores/session';
 
-/** GET /api/auth/me → Pinia unknown → guest | authed. */
 export function useMeQuery() {
   const session = useSessionStore();
 

@@ -2,9 +2,16 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { AuthApiError } from '@/api/auth';
-import { AppButton, AppInput } from '@/components/ui';
+import { TButton, TInput } from '@/components/ui-kit';
 import { useRegisterMutation } from '@/composables/useAuthMutations';
 import { hasFieldErrors, validateRegisterForm } from '@/lib/auth-validation';
+import { RouteName } from '@/router/route-names';
+
+interface FieldErrors {
+  email?: string;
+  nick?: string;
+  password?: string;
+}
 
 const router = useRouter();
 const register = useRegisterMutation();
@@ -12,7 +19,7 @@ const register = useRegisterMutation();
 const email = ref('');
 const nick = ref('');
 const password = ref('');
-const fieldErrors = ref<{ email?: string; nick?: string; password?: string }>({});
+const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 
 const isSubmitting = computed(() => register.isPending.value);
@@ -24,6 +31,7 @@ function clearErrors() {
 
 function applyAuthError(err: unknown) {
   clearErrors();
+
   if (!(err instanceof AuthApiError)) {
     formError.value = 'Не удалось зарегистрироваться';
     return;
@@ -60,23 +68,23 @@ function applyAuthError(err: unknown) {
 
 async function onSubmit() {
   clearErrors();
-  const localErrors = validateRegisterForm({
-    email: email.value,
-    nick: nick.value,
-    password: password.value,
-  });
+
+  const data = {
+    email: email.value.trim(),
+    nick: nick.value.trim(),
+    password: password.value.trim(),
+  };
+
+  const localErrors = validateRegisterForm(data);
+
   if (hasFieldErrors(localErrors)) {
     fieldErrors.value = localErrors;
     return;
   }
 
   try {
-    await register.mutateAsync({
-      email: email.value.trim(),
-      nick: nick.value.trim(),
-      password: password.value,
-    });
-    await router.replace('/app/topics');
+    await register.mutateAsync(data);
+    await router.replace({ name: RouteName.AppTopics });
   } catch (err) {
     applyAuthError(err);
   }
@@ -84,64 +92,54 @@ async function onSubmit() {
 </script>
 
 <template>
-  <main class="flex min-h-dvh items-center justify-center bg-bg px-4 py-8">
-    <div
-      class="flex w-full max-w-89.5 flex-col gap-3 rounded-lg border border-line bg-surface px-6.25 py-7.25 md:max-w-110"
-    >
-      <RouterLink
-        to="/"
-        class="w-fit text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-      >
-        ← Topic
-      </RouterLink>
+  <div
+    class="flex w-full max-w-89.5 flex-col gap-3 rounded-lg border border-line bg-surface px-6.25 py-7.25 md:max-w-110"
+  >
+    <RouterLink :to="RouteName.Root" class="text-label font-semibold text-accent">
+      ← Topic
+    </RouterLink>
 
-      <h1 class="text-h1 text-ink">Регистрация</h1>
+    <h1 class="text-h1">Регистрация</h1>
 
-      <form class="flex flex-col gap-3" novalidate @submit.prevent="onSubmit">
-        <AppInput
-          v-model="email"
-          label="Email"
-          type="email"
-          autocomplete="email"
-          placeholder="you@example.com"
-          :error="fieldErrors.email"
-          :disabled="isSubmitting"
-        />
-        <AppInput
-          v-model="nick"
-          label="Ник"
-          type="text"
-          autocomplete="username"
-          placeholder="topic_fan"
-          :error="fieldErrors.nick"
-          :disabled="isSubmitting"
-        />
-        <AppInput
-          v-model="password"
-          label="Пароль"
-          type="password"
-          autocomplete="new-password"
-          placeholder="••••••••"
-          :error="fieldErrors.password"
-          :disabled="isSubmitting"
-        />
+    <form class="flex flex-col gap-3" novalidate @submit.prevent="onSubmit">
+      <TInput
+        v-model="email"
+        label="Email"
+        type="email"
+        autocomplete="email"
+        placeholder="you@example.com"
+        :error="fieldErrors.email"
+        :disabled="isSubmitting"
+      />
+      <TInput
+        v-model="nick"
+        label="Ник"
+        type="text"
+        autocomplete="username"
+        placeholder="topic_fan"
+        :error="fieldErrors.nick"
+        :disabled="isSubmitting"
+      />
+      <TInput
+        v-model="password"
+        label="Пароль"
+        type="password"
+        autocomplete="new-password"
+        placeholder="••••••••"
+        :error="fieldErrors.password"
+        :disabled="isSubmitting"
+      />
 
-        <p class="text-label font-semibold text-muted">
-          Уже есть аккаунт?
-          <RouterLink
-            class="text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-            to="/login"
-          >
-            Войти
-          </RouterLink>
-        </p>
+      <p class="text-label font-semibold text-muted">
+        Уже есть аккаунт?
+        <RouterLink :to="RouteName.Login" class="text-accent">Войти</RouterLink>
+      </p>
 
-        <p v-if="formError" class="text-caption text-danger" role="alert">{{ formError }}</p>
+      <p v-if="formError" class="text-caption text-danger" role="alert">
+        {{ formError }}
+      </p>
 
-        <AppButton type="submit" :loading="isSubmitting" class="w-full">
-          Зарегистрироваться
-        </AppButton>
-      </form>
-    </div>
-  </main>
+      <TButton type="submit" :loading="isSubmitting">Зарегистрироваться</TButton>
+    </form>
+  </div>
 </template>

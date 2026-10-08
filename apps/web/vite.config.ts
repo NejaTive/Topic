@@ -44,7 +44,6 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
-        // Без runtimeCaching: API не кешируется; precache — только app-shell (ассеты сборки).
       },
     }),
   ],
