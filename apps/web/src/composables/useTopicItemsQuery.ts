@@ -3,7 +3,6 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { fetchTopicItems } from '@/api/items';
 import { queryKeys } from '@/query/keys';
 
-/** GET /api/topics/:id/items → S05 inbox + ranked. */
 export function useTopicItemsQuery(topicId: MaybeRefOrGetter<string>) {
   const id = computed(() => toValue(topicId));
 

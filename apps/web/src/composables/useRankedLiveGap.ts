@@ -14,7 +14,6 @@ function verticalInsertSide(placement: IPlacement | undefined): 'before' | 'afte
   return null;
 }
 
-/** Live-gap без перестановки DOM. hoveredDraggable в onSelfDragMove нет — читаем provider.hovered. */
 export function useRankedLiveGap(ranked: Ref<ItemDto[]>, inbox: Ref<ItemDto[]>) {
   const draggingId = ref<string | null>(null);
   const sourceMode = ref<DragSource | null>(null);

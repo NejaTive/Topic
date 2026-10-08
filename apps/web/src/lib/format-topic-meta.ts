@@ -5,7 +5,7 @@ const monthFormatter = new Intl.DateTimeFormat('ru-RU', {
 
 const MS_DAY = 86_400_000;
 
-/** Meta-line для TopicRow (Figma S03): «обновлён вчера» / «обновлён 5 окт». */
+/** Meta-line для TTopicRow (Figma S03): «обновлён вчера» / «обновлён 5 окт». */
 export function formatTopicUpdatedAt(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return 'обновлён недавно';

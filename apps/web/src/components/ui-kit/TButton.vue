@@ -1,29 +1,30 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-export type AppButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger-ghost';
-export type AppButtonSize = 'md' | 'sm';
+export type TButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger-ghost';
+export type TButtonSize = 'md' | 'sm';
 
-const props = withDefaults(
-  defineProps<{
-    variant?: AppButtonVariant;
-    size?: AppButtonSize;
-    type?: 'button' | 'submit' | 'reset';
-    disabled?: boolean;
-    loading?: boolean;
-  }>(),
-  {
-    variant: 'primary',
-    size: 'md',
-    type: 'button',
-    disabled: false,
-    loading: false,
-  },
-);
+interface TButtonProps {
+  variant?: TButtonVariant;
+  size?: TButtonSize;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  loading?: boolean;
+}
 
-const emit = defineEmits<{
-  click: [event: MouseEvent];
-}>();
+interface TButtonEmits {
+  (e: 'click', event: MouseEvent): void;
+}
+
+const props = withDefaults(defineProps<TButtonProps>(), {
+  variant: 'primary',
+  size: 'md',
+  type: 'button',
+  disabled: false,
+  loading: false,
+});
+
+const emit = defineEmits<TButtonEmits>();
 
 const isInteractive = computed(() => !props.disabled && !props.loading);
 

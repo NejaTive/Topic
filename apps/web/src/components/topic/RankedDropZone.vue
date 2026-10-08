@@ -4,11 +4,12 @@ import { useTemplateRef } from 'vue';
 import type { ItemDto } from '@/api/items';
 import { TOPIC_ITEMS_DND_GROUP } from './RankRowDraggable.vue';
 
-const props = defineProps<{
+interface RankedDropZoneProps {
   items: ItemDto[];
-  /** Promise — библиотека ждёт до dragEnd (settle). */
   onDropEvent: (event: IDragEvent) => void | Promise<void>;
-}>();
+}
+
+const props = defineProps<RankedDropZoneProps>();
 
 const rootRef = useTemplateRef<HTMLElement>('rootRef');
 

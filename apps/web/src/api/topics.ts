@@ -39,7 +39,6 @@ function mapCreateValidationFields(messages: string[]): Partial<Record<TopicsErr
   return fields;
 }
 
-/** GET /api/topics — список топиков владельца (BAC-10). */
 export async function fetchTopics(): Promise<TopicListItem[]> {
   const { data, error, response } = await apiClient.GET('/api/topics');
   if (response.status === 401) {
@@ -51,10 +50,6 @@ export async function fetchTopics(): Promise<TopicListItem[]> {
   return data;
 }
 
-/**
- * POST /api/topics — создать топик (BAC-10).
- * `privacy` optional на API (default unlisted); если не передали — не шлём поле.
- */
 export async function createTopic(body: {
   title: string;
   privacy?: CreateTopicBody['privacy'];
@@ -86,7 +81,6 @@ export async function createTopic(body: {
   return data;
 }
 
-/** GET /api/topics/:id — деталь топика владельца (BAC-10). */
 export async function fetchTopic(id: string): Promise<TopicDetail> {
   const { data, error, response } = await apiClient.GET('/api/topics/{id}', {
     params: { path: { id } },
@@ -103,7 +97,6 @@ export async function fetchTopic(id: string): Promise<TopicDetail> {
   return data;
 }
 
-/** PATCH /api/topics/:id — privacy / title (BAC-10). */
 export async function updateTopic(
   id: string,
   body: components['schemas']['UpdateTopicDto'],
@@ -130,7 +123,6 @@ export async function updateTopic(
   return data;
 }
 
-/** DELETE /api/topics/:id → 204 (BAC-10). */
 export async function deleteTopic(id: string): Promise<void> {
   const { error, response } = await apiClient.DELETE('/api/topics/{id}', {
     params: { path: { id } },

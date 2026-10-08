@@ -4,14 +4,20 @@ Vue 3 SPA (Vite + TypeScript + Vue Router + Tailwind v4).
 
 - `src/pages/` — страницы маршрутов (PascalCase, суффикс `Page`)
 - `src/router/` — Vue Router (`createWebHistory`)
-- `src/components/ui/` — UI-Kit контролы (`AppButton`, `AppInput`, `AppNav`, `GuestNav`, `TopicRow`, `PrivacyChip`, `RankRow`, `CoverUpload`, `MainChip`; реэкспорт из `index.ts`)
+- `src/components/ui-kit/` — DS-контролы без бизнес-логики (`TButton`, `TInput`, `TTopicRow`, `TPrivacyChip`, `TRankRow`, `TCoverUpload`, `TMainChip`, …; префикс `T` = Topic; реэкспорт из `index.ts`)
+- `src/components/layout/` — chrome и page shells (`AppNav`, `GuestNav`, `ContentPageWrapper`, `ErrorStateView`)
+- `src/components/topic/` — DnD/ранги с API-типами (`RankRowDraggable`, `RankedDropZone`, `DnDAnimatedPreview`)
 - `src/styles/` — `main.css` (Tailwind + шрифты) и `tokens.css` (`@theme` из `docs/design/tokens.json`)
 - `src/composables/` — composables (в т.ч. `useAppUpdate` для обновления SW)
 - `src/App.vue` — только `RouterView`
 - `src/main.ts` — точка входа (Vue Query + Pinia)
 - `public/icons/` — иконки PWA
 
-**UI-Kit:** `AppButton` (primary / secondary / ghost / danger-ghost; размеры `md` 44 и `sm` 32; `loading` блокирует клик); `AppInput` (label, `v-model`, text/password/email, error снизу); `PrivacyChip` (`private` / `unlisted` / `public`; `compact` = icon-only для M); `TopicRow` (title, meta, privacy, optional covers, hover); `AppNav` (floating dock: bottom M / top D / `auto`; M tabs «Лента|Мои топики|Профиль» + soft-well; D: Topic + links + soft-pill active; «Лента»/«Профиль» disabled до S13/профиля); `GuestNav` (`ctaMode`: `share` — S09 Primary «Присоединиться»→`/`; `error` — «На главную»; `guest` — «Войти»+«Присоединиться» для витрины; props override); `RankRow` (cover thumb, title, rank badge top-3 accent, drag-handle, inbox «В рейтинг»; states default/hover/focus/dragging; max-width 358; HTML5 DnD на S05 через `dragEnabled` — ranked только с handle, inbox со строки; без ↑↓); `CoverUpload` (empty/hover/filled/error, file input, emit `file` для multipart, copy «до 5 МБ»); `MainChip` (Фильмы/Сериалы/Книги/Игры → emit `select` label в title). Без баннера «Топик изменился» (Flow E). Стили только через токены Tailwind (`tokens.css`); focus — `outline-focus-ring` (2px / offset 2px). Импорт: `import { AppButton, CoverUpload, MainChip, RankRow } from '@/components/ui'`. Временная витрина: `/dev/ui-kit`.
+**UI-Kit (`@/components/ui-kit`):** префикс `T` (Topic). `TButton` (primary / secondary / ghost / danger-ghost; размеры `md` 44 и `sm` 32; `loading` блокирует клик); `TInput` (label, `v-model`, text/password/email, error снизу); `TPrivacyChip` (`private` / `unlisted` / `public`; `compact` = icon-only для M); `TTopicRow` (title, meta, privacy, optional covers, hover); `TRankRow` (cover thumb, title, rank badge top-3 accent, drag-handle, inbox «В рейтинг»; states default/hover/focus/dragging; max-width 358); `TCoverUpload` (empty/hover/filled/error, file input, emit `file` для multipart, copy «до 5 МБ»); `TMainChip` (Фильмы/Сериалы/Книги/Игры → emit `select` label в title). Без баннера «Топик изменился» (Flow E). Стили kit — SCSS + токены; focus — `outline-focus-ring`. Импорт: `import { TButton, TCoverUpload, TMainChip, TRankRow } from '@/components/ui-kit'`. Витрина: `/dev/ui-kit` (также демо `AppNav`/`GuestNav` из `@/components/layout`).
+
+**Layout (`@/components/layout`):** `AppNav` (floating dock: bottom M / top D / `auto`); `GuestNav` (`ctaMode`: `share` / `error` / `guest`); `ContentPageWrapper`; `ErrorStateView`.
+
+**Topic (`@/components/topic`):** `RankRowDraggable` + `RankedDropZone` (DnD S05, `ItemDto`); `DnDAnimatedPreview` в `App.vue`.
 
 **Данные:** server state — TanStack Vue Query (`src/query/client.ts`); клиентская сессия — Pinia `useSessionStore` (`src/stores/session.ts`, без персиста): `unknown` → `guest` | `authed` через `GET /api/auth/me` при старте. Фабрики ключей — `src/query/keys.ts` (`health`, `auth.me`, `topics.list`, `share.detail`). Auth mutations: `useRegisterMutation` / `useLoginMutation` / `useLogoutMutation`; query — `useMeQuery`. Topics: `useTopicsQuery` → `GET /api/topics`; `useCreateTopicMutation` → `POST /api/topics` (`src/api/topics.ts`). Share: `useShareQuery` → `GET /api/t/:shareId` (`src/api/share.ts`). previewCovers → URL через `src/lib/cover-url.ts` (дефолты MinIO = api `.env.example`; опционально `VITE_S3_PUBLIC_URL` / `VITE_S3_BUCKET`). S05: `useTopicQuery` + `useTopicItemsQuery`; `useRankItemMutation` (inbox→конец); `useReorderItemsMutation` (optimistic ranked DnD + rollback).
 

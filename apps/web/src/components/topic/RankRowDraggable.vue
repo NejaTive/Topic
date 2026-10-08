@@ -6,32 +6,33 @@ export const TOPIC_ITEMS_DND_GROUP = 'topic-items';
 import { type IDragEvent, makeDraggable } from '@vue-dnd-kit/core';
 import { useTemplateRef } from 'vue';
 import type { ItemDto } from '@/api/items';
-import RankRow, { type RankRowMode } from './RankRow.vue';
+import TRankRow, { type TRankRowMode } from '@/components/ui-kit/TRankRow.vue';
 
-const props = withDefaults(
-  defineProps<{
-    title: string;
-    rank?: number;
-    coverUrl?: string;
-    mode?: RankRowMode;
-    index: number;
-    items: ItemDto[];
-    itemId: string;
-  }>(),
-  {
-    rank: undefined,
-    coverUrl: undefined,
-    mode: 'ranked',
-  },
-);
+interface RankRowDraggableProps {
+  title: string;
+  rank?: number;
+  coverUrl?: string;
+  mode?: TRankRowMode;
+  index: number;
+  items: ItemDto[];
+  itemId: string;
+}
 
-const emit = defineEmits<{
-  click: [event: MouseEvent];
-  dragStart: [event: IDragEvent];
-  dragMove: [event: IDragEvent];
-  dragEnd: [event: IDragEvent];
-  dragCancel: [event: IDragEvent];
-}>();
+interface RankRowDraggableEmits {
+  (e: 'click', event: MouseEvent): void;
+  (e: 'dragStart', event: IDragEvent): void;
+  (e: 'dragMove', event: IDragEvent): void;
+  (e: 'dragEnd', event: IDragEvent): void;
+  (e: 'dragCancel', event: IDragEvent): void;
+}
+
+const props = withDefaults(defineProps<RankRowDraggableProps>(), {
+  rank: undefined,
+  coverUrl: undefined,
+  mode: 'ranked',
+});
+
+const emit = defineEmits<RankRowDraggableEmits>();
 
 const rootRef = useTemplateRef<HTMLElement>('rootRef');
 
@@ -61,7 +62,7 @@ function onClick(event: MouseEvent) {
 
 <template>
   <div ref="rootRef" class="w-full">
-    <RankRow
+    <TRankRow
       class="max-w-none! w-full"
       :mode="mode"
       :title="title"

@@ -22,7 +22,7 @@ export function coverUrlFromKey(key: string | null | undefined): string | null {
   return base ? `${base}${path}` : path;
 }
 
-/** До 3 URL/null в порядке rank — null = placeholder в TopicRow. */
+/** До 3 URL/null в порядке rank — null = placeholder в TTopicRow. */
 export function previewCoverUrls(keys: Array<string | null> | undefined): Array<string | null> {
   if (!keys?.length) return [];
   return keys.slice(0, 3).map((key) => coverUrlFromKey(key));

@@ -2,9 +2,15 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { AuthApiError } from '@/api/auth';
-import { AppButton, AppInput } from '@/components/ui';
+import { TButton, TInput } from '@/components/ui-kit';
 import { useLoginMutation } from '@/composables/useAuthMutations';
 import { hasFieldErrors, validateLoginForm } from '@/lib/auth-validation';
+import { RouteName } from '@/router/route-names';
+
+interface FieldErrors {
+  email?: string;
+  password?: string;
+}
 
 const route = useRoute();
 const router = useRouter();
@@ -12,16 +18,15 @@ const login = useLoginMutation();
 
 const email = ref('');
 const password = ref('');
-const fieldErrors = ref<{ email?: string; password?: string }>({});
+const fieldErrors = ref<FieldErrors>({});
 const emailInvalid = ref(false);
 
 const isSubmitting = computed(() => login.isPending.value);
 
-/** Same-origin path only; reject protocol-relative and absolute URLs. */
 function resolveReturnPath(): string {
   const raw = route.query.returnUrl;
   if (typeof raw !== 'string' || !raw.startsWith('/') || raw.startsWith('//')) {
-    return '/app/topics';
+    return router.resolve({ name: RouteName.AppTopics }).fullPath;
   }
   return raw;
 }
@@ -33,6 +38,7 @@ function clearErrors() {
 
 function applyAuthError(err: unknown) {
   clearErrors();
+
   if (!(err instanceof AuthApiError)) {
     fieldErrors.value = { password: 'Не удалось войти' };
     return;
@@ -65,20 +71,19 @@ function applyAuthError(err: unknown) {
 
 async function onSubmit() {
   clearErrors();
-  const localErrors = validateLoginForm({
-    email: email.value,
-    password: password.value,
-  });
+
+  const data = {
+    email: email.value.trim(),
+    password: password.value.trim(),
+  };
+  const localErrors = validateLoginForm(data);
   if (hasFieldErrors(localErrors)) {
     fieldErrors.value = localErrors;
     return;
   }
 
   try {
-    await login.mutateAsync({
-      email: email.value.trim(),
-      password: password.value,
-    });
+    await login.mutateAsync(data);
     await router.replace(resolveReturnPath());
   } catch (err) {
     applyAuthError(err);
@@ -87,52 +92,44 @@ async function onSubmit() {
 </script>
 
 <template>
-  <main class="flex min-h-dvh items-center justify-center bg-bg px-4 py-8">
-    <div
-      class="flex w-full max-w-89.5 flex-col gap-3 rounded-lg border border-line bg-surface px-6.25 py-7.25 md:max-w-110"
-    >
-      <RouterLink
-        to="/"
-        class="w-fit text-label font-semibold text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-      >
-        ← Topic
-      </RouterLink>
+  <div
+    class="flex w-full max-w-89.5 flex-col gap-3 rounded-lg border border-line bg-surface px-6.25 py-7.25 md:max-w-110"
+  >
+    <RouterLink :to="RouteName.Root" class="text-label font-semibold text-accent">
+      ← Topic
+    </RouterLink>
 
-      <h1 class="text-h1 text-ink">Вход</h1>
+    <h1 class="text-h1">Вход</h1>
 
-      <form class="flex flex-col gap-3" novalidate @submit.prevent="onSubmit">
-        <AppInput
-          v-model="email"
-          label="Email"
-          type="email"
-          autocomplete="email"
-          placeholder="you@example.com"
-          :error="fieldErrors.email"
-          :invalid="emailInvalid"
-          :disabled="isSubmitting"
-        />
-        <AppInput
-          v-model="password"
-          label="Пароль"
-          type="password"
-          autocomplete="current-password"
-          placeholder="••••••••"
-          :error="fieldErrors.password"
-          :disabled="isSubmitting"
-        />
+    <form class="flex flex-col gap-3" novalidate @submit.prevent="onSubmit">
+      <TInput
+        v-model="email"
+        label="Email"
+        type="email"
+        autocomplete="email"
+        placeholder="you@example.com"
+        :error="fieldErrors.email"
+        :invalid="emailInvalid"
+        :disabled="isSubmitting"
+      />
+      <TInput
+        v-model="password"
+        label="Пароль"
+        type="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+        :error="fieldErrors.password"
+        :disabled="isSubmitting"
+      />
 
-        <p class="text-label font-semibold text-muted">
-          Нет аккаунта?
-          <RouterLink
-            class="text-accent font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-            to="/register"
-          >
-            Регистрация
-          </RouterLink>
-        </p>
+      <p class="text-label font-semibold text-muted">
+        Нет аккаунта?
+        <RouterLink :to="RouteName.Register" class="text-accent font-semibold">
+          Регистрация
+        </RouterLink>
+      </p>
 
-        <AppButton type="submit" :loading="isSubmitting" class="w-full">Войти</AppButton>
-      </form>
-    </div>
-  </main>
+      <TButton type="submit" :loading="isSubmitting">Войти</TButton>
+    </form>
+  </div>
 </template>

@@ -13,7 +13,6 @@ export class ShareApiError extends Error {
   }
 }
 
-/** GET /api/t/:shareId — публичный рейтинг (BAC-13). */
 export async function fetchShare(shareId: string): Promise<ShareTopic> {
   const { data, error, response } = await apiClient.GET('/api/t/{shareId}', {
     params: { path: { shareId } },

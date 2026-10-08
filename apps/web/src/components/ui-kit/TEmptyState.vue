@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import AppButton from './AppButton.vue';
+import TButton from './TButton.vue';
 
-withDefaults(
-  defineProps<{
-    title?: string;
-    description?: string;
-    ctaLabel?: string;
-    /** Figma: Empty state / With CTA */
-    showCta?: boolean;
-  }>(),
-  {
-    title: 'Создайте первый топик',
-    description: 'Добавьте элементы и расставьте их получится ваш рейтинг.',
-    ctaLabel: 'Создать топик',
-    showCta: true,
-  },
-);
+interface TEmptyStateProps {
+  title?: string;
+  description?: string;
+  ctaLabel?: string;
+  showCta?: boolean;
+}
 
-const emit = defineEmits<{
-  create: [event: MouseEvent];
-}>();
+interface TEmptyStateEmits {
+  (e: 'create', event: MouseEvent): void;
+}
+
+withDefaults(defineProps<TEmptyStateProps>(), {
+  title: 'Создайте первый топик',
+  description: 'Добавьте элементы и расставьте их получится ваш рейтинг.',
+  ctaLabel: 'Создать топик',
+  showCta: true,
+});
+
+const emit = defineEmits<TEmptyStateEmits>();
 </script>
 
 <template>
@@ -39,8 +39,8 @@ const emit = defineEmits<{
     <p class="text-title text-ink">{{ title }}</p>
     <p class="max-w-80 text-body-sm text-muted">{{ description }}</p>
 
-    <AppButton v-if="showCta" @click="emit('create', $event)">
+    <TButton v-if="showCta" @click="emit('create', $event)">
       {{ ctaLabel }}
-    </AppButton>
+    </TButton>
   </div>
 </template>

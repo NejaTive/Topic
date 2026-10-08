@@ -4,13 +4,10 @@
   Имя --color-*: путь токена, ключ default опускается.
 */
 
-/* static — все токены всегда в CSS (не tree-shake неиспользованных) */
 @theme static {
-  /* Сброс дефолтных палитры и радиусов Tailwind — в UI только токены Topic */
   --color-*: initial;
   --radius-*: initial;
 
-  /* color/* */
   --color-bg: #f6f7f5;
   --color-surface: #ffffff;
   --color-surface-sunken: #edf0ed;
@@ -34,29 +31,20 @@
   --color-info-hover: #d4e0ef;
   --color-rank: #16201e;
   --color-rank-top: #0f6b5c;
-  /*
-    --color-focus-ring: нет в tokens.json.
-    Дефолт агента из docs/stages/stage-2-brainstorm.md (§ Colors Light): #0F6B5C, ring 2px, зазор 2px.
-  */
   --color-focus-ring: #0f6b5c;
 
-  /* radius/* — sm/md/lg = 4/8/12px; pill не используем */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
 
-  /* shadow/float — единственная тень */
   --shadow-float: 0px 4px 16px 0px #16201e14;
 
-  /* size/* — CSS-переменные контролов */
   --size-control-md: 44px;
   --size-control-sm: 32px;
 
-  /* font/family + системный fallback */
   --font-sans: 'Onest Variable', 'Onest', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* typography/* → утилиты text-* */
   --text-display: 40px;
   --text-display--line-height: 48px;
   --text-display--letter-spacing: -0.8px;
@@ -123,7 +111,6 @@
   --text-rank-s--font-weight: 500;
 }
 
-/* overline: uppercase поверх theme text-overline */
 @utility text-overline {
   font-size: var(--text-overline);
   line-height: var(--text-overline--line-height);

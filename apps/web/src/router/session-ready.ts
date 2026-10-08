@@ -3,7 +3,6 @@ import { queryClient } from '@/query/client';
 import { queryKeys } from '@/query/keys';
 import { useSessionStore } from '@/stores/session';
 
-/** Дождаться первого me и синхронизировать Pinia (unknown → guest|authed). */
 export async function ensureSessionReady(): Promise<void> {
   const session = useSessionStore();
   if (session.status !== 'unknown') return;

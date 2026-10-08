@@ -18,7 +18,6 @@ function invalidateTopicLists(queryClient: ReturnType<typeof useQueryClient>, to
   void queryClient.invalidateQueries({ queryKey: queryKeys.topics.list() });
 }
 
-/** POST create item → invalidate items + list. */
 export function useCreateItemMutation(topicId: () => string) {
   const queryClient = useQueryClient();
 
@@ -32,7 +31,6 @@ export function useCreateItemMutation(topicId: () => string) {
   });
 }
 
-/** PATCH title. */
 export function useUpdateItemMutation(topicId: () => string, itemId: () => string) {
   const queryClient = useQueryClient();
 
@@ -46,7 +44,6 @@ export function useUpdateItemMutation(topicId: () => string, itemId: () => strin
   });
 }
 
-/** DELETE item → back to S05. */
 export function useDeleteItemMutation(topicId: () => string) {
   const queryClient = useQueryClient();
 
@@ -60,7 +57,6 @@ export function useDeleteItemMutation(topicId: () => string) {
   });
 }
 
-/** POST cover multipart. */
 export function useUploadItemCoverMutation(topicId: () => string, itemId: () => string) {
   const queryClient = useQueryClient();
 
@@ -74,7 +70,6 @@ export function useUploadItemCoverMutation(topicId: () => string, itemId: () => 
   });
 }
 
-/** DELETE cover. */
 export function useDeleteItemCoverMutation(topicId: () => string, itemId: () => string) {
   const queryClient = useQueryClient();
 
@@ -88,7 +83,6 @@ export function useDeleteItemCoverMutation(topicId: () => string, itemId: () => 
   });
 }
 
-/** POST rank — inbox → конец ranked (S07 / S05). */
 export function useRankItemOnDetailMutation(topicId: () => string, itemId: () => string) {
   const queryClient = useQueryClient();
 
@@ -102,7 +96,6 @@ export function useRankItemOnDetailMutation(topicId: () => string, itemId: () =>
   });
 }
 
-/** POST unrank — ranked → inbox (S07). */
 export function useUnrankItemMutation(topicId: () => string, itemId: () => string) {
   const queryClient = useQueryClient();
 

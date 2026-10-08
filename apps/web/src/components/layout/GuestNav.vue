@@ -1,51 +1,38 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
-import AppButton from './AppButton.vue';
+import TButton from '@/components/ui-kit/TButton.vue';
 
 export type GuestNavPlacement = 'auto' | 'bottom' | 'top';
-/**
- * guest — demo/витрина («Войти» + «Присоединиться»);
- * share — S09 гость (одна Primary «Присоединиться» → `/`);
- * error — S11/S12 (Primary «На главную»).
- */
 export type GuestNavCtaMode = 'guest' | 'share' | 'error';
 
-const props = withDefaults(
-  defineProps<{
-    /** auto: bottom below md, top from md up (floating dock). */
-    placement?: GuestNavPlacement;
-    /** false — relative shell for UI-Kit samples (not viewport-fixed). */
-    fixed?: boolean;
-    /** guest | share | error — см. GuestNavCtaMode. */
-    ctaMode?: GuestNavCtaMode;
-    brandTo?: string;
-    /** guest primary target (default /login). */
-    loginTo?: string;
-    /** join / share primary target (default /). */
-    joinTo?: string;
-    /** Override primary label/to (e.g. error screens). */
-    primaryLabel?: string;
-    primaryTo?: string;
-    /** Override secondary; set showSecondary=false to hide. */
-    secondaryLabel?: string;
-    secondaryTo?: string;
-    showSecondary?: boolean;
-  }>(),
-  {
-    placement: 'auto',
-    fixed: true,
-    ctaMode: 'guest',
-    brandTo: '/',
-    loginTo: '/login',
-    joinTo: '/',
-    primaryLabel: undefined,
-    primaryTo: undefined,
-    secondaryLabel: undefined,
-    secondaryTo: undefined,
-    showSecondary: undefined,
-  },
-);
+interface GuestNavProps {
+  placement?: GuestNavPlacement;
+  fixed?: boolean;
+  ctaMode?: GuestNavCtaMode;
+  brandTo?: string;
+  loginTo?: string;
+  joinTo?: string;
+  primaryLabel?: string;
+  primaryTo?: string;
+  secondaryLabel?: string;
+  secondaryTo?: string;
+  showSecondary?: boolean;
+}
+
+const props = withDefaults(defineProps<GuestNavProps>(), {
+  placement: 'auto',
+  fixed: true,
+  ctaMode: 'guest',
+  brandTo: '/',
+  loginTo: '/login',
+  joinTo: '/',
+  primaryLabel: undefined,
+  primaryTo: undefined,
+  secondaryLabel: undefined,
+  secondaryTo: undefined,
+  showSecondary: undefined,
+});
 
 const resolvedPrimaryLabel = computed(() => {
   if (props.primaryLabel !== undefined) return props.primaryLabel;
@@ -110,33 +97,31 @@ const showWideCtas = computed(() => props.placement === 'top' || props.placement
     <div :class="shellClass">
       <RouterLink :to="brandTo" :class="brandClass">Topic</RouterLink>
 
-      <!-- M / auto &lt; md: sm buttons -->
       <div
         v-if="showCompactCtas"
         class="flex shrink-0 items-center gap-2"
         :class="placement === 'auto' ? 'md:hidden' : undefined"
       >
         <RouterLink v-slot="{ navigate }" :to="resolvedPrimaryTo" custom>
-          <AppButton size="sm" @click="navigate">{{ resolvedPrimaryLabel }}</AppButton>
+          <TButton size="sm" @click="navigate">{{ resolvedPrimaryLabel }}</TButton>
         </RouterLink>
         <RouterLink v-if="showJoinCta" v-slot="{ navigate }" :to="resolvedSecondaryTo" custom>
-          <AppButton variant="ghost" size="sm" @click="navigate">
+          <TButton variant="ghost" size="sm" @click="navigate">
             {{ resolvedSecondaryLabel }}
-          </AppButton>
+          </TButton>
         </RouterLink>
       </div>
 
-      <!-- D / auto ≥ md: md buttons -->
       <div
         v-if="showWideCtas"
         class="hidden shrink-0 items-center gap-2"
         :class="placement === 'auto' ? 'md:flex' : 'flex'"
       >
         <RouterLink v-slot="{ navigate }" :to="resolvedPrimaryTo" custom>
-          <AppButton @click="navigate">{{ resolvedPrimaryLabel }}</AppButton>
+          <TButton @click="navigate">{{ resolvedPrimaryLabel }}</TButton>
         </RouterLink>
         <RouterLink v-if="showJoinCta" v-slot="{ navigate }" :to="resolvedSecondaryTo" custom>
-          <AppButton variant="ghost" @click="navigate">{{ resolvedSecondaryLabel }}</AppButton>
+          <TButton variant="ghost" @click="navigate">{{ resolvedSecondaryLabel }}</TButton>
         </RouterLink>
       </div>
     </div>
