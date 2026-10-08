@@ -19,6 +19,7 @@ import {
 import { useRankedLiveGap } from '@/composables/useRankedLiveGap';
 import { useTopicItemsQuery } from '@/composables/useTopicItemsQuery';
 import { useTopicQuery } from '@/composables/useTopicQuery';
+import { copyText } from '@/lib/copy-text';
 import { playDropSettleAnimation } from '@/lib/dnd-drop-settle';
 import { queryKeys } from '@/query/keys';
 import { RouteName } from '@/router/route-names';
@@ -111,7 +112,7 @@ async function onCopyLink() {
   const url = shareUrl.value;
   if (!url) return;
   try {
-    await navigator.clipboard.writeText(url);
+    await copyText(url);
     copyFeedback.value = 'Ссылка скопирована';
     window.setTimeout(() => {
       if (copyFeedback.value === 'Ссылка скопирована') copyFeedback.value = '';
