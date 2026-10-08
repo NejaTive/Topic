@@ -31,6 +31,11 @@ class EnvironmentVariables {
   @IsNotEmpty()
   DATABASE_URL!: string;
 
+  /** Браузерный origin; `https://…` включает Secure на session cookie. */
+  @IsOptional()
+  @IsString()
+  PUBLIC_BASE_URL?: string;
+
   /** S3-совместимый endpoint (MinIO в dev), без trailing slash. */
   @IsString()
   @IsNotEmpty()
