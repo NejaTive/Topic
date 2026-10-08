@@ -1,8 +1,15 @@
 {
-	auto_https off
+	email {$ACME_EMAIL}
+	default_sni {$PUBLIC_HOST}
 }
 
-:80 {
+{$PUBLIC_HOST} {
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+
 	encode gzip
 
 	request_body {
@@ -13,7 +20,6 @@
 		reverse_proxy api:3001
 	}
 
-	# path-style MinIO: /{S3_BUCKET}/{key}
 	handle /{$S3_BUCKET}/* {
 		reverse_proxy minio:9000 {
 			header_up Host {http.reverse_proxy.upstream.hostport}

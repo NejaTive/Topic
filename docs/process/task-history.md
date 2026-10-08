@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 09.10.2026 — Prod HTTPS на IP (LE short-lived)
+
+- **YouGile:** BAC-15
+- **Итог:** HTTPS на IPv4 без домена: Caddy 2.11 + ACME `shortlived`, порты 80/443, тома certs; Nest `Secure` cookie от `PUBLIC_BASE_URL`; CI health по HTTPS; docs/deploy/decisions.
+- **Репо:** `feat/BAC-15` / [PR #46](https://github.com/NejaTive/Topic/pull/46) / (merge в develop)
+- **Заметки:** manual-close; `.env` на VPS уже с PUBLIC_HOST/BASE_URL/ACME; выкат — после promote в `main`.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 09.10.2026 — S05 — копирование ссылки unlisted на HTTP (prod)
 
 - **YouGile:** FRO-27

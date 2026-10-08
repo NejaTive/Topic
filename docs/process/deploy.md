@@ -1,22 +1,22 @@
 # Деплой Topic (VPS + GitHub Actions)
 
-Канон решения: [`decisions.md`](decisions.md) (08.10.2026 — prod-хостинг).
+Канон решения: [`decisions.md`](decisions.md) (08.10.2026 — prod-хостинг; 09.10.2026 — TLS на IP).
 
 ## Топология
 
 - **VPS:** Ubuntu 22.04, Docker Compose.
-- **Edge:** Caddy (`topic-web`) на `:80` — SPA, `/api/*` → Nest, `/{S3_BUCKET}/*` → MinIO.
+- **Edge:** Caddy (`topic-web`) на `:80` + `:443` — SPA, `/api/*` → Nest, `/{S3_BUCKET}/*` → MinIO; HTTPS на публичный IPv4 (Let's Encrypt short-lived ~6 суток).
 - **Обложки:** same-origin `/{bucket}/{key}` (`S3_PUBLIC_URL=.` у api); не `127.0.0.1:9000` в браузере.
-- **Данные:** Postgres + MinIO на том же VPS (тома Docker).
+- **Данные:** Postgres + MinIO на том же VPS (тома Docker); том `caddy_data` — сертификаты (не терять при recreate).
 - **CI:** push в `main` → build/push образов в GHCR → SSH → `compose up`.
-- **Первый этап:** HTTP по IP, без TLS и без `Secure` cookie.
+- **Origin:** `https://<PUBLIC_HOST>/`; session cookie с `Secure`.
 
 Каталог на сервере: `/opt/topic` (`compose.prod.yaml`, `.env`).
 
 ## Одноразово на VPS
 
 1. Установить Docker Engine + Compose plugin.
-2. Firewall: открыть `22` и `80` (MinIO/Postgres наружу не публиковать).
+2. Firewall: открыть `22`, `80`, **`443`** (MinIO/Postgres наружу не публиковать).
 3. Пользователь деплоя в группе `docker` (или root — хуже).
 4. Каталог и env:
 
@@ -25,7 +25,7 @@ sudo mkdir -p /opt/topic
 sudo chown "$USER":"$USER" /opt/topic
 cd /opt/topic
 # скопировать содержимое deploy/.env.example → .env
-nano .env   # PUBLIC_BASE_URL=http://<IP>, пароли, bucket
+nano .env   # PUBLIC_HOST, PUBLIC_BASE_URL=https://…, ACME_EMAIL, пароли, bucket
 ```
 
 5. SSH-ключ только для деплоя; публичный ключ в `~/.ssh/authorized_keys`.
@@ -44,7 +44,7 @@ echo '<PAT>' | docker login ghcr.io -u <github-user> --password-stdin
 cd /opt/topic
 docker compose -f compose.prod.yaml pull
 docker compose -f compose.prod.yaml up -d
-curl -fsS "http://127.0.0.1/api/health"
+curl -fsS --resolve "${PUBLIC_HOST}:443:127.0.0.1" "https://${PUBLIC_HOST}/api/health"
 ```
 
 ## Secrets в GitHub (Settings → Secrets)
@@ -62,7 +62,7 @@ curl -fsS "http://127.0.0.1/api/health"
 1. Фичи мержатся в `develop` (PR).
 2. Promote: skill **`publish-prod`** (или вручную) — перед PR в `main` выставить semver в корневом `package.json` и в `apps/api` / `apps/web` → PR / merge `develop` → `main`.
 3. **Версия:** annotated git tag `vX.Y.Z` на merge-commit в `main` (номер = `package.json` `version`). Файл `VERSION` / health·UI / теги GHCR `:X.Y.Z` — отложено.
-4. Workflow `Deploy` собирает образы, синхронизирует `compose.prod.yaml`, поднимает стек, ждёт `/api/health`.
+4. Workflow `Deploy` собирает образы, синхронизирует `compose.prod.yaml`, поднимает стек, ждёт HTTPS `/api/health` (через `--resolve` на `PUBLIC_HOST`).
 
 ## Откат
 
@@ -78,12 +78,19 @@ docker compose -f compose.prod.yaml up -d
 
 ## Smoke после деплоя
 
-- `http://<IP>/` — SPA
-- `http://<IP>/api/health` — `{"status":"ok",…}`
-- регистрация / логин (cookie)
-- топик + обложка (URL вида `http://<IP>/topic-covers/…`)
+- `https://<PUBLIC_HOST>/` — SPA (без предупреждения браузера о сертификате)
+- `https://<PUBLIC_HOST>/api/health` — `{"status":"ok",…}`
+- регистрация / логин (cookie `Secure`)
+- топик + обложка (URL вида `https://<PUBLIC_HOST>/topic-covers/…`)
 - share-ссылка
+
+## Переход с HTTP (разово)
+
+1. Открыть **443** на VPS / у провайдера.
+2. В `/opt/topic/.env` задать `PUBLIC_HOST`, `PUBLIC_BASE_URL=https://…`, `ACME_EMAIL`, `HTTPS_PORT=443`.
+3. После выката образа с новым Caddyfile — `compose up -d` (том `caddy_data` появится сам).
+4. Старые HTTP-закладки → обновить на HTTPS; перелогиниться.
 
 ## Вне текущего этапа
 
-Домен, TLS (в Caddy), `Secure` cookie, rate-limit auth, внешний S3/managed Postgres, автотесты в CI.
+Купленный домен (обычный LE на имя), rate-limit auth, внешний S3/managed Postgres, автотесты в CI.

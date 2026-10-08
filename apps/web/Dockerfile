@@ -21,9 +21,9 @@ COPY apps/web apps/web
 
 RUN pnpm --filter web build
 
-FROM caddy:2.10-alpine
+FROM caddy:2.11-alpine
 
 COPY --from=build /app/apps/web/dist /srv
 COPY deploy/Caddyfile /etc/caddy/Caddyfile
 
-EXPOSE 80
+EXPOSE 80 443
