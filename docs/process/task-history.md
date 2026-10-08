@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 09.10.2026 — S05 — копирование ссылки unlisted на HTTP (prod)
+
+- **YouGile:** FRO-27
+- **Итог:** Clipboard API недоступен на HTTP-проде; добавлен `copyText` с fallback `execCommand('copy')`, подключён в TopicDetailPage.
+- **Репо:** `fix/FRO-27` / [PR #45](https://github.com/NejaTive/Topic/pull/45) / (merge в develop)
+- **Заметки:** manual-close; баг на prod HTTP/IP без TLS.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 09.10.2026 — AuthLayout/MainLayout + декомпозиция components (ui-kit T*)
 
 - **YouGile:** FRO-26
