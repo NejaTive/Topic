@@ -485,5 +485,13 @@
 - **Сеть:** один origin по **HTTP/IP без TLS** на первом этапе; MinIO/Postgres наружу не публиковать.
 - **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
 - **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`).
-- **Версии (A):** annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit в `main` перед/сразу после выката; skill предлагает bump, владелец подтверждает.
-- **Отложено (B и прочее):** `VERSION` / bump package.json / version в health·UI / теги GHCR `:X.Y.Z`; домен, TLS/`Secure` cookie, rate-limit auth, внешний object storage.
+- **Версии:** перед каждым promote `develop`→`main` (skill `publish-prod`) **обязательно** выставить semver в корневом `package.json` (`version`) и синхронизировать `apps/api` / `apps/web` с тем же номером; после merge в `main` — annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit. Skill предлагает bump, владелец подтверждает (или задаёт номер / «следующая» в команде).
+- **Отложено (остаток B и прочее):** файл `VERSION` / version в health·UI / теги образов GHCR `:X.Y.Z`; домен, TLS/`Secure` cookie, rate-limit auth, внешний object storage.
+- **Отмена (частично):** ранее (тот же день) откладывали bump `package.json` — **снято** 08.10.2026 по решению владельца.
+
+### S05 — accent-обводка RankedDropZone (drag-over)
+
+- Визуальный highlight зоны «Рейтинг» при drag-over (ring/outline accent) **отложен**.
+- Сейчас: `RankedDropZone` остаётся droppable без accent-обводки; feedback — live-gap / spacer.
+- Вернуться явно; на мобилке inset-ring без padding ломался (карточки перекрывали обводку) — при возврате: outer outline/ring или padding ≥ толщины ring.
+- См. `docs/backlog/ideas.md`.

@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const rootRef = useTemplateRef<HTMLElement>('rootRef');
 
-const { isDragOver } = makeDroppable(
+makeDroppable(
   rootRef,
   {
     groups: [TOPIC_ITEMS_DND_GROUP],
@@ -27,11 +27,7 @@ const { isDragOver } = makeDroppable(
 </script>
 
 <template>
-  <section
-    ref="rootRef"
-    class="rounded-lg ring-2 ring-inset transition-shadow md:border md:border-line md:bg-surface md:p-5"
-    :class="isDragOver ? 'ring-accent' : 'ring-transparent'"
-  >
+  <section ref="rootRef" class="rounded-lg md:border md:border-line md:bg-surface md:p-5">
     <slot />
   </section>
 </template>
