@@ -618,4 +618,5 @@
 
 - **A+B:** канон текста — корневой `CHANGELOG.md` (буллеты); зеркало — GitHub Release на `vX.Y.Z`.
 - Источник буллетов при релизе: осмысленный diff `main..develop` (не сырой dump всех коммитов).
+- В тексте релизов **не** упоминать id/названия карточек YouGile (`BAC-…` / `FRO-…`).
 - Вшить в skill `publish-prod`: правка CHANGELOG вместе с bump → после тега `gh release create`.
