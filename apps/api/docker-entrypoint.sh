@@ -1,4 +1,4 @@
 #!/bin/sh
 set -e
-pnpm run db:migrate:deploy
+./node_modules/.bin/prisma migrate deploy
 exec node dist/main.js

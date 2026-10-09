@@ -410,7 +410,7 @@
 ### Skill «запуск проекта»
 
 - Project skill: `.cursor/skills/engineering/start-project/SKILL.md`.
-- Skills раскладываем по секциям как rules: `collaboration/` (YouGile), `engineering/` (dev/стек).
+- Skills раскладываем по секциям как rules: `collaboration/` (YouGile), `engineering/` (dev/стек + prod publish).
 - Поднимает локальный стек Topic (infra → migrate deploy → `pnpm dev`); профили `full` / `infra` / `api` / `web`.
 - Отчёт агента: markdown **вне** code fence (кликабельные ссылки); секции Infra / API / Web с таблицами + dev-креды; **длительность** старта (всего + по сервисам), не часы; профиль (`full`/…) в отчёт не писать.
 - Остановка — зеркальный каркас («остановлен» + shutdown ~Xs); только по просьбе владельца или cleanup вызывающего skill (ревьюер).
@@ -486,7 +486,7 @@
 - **Сеть (было):** один origin по **HTTP/IP без TLS** на первом этапе; MinIO/Postgres наружу не публиковать.
 - **Сеть (с 09.10.2026):** HTTPS на IP без покупки домена — см. ниже «Prod TLS на IP».
 - **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
-- **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`).
+- **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`, путь `.cursor/skills/engineering/publish-prod/`).
 - **Версии:** перед каждым promote `develop`→`main` (skill `publish-prod`) **обязательно** выставить semver в корневом `package.json` (`version`) и синхронизировать `apps/api` / `apps/web` с тем же номером; после merge в `main` — annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit. Skill предлагает bump, владелец подтверждает (или задаёт номер / «следующая» в команде).
 - **Отложено (остаток B и прочее):** файл `VERSION` / version в health·UI / теги образов GHCR `:X.Y.Z`; **купленный** домен; rate-limit auth, внешний object storage.
 - **Снято с отложенного (09.10.2026):** TLS + `Secure` cookie — путь **A** (HTTPS на IP), см. «Prod TLS на IP».
@@ -557,3 +557,16 @@
 - **Владелец на VPS:** открыть **443** (ufw/панель), обновить `.env`, smoke `https://31.76.22.106/` (логин, обложки, share).
 - **Отложено по-прежнему:** купленный домен; при появлении домена — обычный LE на имя (не shortlived-IP).
 - Канон: `docs/process/deploy.md`, `tech-stack.mdc`, stage-3 строка деплоя.
+
+### CI/CD — ускорение деплоя
+
+- **Решение владельца:** оптимизировать wall-clock Deploy без смены топологии (VPS + GHCR + Compose).
+- **Сделано:** параллельные jobs `build-api` / `build-web` → `deploy`; раздельные GHA cache `scope=topic-api` / `topic-web`; multi-stage slim `topic-api` (`pnpm --filter api deploy --prod`); на VPS `pull api web` (не postgres/minio); `prisma` + `dotenv` в dependencies api для migrate в entrypoint без pnpm в runtime.
+- **Канон для агентов:** `docs/process/deploy.md` §«CI/CD — инварианты скорости»; правило `.cursor/rules/engineering/deploy-ci.mdc`.
+- **Отложено:** path-filter на один образ; self-hosted runner; убрать `docker login` из каждого SSH (public GHCR / разовый login на VPS).
+
+### Skill publish-prod → engineering
+
+- Project skill перенесён: `.cursor/skills/collaboration/publish-prod/` → `.cursor/skills/engineering/publish-prod/SKILL.md`.
+- Рядом с `start-project` (локальный стек / прод-релиз); не YouGile-флоу.
+- Slash `/publish-prod` и `name` в frontmatter без изменений.

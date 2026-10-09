@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 09.10.2026 — CI/CD — ускорение Deploy
+
+- **YouGile:** BAC-16
+- **Итог:** Параллельные `build-api`/`build-web` → `deploy`; раздельные GHA cache; slim multi-stage `topic-api` (`pnpm deploy --prod`); на VPS `pull api web`; docs + skill `publish-prod` → engineering.
+- **Репо:** `perf/BAC-16` / [PR #48](https://github.com/NejaTive/Topic/pull/48) / (merge в develop)
+- **Заметки:** manual-close; канон `deploy-ci.mdc`.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 09.10.2026 — Prod HTTPS на IP (LE short-lived)
 
 - **YouGile:** BAC-15
