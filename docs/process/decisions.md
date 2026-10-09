@@ -570,3 +570,45 @@
 - Project skill перенесён: `.cursor/skills/collaboration/publish-prod/` → `.cursor/skills/engineering/publish-prod/SKILL.md`.
 - Рядом с `start-project` (локальный стек / прод-релиз); не YouGile-флоу.
 - Slash `/publish-prod` и `name` в frontmatter без изменений.
+
+### Этап 5 — закрытие MVP (follow + лента)
+
+- Заведён [`../stages/stage-5-brainstorm.md`](../stages/stage-5-brainstorm.md); фаза **5a** (docs kickoff) ✅.
+- Модель соцсвязи: **односторонняя подписка (follow)** — без заявок и взаимности (как stage-1); UI-термины «Подписаться» / «подписка», не «друзья».
+- Scope этапа 5: S10 + follow + S13 (дизайн hi-fi, API, YouGile, реализация). Хвост **5f**: позже выбрать **1–2** пункта из `ideas.md` — последними, состав отдельным решением.
+- S10/S13 возвращены из отложения hi-fi этапа 2 → этап 5 (см. `ideas.md`).
+
+### Этап 4 — закрыт
+
+- **Решение владельца (09.10.2026):** этап 4 ✅ закрыт (YouGile, agent-workflow, нарезка MVP-среза, реализация **4f**).
+- Канон: [`../stages/stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md).
+- Дальнейшее исполнение карточек YouGile и записи в `task-history` — штатно, без отдельного «этапа 4».
+- Активный этап трекера: **5** (закрытие MVP).
+
+### Этап 5 — уточнения UI перед 5b
+
+- **Карточка ленты (S13):** как «Мои топики» / Topic row — до 3 обложек + title + meta; **privacy-chip в ленте скрыт** (всё public).
+- **Таб «Профиль»:** ведёт на свой `/u/:nick` (тот же S10); отдельного «настройки/я» нет.
+- **S10 мета:** лёгкие счётчики подписчиков / подписок (числа); списки подписчиков в MVP не делаем.
+- Порядок hi-fi **5b:** по одному экрану (M+D), ждать аппрув; старт — **S13 Лента**.
+
+### Этап 5 — 5b дизайн (09.10.2026, продолжение)
+
+- **S13** (List / Empty / Empty·subscribed, M+D) + nav `Select=List|Topic|Profile` с soft-well — **аппрув владельца**.
+- **S10** (List / Empty / Subscribed / Own, M+D) — **аппрув владельца** (правки владельца после ревью). Чужой: счётчики + Подписаться/Отписаться; свой (`Select=Profile`): без CTA. Секции «Открытые топики» нет; rows без privacy-chip. CTA снизу только на mobile.
+- Фаза **5b** ✅ → дальше **5c** (контракт API Follow + лента).
+
+### Этап 5 — 5c контракт API (09.10.2026)
+
+- **Аппрув владельца.** Канон: [`stage-5-brainstorm.md`](../stages/stage-5-brainstorm.md) §5c.
+- Prisma `Follow`; `GET /users/:nick` (auth опционален: `isSelf` / `isFollowing`); `POST|DELETE /users/:nick/follow` → 204 идемпотентно; `GET /feed` → `{ followingCount, items }` с `ownerNick`; на S10 только public; свои топики в ленту не попадают.
+- Фаза **5c** ✅ → дальше **5d** (нарезка YouGile Social).
+- Уточнение при 5d: в `ProfileTopicDto` / `FeedItemDto` добавлен **`shareId`** (навигация на `/t/:shareId`).
+
+### Этап 5 — 5d нарезка YouGile Social (09.10.2026)
+
+- Эпик **Social** в бэклоге BAC/FRO:
+  - **BAC-20** Follow Prisma → **BAC-19** profile, **BAC-18** follow, **BAC-17** feed
+  - **FRO-30** AppNav+роуты; **FRO-31** API-клиент; **FRO-29** S10; **FRO-28** S13
+- Стикер: на досках появился «Эпик (2)/(3)» со значением Social (старый «Эпик» без Social оставлен для старых карточек — при желании слить вручную).
+- Фаза **5d** ✅ → **5e** по agent-workflow.
