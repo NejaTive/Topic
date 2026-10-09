@@ -27,6 +27,23 @@ ENV DATABASE_URL=postgresql://topic:topic@127.0.0.1:5432/topic
 RUN pnpm run build \
   && chmod +x docker-entrypoint.sh
 
+WORKDIR /app
+RUN pnpm --filter api deploy --prod /deploy
+
+FROM node:20-bookworm-slim AS runtime
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=build /deploy ./
+COPY --from=build /app/apps/api/dist ./dist
+COPY --from=build /app/apps/api/prisma ./prisma
+COPY --from=build /app/apps/api/prisma.config.ts ./prisma.config.ts
+COPY --from=build /app/apps/api/docker-entrypoint.sh ./docker-entrypoint.sh
+
 ENV NODE_ENV=production
 EXPOSE 3001
 
