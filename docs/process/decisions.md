@@ -488,6 +488,7 @@
 - **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
 - **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`, путь `.cursor/skills/engineering/publish-prod/`).
 - **Версии:** перед каждым promote `develop`→`main` (skill `publish-prod`) **обязательно** выставить semver в корневом `package.json` (`version`) и синхронизировать `apps/api` / `apps/web` с тем же номером; после merge в `main` — annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit. Skill предлагает bump, владелец подтверждает (или задаёт номер / «следующая» в команде).
+- **История релизов (09.10.2026):** канон — корневой [`CHANGELOG.md`](../../CHANGELOG.md) (текстовые буллеты на версию); зеркало — **GitHub Release** на тег (`gh release create` в `publish-prod`). Не дублировать смысл в `task-history` (там карточки, не релизы).
 - **Отложено (остаток B и прочее):** файл `VERSION` / version в health·UI / теги образов GHCR `:X.Y.Z`; **купленный** домен; rate-limit auth, внешний object storage.
 - **Снято с отложенного (09.10.2026):** TLS + `Secure` cookie — путь **A** (HTTPS на IP), см. «Prod TLS на IP».
 - **Отмена (частично):** ранее (тот же день) откладывали bump `package.json` — **снято** 08.10.2026 по решению владельца.
@@ -612,3 +613,9 @@
   - **FRO-30** AppNav+роуты; **FRO-31** API-клиент; **FRO-29** S10; **FRO-28** S13
 - Стикер: на досках появился «Эпик (2)/(3)» со значением Social (старый «Эпик» без Social оставлен для старых карточек — при желании слить вручную).
 - Фаза **5d** ✅ → **5e** по agent-workflow.
+
+### История релизов — CHANGELOG + GitHub Releases (09.10.2026)
+
+- **A+B:** канон текста — корневой `CHANGELOG.md` (буллеты); зеркало — GitHub Release на `vX.Y.Z`.
+- Источник буллетов при релизе: осмысленный diff `main..develop` (не сырой dump всех коммитов).
+- Вшить в skill `publish-prod`: правка CHANGELOG вместе с bump → после тега `gh release create`.
