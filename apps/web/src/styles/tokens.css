@@ -8,36 +8,47 @@
   --color-*: initial;
   --radius-*: initial;
 
-  --color-bg: #f6f7f5;
-  --color-surface: #ffffff;
-  --color-surface-sunken: #edf0ed;
-  --color-ink: #16201e;
-  --color-muted: #5b6865;
-  --color-subtle: #8a9693;
-  --color-line: #dde3e0;
-  --color-line-strong: #c3ccc8;
-  --color-accent: #0f6b5c;
-  --color-accent-hover: #0b574b;
-  --color-accent-soft: #e2f0ec;
-  --color-accent-soft-hover: #cfe6df;
+  --color-bg: #0c0c10;
+  --color-surface: #12121a;
+  --color-surface-sunken: #16161e;
+  --color-surface-glass: color-mix(in srgb, var(--color-surface) 62%, transparent);
+  --color-surface-glass-hover: color-mix(in srgb, var(--color-surface) 78%, transparent);
+  --color-glass-line: color-mix(in srgb, #fff 12%, transparent);
+  --color-ink: #e4e4e7;
+  --color-muted: #a1a1aa;
+  --color-subtle: #71717a;
+  --color-line: #27272a;
+  --color-line-strong: #32363f;
+  --color-accent: #2f8f63;
+  --color-accent-hover: #3da87a;
+  --color-accent-soft: #163024;
+  --color-accent-soft-hover: #1e3d2e;
   --color-accent-on: #ffffff;
-  --color-danger: #b3342b;
-  --color-danger-soft: #fbeae8;
-  --color-warning: #8a5a00;
-  --color-warning-soft: #fbf1dc;
-  --color-warning-hover: #f0e0b8;
-  --color-info: #2f4a68;
-  --color-info-soft: #e8eef5;
-  --color-info-hover: #d4e0ef;
-  --color-rank: #16201e;
-  --color-rank-top: #0f6b5c;
-  --color-focus-ring: #0f6b5c;
+  --color-danger: #f66f81;
+  --color-danger-soft: #2a1218;
+  --color-warning: #f9b44e;
+  --color-warning-soft: #2a2410;
+  --color-warning-hover: #3a3218;
+  --color-success: #3dd68c;
+  --color-success-soft: #163024;
+  --color-success-hover: #1e3d2e;
+  --color-success-on: #0c0c10;
+  --color-info: #a879e6;
+  --color-info-soft: #1e1830;
+  --color-info-hover: #2a2240;
+  --color-rank: #e4e4e7;
+  --color-rank-top: #2f8f63;
+  --color-row: #163024;
+  --color-row-hover: #1e3d2e;
+  --color-row-line: #2f8f63;
+  --color-focus-ring: #2f8f63;
 
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
 
-  --shadow-float: 0px 4px 16px 0px #16201e14;
+  --shadow-float: 0px 4px 16px 0px #00000066;
+  --blur-glass: 20px;
 
   --size-control-md: 44px;
   --size-control-sm: 32px;
@@ -117,4 +128,18 @@
   letter-spacing: var(--text-overline--letter-spacing);
   font-weight: var(--text-overline--font-weight);
   text-transform: uppercase;
+}
+
+@utility glass {
+  border: 1px solid var(--color-glass-line);
+  background-color: var(--color-surface-glass);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.15);
+  backdrop-filter: blur(var(--blur-glass)) saturate(1.15);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  :where(.glass),
+  :where(.md\:glass) {
+    background-color: var(--color-surface);
+  }
 }

@@ -6,7 +6,7 @@ import { TError, TRankRow } from '@/components/ui-kit';
 import { useShareQuery } from '@/composables/useShareQuery';
 import { RouteName } from '@/router/route-names';
 import TLoader from '@/components/ui-kit/TLoader.vue';
-import { ContentPageWrapper } from '@/components/layout';
+import { ContentPageWrapper, PageShell } from '@/components/layout';
 
 const route = useRoute();
 const router = useRouter();
@@ -40,13 +40,22 @@ function onRetry() {
 </script>
 
 <template>
-  <TLoader v-if="shareQuery.isPending.value" />
-  <TError v-else-if="shareQuery.isError.value" @retry="onRetry" />
+  <PageShell v-if="shareQuery.isPending.value">
+    <TLoader />
+  </PageShell>
+  <PageShell v-else-if="shareQuery.isError.value">
+    <TError @retry="onRetry" />
+  </PageShell>
 
-  <ContentPageWrapper v-else-if="share" :title="share.title">
-    <p v-if="isEmptyRanked" class="text-title text-ink mt-4">Пока нечего показать</p>
+  <ContentPageWrapper
+    v-else-if="share"
+    :title="share.title"
+    :route-to="{ name: RouteName.UserProfile, params: { nick: share.ownerNick } }"
+    :text-to="`@${share.ownerNick}`"
+  >
+    <p v-if="isEmptyRanked" class="text-title text-ink">Пока нечего показать</p>
 
-    <ul v-else class="flex flex-col gap-3 mt-4" aria-label="Рейтинг">
+    <ul v-else class="flex flex-col gap-3" aria-label="Рейтинг">
       <li v-for="item in rankedItems" :key="item.id">
         <TRankRow
           class="max-w-none! w-full"

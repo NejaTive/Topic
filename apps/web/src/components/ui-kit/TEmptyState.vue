@@ -24,7 +24,7 @@ const emit = defineEmits<TEmptyStateEmits>();
 
 <template>
   <div
-    class="flex w-full flex-col items-center gap-3 rounded-lg border border-line bg-surface px-8 py-13 text-center"
+    class="glass flex w-full flex-col items-center gap-3 rounded-lg px-8 py-13 text-center"
     role="status"
   >
     <div
@@ -37,7 +37,7 @@ const emit = defineEmits<TEmptyStateEmits>();
     </div>
 
     <p class="text-title text-ink">{{ title }}</p>
-    <p class="max-w-80 text-body-sm text-muted">{{ description }}</p>
+    <p v-if="description" class="max-w-80 text-body-sm text-muted">{{ description }}</p>
 
     <TButton v-if="showCta" @click="emit('create', $event)">
       {{ ctaLabel }}

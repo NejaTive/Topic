@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { AppNav, GuestNav } from '@/components/layout';
+import { RouterLink } from 'vue-router';
 import {
+  TApproveModal,
   TButton,
   TInput,
   TCoverUpload,
@@ -18,6 +19,8 @@ const email = ref('');
 const password = ref('secret');
 const errorEmail = ref('Некорректный email');
 const loading = ref(false);
+const approveOpen = ref(false);
+const approveLoading = ref(false);
 
 const selectedChip = ref<string | null>(null);
 const coverPreview = ref<string | null>(null);
@@ -50,7 +53,7 @@ const sampleRows: {
         ),
       'data:image/svg+xml,' +
         encodeURIComponent(
-          '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40"><rect fill="#EDF0ED" width="32" height="40"/></svg>',
+          '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40"><rect fill="#16161E" width="32" height="40"/></svg>',
         ),
     ],
   },
@@ -71,6 +74,14 @@ function toggleLoading() {
   window.setTimeout(() => {
     loading.value = false;
   }, 1500);
+}
+
+function onApproveConfirm() {
+  approveLoading.value = true;
+  window.setTimeout(() => {
+    approveLoading.value = false;
+    approveOpen.value = false;
+  }, 800);
 }
 
 function onCoverFile(file: File) {
@@ -102,8 +113,6 @@ function showCoverErrorDemo() {
       Временная страница для сверки с Figma 04.4 / 04.7 + Main chip (+ Nav / Topic / Privacy /
       Button / Input)
     </p>
-
-    <AppNav />
 
     <section class="mt-10 space-y-4">
       <h2 class="text-title">TMainChip · подсказки S04</h2>
@@ -206,31 +215,18 @@ function showCoverErrorDemo() {
     <section class="mt-10 space-y-4">
       <h2 class="text-title">GuestNav · S09 / S11–S12</h2>
       <p class="text-body-sm text-muted">
-        Floating dock: bottom (M) / top (D). S09 share — Primary «Присоединиться»; error — «На
-        главную» (S11/S12).
+        Floating dock auto (M bottom / D top), CTA «Присоединиться» → `/`. Live:
+        <RouterLink class="text-accent" to="/t/demo">/t/…</RouterLink>
+        или S11/S12.
       </p>
-      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
-        <GuestNav :fixed="false" placement="bottom" cta-mode="share" />
-      </div>
-      <div class="max-w-210 rounded-lg border border-line bg-bg p-3">
-        <GuestNav :fixed="false" placement="top" cta-mode="share" />
-      </div>
-      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
-        <GuestNav :fixed="false" placement="bottom" cta-mode="error" />
-      </div>
     </section>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">AppNav · placement samples</h2>
+      <h2 class="text-title">AppNav</h2>
       <p class="text-body-sm text-muted">
-        Fixed auto-dock на краях viewport. Ниже — inline bottom (M) и top (D).
+        Floating dock auto (M bottom / D top). Live в
+        <RouterLink class="text-accent" to="/app/topics">/app/topics</RouterLink>.
       </p>
-      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
-        <AppNav :fixed="false" placement="bottom" active="topics" />
-      </div>
-      <div class="rounded-lg border border-line bg-bg p-3">
-        <AppNav :fixed="false" placement="top" active="topics" />
-      </div>
     </section>
 
     <section class="mt-10 space-y-4">
@@ -241,18 +237,33 @@ function showCoverErrorDemo() {
     </section>
 
     <section class="mt-10 space-y-4">
+      <h2 class="text-title">TApproveModal</h2>
+      <TButton variant="danger-ghost" @click="approveOpen = true">Открыть approve</TButton>
+      <TApproveModal
+        v-model:open="approveOpen"
+        title="Удалить топик?"
+        description="Безвозвратно. Элементы тоже удалятся."
+        confirm-label="Удалить"
+        :confirm-loading="approveLoading"
+        @confirm="onApproveConfirm"
+      />
+    </section>
+
+    <section class="mt-10 space-y-4">
       <h2 class="text-title">TButton · md (44)</h2>
       <div class="flex flex-wrap gap-3">
         <TButton>Primary</TButton>
         <TButton variant="secondary">Secondary</TButton>
         <TButton variant="ghost">Ghost</TButton>
+        <TButton variant="danger">Danger</TButton>
         <TButton variant="danger-ghost">Danger ghost</TButton>
       </div>
       <div class="flex flex-wrap gap-3">
         <TButton disabled>Primary disabled</TButton>
         <TButton variant="secondary" disabled>Secondary disabled</TButton>
         <TButton variant="ghost" disabled>Ghost disabled</TButton>
-        <TButton variant="danger-ghost" disabled>Danger disabled</TButton>
+        <TButton variant="danger" disabled>Danger disabled</TButton>
+        <TButton variant="danger-ghost" disabled>Danger ghost disabled</TButton>
       </div>
       <div class="flex flex-wrap gap-3">
         <TButton :loading="loading" @click="toggleLoading">

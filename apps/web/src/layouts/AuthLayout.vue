@@ -4,7 +4,11 @@ import { RouterView } from 'vue-router';
 
 <template>
   <main class="auth-layout">
-    <RouterView />
+    <RouterView v-slot="{ Component, route }">
+      <Transition name="page-fade" mode="out-in">
+        <component :is="Component" :key="route.fullPath" />
+      </Transition>
+    </RouterView>
   </main>
 </template>
 

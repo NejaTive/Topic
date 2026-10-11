@@ -24,9 +24,15 @@ const label = computed(() => LABELS[props.privacy]);
 
 const toneClass = computed(() => {
   const map: Record<PrivacyValue, string> = {
-    private: props.selected ? 'bg-line-strong text-ink' : 'bg-surface-sunken text-muted',
-    unlisted: props.selected ? 'bg-info-hover text-info' : 'bg-info-soft text-info',
-    public: props.selected ? 'bg-accent-soft-hover text-accent' : 'bg-accent-soft text-accent',
+    private: props.selected
+      ? 'border-warning bg-warning-soft text-warning'
+      : 'border-transparent bg-warning-soft text-warning',
+    unlisted: props.selected
+      ? 'border-info bg-info-soft text-info'
+      : 'border-transparent bg-info-soft text-info',
+    public: props.selected
+      ? 'border-success bg-success-soft text-success'
+      : 'border-transparent bg-success-soft text-success',
   };
   return map[props.privacy];
 });
@@ -34,7 +40,7 @@ const toneClass = computed(() => {
 
 <template>
   <span
-    class="inline-flex items-center justify-center gap-1 rounded-sm font-sans transition-colors"
+    class="inline-flex items-center justify-center gap-1 rounded-sm border font-sans transition-colors"
     :class="[
       toneClass,
       compact ? 'size-6' : 'h-6 px-2 text-caption',

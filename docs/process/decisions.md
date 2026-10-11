@@ -488,6 +488,7 @@
 - **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
 - **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`, путь `.cursor/skills/engineering/publish-prod/`).
 - **Версии:** перед каждым promote `develop`→`main` (skill `publish-prod`) **обязательно** выставить semver в корневом `package.json` (`version`) и синхронизировать `apps/api` / `apps/web` с тем же номером; после merge в `main` — annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit. Skill предлагает bump, владелец подтверждает (или задаёт номер / «следующая» в команде).
+- **История релизов (09.10.2026):** канон — корневой [`CHANGELOG.md`](../../CHANGELOG.md) (текстовые буллеты на версию); зеркало — **GitHub Release** на тег (`gh release create` в `publish-prod`). Не дублировать смысл в `task-history` (там карточки, не релизы).
 - **Отложено (остаток B и прочее):** файл `VERSION` / version в health·UI / теги образов GHCR `:X.Y.Z`; **купленный** домен; rate-limit auth, внешний object storage.
 - **Снято с отложенного (09.10.2026):** TLS + `Secure` cookie — путь **A** (HTTPS на IP), см. «Prod TLS на IP».
 - **Отмена (частично):** ранее (тот же день) откладывали bump `package.json` — **снято** 08.10.2026 по решению владельца.
@@ -570,3 +571,105 @@
 - Project skill перенесён: `.cursor/skills/collaboration/publish-prod/` → `.cursor/skills/engineering/publish-prod/SKILL.md`.
 - Рядом с `start-project` (локальный стек / прод-релиз); не YouGile-флоу.
 - Slash `/publish-prod` и `name` в frontmatter без изменений.
+
+### Этап 5 — закрытие MVP (follow + лента)
+
+- Заведён [`../stages/stage-5-brainstorm.md`](../stages/stage-5-brainstorm.md); фаза **5a** (docs kickoff) ✅.
+- Модель соцсвязи: **односторонняя подписка (follow)** — без заявок и взаимности (как stage-1); UI-термины «Подписаться» / «подписка», не «друзья».
+- Scope этапа 5: S10 + follow + S13 (дизайн hi-fi, API, YouGile, реализация). Хвост **5f**: позже выбрать **1–2** пункта из `ideas.md` — последними, состав отдельным решением.
+- S10/S13 возвращены из отложения hi-fi этапа 2 → этап 5 (см. `ideas.md`).
+
+### Этап 4 — закрыт
+
+- **Решение владельца (09.10.2026):** этап 4 ✅ закрыт (YouGile, agent-workflow, нарезка MVP-среза, реализация **4f**).
+- Канон: [`../stages/stage-4-brainstorm.md`](../stages/stage-4-brainstorm.md).
+- Дальнейшее исполнение карточек YouGile и записи в `task-history` — штатно, без отдельного «этапа 4».
+- Активный этап трекера: **5** (закрытие MVP).
+
+### Этап 5 — уточнения UI перед 5b
+
+- **Карточка ленты (S13):** как «Мои топики» / Topic row — до 3 обложек + title + meta; **privacy-chip в ленте скрыт** (всё public).
+- **Таб «Профиль»:** ведёт на свой `/u/:nick` (тот же S10); отдельного «настройки/я» нет.
+- **S10 мета:** лёгкие счётчики подписчиков / подписок (числа); списки подписчиков в MVP не делаем.
+- Порядок hi-fi **5b:** по одному экрану (M+D), ждать аппрув; старт — **S13 Лента**.
+
+### Этап 5 — 5b дизайн (09.10.2026, продолжение)
+
+- **S13** (List / Empty / Empty·subscribed, M+D) + nav `Select=List|Topic|Profile` с soft-well — **аппрув владельца**.
+- **S10** (List / Empty / Subscribed / Own, M+D) — **аппрув владельца** (правки владельца после ревью). Чужой: счётчики + Подписаться/Отписаться; свой (`Select=Profile`): без CTA. Секции «Открытые топики» нет; rows без privacy-chip. CTA снизу только на mobile.
+- Фаза **5b** ✅ → дальше **5c** (контракт API Follow + лента).
+
+### Этап 5 — 5c контракт API (09.10.2026)
+
+- **Аппрув владельца.** Канон: [`stage-5-brainstorm.md`](../stages/stage-5-brainstorm.md) §5c.
+- Prisma `Follow`; `GET /users/:nick` (auth опционален: `isSelf` / `isFollowing`); `POST|DELETE /users/:nick/follow` → 204 идемпотентно; `GET /feed` → `{ followingCount, items }` с `ownerNick`; на S10 только public; свои топики в ленту не попадают.
+- Фаза **5c** ✅ → дальше **5d** (нарезка YouGile Social).
+- Уточнение при 5d: в `ProfileTopicDto` / `FeedItemDto` добавлен **`shareId`** (навигация на `/t/:shareId`).
+
+### Этап 5 — 5d нарезка YouGile Social (09.10.2026)
+
+- Эпик **Social** в бэклоге BAC/FRO:
+  - **BAC-20** Follow Prisma → **BAC-19** profile, **BAC-18** follow, **BAC-17** feed
+  - **FRO-30** AppNav+роуты; **FRO-31** API-клиент; **FRO-29** S10; **FRO-28** S13
+- Стикер: на досках появился «Эпик (2)/(3)» со значением Social (старый «Эпик» без Social оставлен для старых карточек — при желании слить вручную).
+- Фаза **5d** ✅ → **5e** по agent-workflow.
+
+### История релизов — CHANGELOG + GitHub Releases (09.10.2026)
+
+- **A+B:** канон текста — корневой `CHANGELOG.md` (буллеты); зеркало — GitHub Release на `vX.Y.Z`.
+- Источник буллетов при релизе: осмысленный diff `main..develop` (не сырой dump всех коммитов).
+- В тексте релизов **не** упоминать id/названия карточек YouGile (`BAC-…` / `FRO-…`).
+- Вшить в skill `publish-prod`: правка CHANGELOG вместе с bump → после тега `gh release create`.
+
+## 11.10.2026
+
+### S10 — свой профиль: копирование ссылки и выход
+
+- Отдельной страницы «настройки / я» по-прежнему **нет** (решение перед 5b).
+- На своём S10 (`isSelf`): у ника иконка copy (`info`, как S05); справа — «Выйти» (mobile — иконка) → `POST /auth/logout` → лендинг.
+- Смена ника / email / пароля — вне MVP.
+
+### GuestNav — одна CTA
+
+- GuestNav: fixed auto dock; бренд и CTA → `/`; везде одна Primary **«Присоединиться»** (S09/S10 guest, S11/S12). Без «Войти» / «На главную» в nav (вход — с лендинга).
+
+### Палитра — dark green (jewel)
+
+- Dark UI: `bg` `#0C0C10`, `surface` `#12121A`, brand green `#2F8F63` / hover `#3DA87A` (ярче сырого Vue-green для CTA не берём), purple secondary `#A879E6`.
+- Текст `#E4E4E7` / `#A1A1AA` / `#71717A`; линии `#27272A`.
+- Danger `#F66F81` только destructive; warning `#F9B44E`; success `#3DD68C`.
+- Privacy: private warning / unlisted info(purple) / public success; selected = soft + обводка.
+- Rank rows: green `row` в тоне brand soft; exploration `feat/palette-clay` удалена (12.10.2026).
+
+## 12.10.2026
+
+### Liquid-glass (nav + карточки)
+
+- Утилита `glass`: полупрозрачный `surface` (62%, hover 78%) + blur 20px + обводка white@12%.
+- Где: AppNav / GuestNav, TopicRow, EmptyState, Login/Register, inbox/ranked panels (md+).
+- Где нет: инпуты, secondary-кнопки, cover upload, RankRow (`row/*`).
+- Fallback без `backdrop-filter`: непрозрачный `surface`.
+- Скролл под dock: inset 88px внутри `PageShell` body (M bottom / D top), не padding layout; header в scroll-потоке, чтобы карточки уезжали под nav.
+- DnD drop-slot (источник + insert): fill `row` @ 55% + `bg` — темнее прежнего mix с `surface`.
+
+### AppNav — sliding soft-well
+
+- Mobile: pill 32×32 под иконкой; desktop: pill по размеру пункта (translate + width/height) ~220ms.
+- Актив = цвет; вес/padding стабильны (без layout jump). `prefers-reduced-motion` — без transition.
+
+### Page fade
+
+- Смена страницы: `page-fade` opacity ~120ms, `mode="out-in"` в MainLayout / AuthLayout.
+- `prefers-reduced-motion` — без transition.
+
+### TApproveModal
+
+- Confirm-модалка вместо `window.confirm`: удаление топика/элемента, выход из аккаунта.
+- UI-kit SCSS: scrim + glass; M bottom sheet ≤390, D centered ≤480; confirm `danger-ghost`.
+- Пока `confirmLoading` — нельзя закрыть scrim/Escape.
+
+### MVP зафиксирован
+
+- Этап **5** и Must MVP ✅ закрыты владельцем (12.10.2026): Auth, Topics, Share, Social (follow + лента + S10), UI-полировка.
+- **5f** (хвост из `ideas.md`) **не** входит в MVP — post-MVP отдельным решением.
+- Трекер: [`stages-todo.md`](stages-todo.md); итог этапа — [`../stages/stage-5-brainstorm.md`](../stages/stage-5-brainstorm.md).

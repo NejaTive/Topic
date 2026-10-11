@@ -3,7 +3,7 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import { TButton, TError, TInput, TLoader, TCoverUpload } from '@/components/ui-kit';
+import { TApproveModal, TButton, TError, TInput, TLoader, TCoverUpload } from '@/components/ui-kit';
 import {
   useDeleteItemCoverMutation,
   useDeleteItemMutation,
@@ -60,6 +60,7 @@ const coverError = ref<string | null>(null);
 const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 const actionError = ref('');
+const approveOpen = ref(false);
 
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
 const item = computed(() => itemQuery.data.value);
@@ -191,13 +192,16 @@ async function onSave() {
   }
 }
 
-async function onDelete() {
+function openDelete() {
   clearActionError();
+  approveOpen.value = true;
+}
 
-  const ok = window.confirm('Удалить элемент безвозвратно?');
-  if (!ok) return;
+async function onApproveDelete() {
+  clearActionError();
   try {
     await deleteItemMut.mutateAsync(itemId.value);
+    approveOpen.value = false;
     await router.replace({
       name: RouteName.AppTopicDetail,
       params: { id: topicId.value },
@@ -219,15 +223,11 @@ function onRetry() {
     :route-to="{ name: RouteName.AppTopicDetail, params: { id: topicId } }"
     :text-to="topicTitle"
   >
-    <TLoader v-if="topicQuery.isPending.value || itemQuery.isPending.value" class="mt-6" />
-    <TError
-      v-else-if="topicQuery.isError.value || itemQuery.isError.value"
-      class="mt-6"
-      @retry="onRetry"
-    />
+    <TLoader v-if="topicQuery.isPending.value || itemQuery.isPending.value" />
+    <TError v-else-if="topicQuery.isError.value || itemQuery.isError.value" @retry="onRetry" />
 
     <template v-else-if="item">
-      <form class="flex flex-col gap-5 mt-6" @submit.prevent="onSave">
+      <form class="flex flex-col gap-5" @submit.prevent="onSave">
         <TInput
           v-model="title"
           label="Название"
@@ -252,22 +252,44 @@ function onRetry() {
           {{ actionError }}
         </p>
 
-        <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
-          <TButton
-            type="submit"
-            :loading="
-              updateItem.isPending.value ||
-              uploadCover.isPending.value ||
-              deleteCover.isPending.value
-            "
+        <div
+          class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block"
+        >
+          <div
+            class="flex w-full max-w-91.5 flex-col gap-3 px-3 md:w-auto md:max-w-none md:flex-row md:items-center md:px-0"
           >
-            Сохранить
-          </TButton>
-          <TButton type="button" variant="danger-ghost" :disabled="isBusy" @click="onDelete">
-            Удалить
-          </TButton>
+            <TButton
+              type="submit"
+              class="w-full shadow-float md:w-auto md:shadow-none"
+              :loading="
+                updateItem.isPending.value ||
+                uploadCover.isPending.value ||
+                deleteCover.isPending.value
+              "
+            >
+              Сохранить
+            </TButton>
+            <TButton
+              type="button"
+              variant="danger-ghost"
+              class="w-full md:w-auto"
+              :disabled="isBusy"
+              @click="openDelete"
+            >
+              Удалить
+            </TButton>
+          </div>
         </div>
       </form>
     </template>
+
+    <TApproveModal
+      v-model:open="approveOpen"
+      title="Удалить элемент?"
+      description="Безвозвратно."
+      confirm-label="Удалить"
+      :confirm-loading="deleteItemMut.isPending.value"
+      @confirm="onApproveDelete"
+    />
   </ContentPageWrapper>
 </template>

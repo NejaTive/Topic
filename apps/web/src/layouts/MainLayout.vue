@@ -9,28 +9,48 @@ const isAuthed = computed(() => session.status === 'authed');
 </script>
 
 <template>
-  <AppNav v-if="isAuthed" />
-  <GuestNav v-else />
-  <main class="main-layout">
-    <RouterView />
-  </main>
+  <div class="app-shell">
+    <AppNav v-if="isAuthed" />
+    <GuestNav v-else />
+    <main class="app-shell__main">
+      <div class="app-shell__page">
+        <RouterView v-slot="{ Component, route }">
+          <Transition name="page-fade" mode="out-in">
+            <component :is="Component" :key="route.fullPath" />
+          </Transition>
+        </RouterView>
+      </div>
+    </main>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.main-layout {
+.app-shell {
   height: 100dvh;
+  padding: 12px;
+}
+
+.app-shell__main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   max-width: 366px;
   margin-inline: auto;
-  padding: 24px 12px 112px;
+  overflow: hidden;
 
   @media (min-width: 768px) {
     max-width: 804px;
-    padding-top: 112px;
-    padding-bottom: 40px;
   }
 
   @media (min-width: 1024px) {
     max-width: 1256px;
   }
+}
+
+.app-shell__page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 }
 </style>

@@ -229,6 +229,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["FeedController_getFeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{nick}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UsersController_getProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{nick}/follow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["UsersController_follow"];
+        delete: operations["UsersController_unfollow"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -435,6 +483,97 @@ export interface components {
         UpdateItemDto: {
             /** @example Dune 2 */
             title?: string;
+        };
+        FeedItemDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Opaque shareId; клик → /t/:shareId
+             * @example xY7k_mPq2RnVw8sZ
+             */
+            shareId: string;
+            /** @example Фильмы 2026 */
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * @description coverKey топ-3 ranked по rankPosition (или пустой массив). Элемент null — ranked без обложки.
+             * @example [
+             *       "covers/abc.webp",
+             *       null
+             *     ]
+             */
+            previewCovers: (string | null)[];
+            /**
+             * @description nick владельца топика
+             * @example topic_fan
+             */
+            ownerNick: string;
+        };
+        FeedDto: {
+            /**
+             * @description Число подписок текущего пользователя (empty vs empty·subscribed)
+             * @example 3
+             */
+            followingCount: number;
+            items: components["schemas"]["FeedItemDto"][];
+        };
+        ProfileTopicDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Opaque shareId; клик → /t/:shareId
+             * @example xY7k_mPq2RnVw8sZ
+             */
+            shareId: string;
+            /** @example Фильмы 2026 */
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * @description coverKey топ-3 ranked по rankPosition (или пустой массив). Элемент null — ranked без обложки.
+             * @example [
+             *       "covers/abc.webp",
+             *       null
+             *     ]
+             */
+            previewCovers: (string | null)[];
+        };
+        UserProfileDto: {
+            /** @example topic_fan */
+            nick: string;
+            /** @example 12 */
+            followersCount: number;
+            /** @example 5 */
+            followingCount: number;
+            /**
+             * @description Число public-топиков владельца
+             * @example 3
+             */
+            topicsCount: number;
+            /**
+             * @description Сессия есть и me.id === владелец профиля
+             * @example false
+             */
+            isSelf: boolean;
+            /**
+             * @description null без сессии; иначе подписан ли me на владельца
+             * @example true
+             */
+            isFollowing: boolean | null;
+            topics: components["schemas"]["ProfileTopicDto"][];
+        };
+        UserNotFoundResponseDto: {
+            /** @example Пользователь не найден */
+            message: string;
+            /** @example 404 */
+            statusCode: number;
+        };
+        FollowBadRequestResponseDto: {
+            /** @example Нельзя подписаться на себя */
+            message: string;
+            /** @example 400 */
+            statusCode: number;
         };
     };
     responses: never;
@@ -1239,6 +1378,140 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ItemNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    FeedController_getFeed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    UsersController_getProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                nick: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    UsersController_follow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                nick: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    UsersController_unfollow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                nick: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserNotFoundResponseDto"];
                 };
             };
         };

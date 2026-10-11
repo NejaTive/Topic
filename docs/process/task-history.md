@@ -33,6 +33,114 @@
 
 ## Записи
 
+### 12.10.2026 — Dark green палитра, liquid-glass, nav slide и approve-modal
+
+- **YouGile:** FRO-35
+- **Итог:** Тёмная green-палитра и токены; liquid-glass на nav/карточках + скролл под dock; sliding soft-well AppNav; page-fade; TApproveModal (удаление/выход); follow/unfollow accent; назад на S09.
+- **Репо:** `feat/FRO-35` / [PR #61](https://github.com/NejaTive/Topic/pull/61) / (merge в develop)
+- **Заметки:** manual-close; проверено владельцем вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 11.10.2026 — App shell: PageShell, скролл списков, CTA снизу на mobile
+
+- **YouGile:** FRO-34
+- **Итог:** `PageShell` + app-shell layout: фиксированная шапка, скролл у body списков, отступы от экрана/навигации; на mobile fixed CTA снизу на S04/S06/S07; временный автоскролл DnD в PageShell (библиотечный `makeAutoScroll` отложен).
+- **Репо:** `feat/FRO-34` / [PR #60](https://github.com/NejaTive/Topic/pull/60) / (merge в develop)
+- **Заметки:** manual-close; проверено владельцем вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 11.10.2026 — S10: выход и копирование ссылки; упростить AppNav/GuestNav
+
+- **YouGile:** FRO-33
+- **Итог:** На своём S10 — copy у ника + «Выйти» → logout → лендинг; GuestNav везде одна CTA «Присоединиться»; AppNav/GuestNav без demo-props, fill иконок через CSS-переменные.
+- **Репо:** `feat/FRO-33` / [PR #59](https://github.com/NejaTive/Topic/pull/59) / (merge в develop)
+- **Заметки:** manual-close; проверено владельцем вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 11.10.2026 — Фиксы: Share для гостя, назад в топиках, FAB только mobile
+
+- **YouGile:** FRO-32
+- **Итог:** `/t/:shareId` вне requiresAuth `/app` (гость + GuestNav); ContentPageWrapper нормализует RouteName в `{ name }` для «← назад»; FAB «Создать топик» на S03 только mobile; AppNav fill иконок Лента/Профиль по active.
+- **Репо:** `fix/FRO-32` / [PR #58](https://github.com/NejaTive/Topic/pull/58) / (merge в develop)
+- **Заметки:** manual-close; проверено владельцем вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 11.10.2026 — Сверстать S10 — публичный профиль
+
+- **YouGile:** FRO-29
+- **Итог:** ProfilePage `/u/:nick`: @nick + счётчики, public Topic row без privacy, empty «Пока нет открытых топиков», CTA Подписаться/Отписаться (mobile низ / desktop шапка), isSelf без CTA, клик → `/t/:shareId`, 404 → NotFound; invalidate `users.*` на login/register/logout.
+- **Репо:** `feat/FRO-29` / [PR #57](https://github.com/NejaTive/Topic/pull/57) / (merge в develop)
+- **Заметки:** списки подписчиков / S13 / edit профиля не входят.
+- **Доработка после ревью:** да (цикл 2/3; invalidate users после auth)
+- **Длительность:** реализация ~3 мин · ревью ~9 мин · всего ~12 мин
+
+### 11.10.2026 — Сверстать S13 — лента
+
+- **YouGile:** FRO-28
+- **Итог:** FeedPage: GET /feed → List / Empty / Empty·subscribed; TTopicRow без privacy в ленте, ownerNick → `/u/:nick`, клик → `/t/:shareId`; soft-well «Лента» на `/app/feed`.
+- **Репо:** `feat/FRO-28` / [PR #56](https://github.com/NejaTive/Topic/pull/56) / (merge в develop)
+- **Заметки:** фильтры и count элементов в meta не входят (нет в DTO).
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~6 мин · ревью ~5 мин · всего ~11 мин
+
+### 11.10.2026 — Social API-клиент — users / follow / feed
+
+- **YouGile:** FRO-31
+- **Итог:** `api/social.ts` (getUserProfile / followUser / unfollowUser / getFeed) + Vue Query composables и keys; credentials через общий `apiClient`; typecheck ок.
+- **Репо:** `feat/FRO-31` / [PR #55](https://github.com/NejaTive/Topic/pull/55) / (merge в develop)
+- **Заметки:** S10/S13 UI не входят; schema paths уже были после BAC-17/18/19.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
+### 11.10.2026 — AppNav — табы Лента и Профиль + роуты
+
+- **YouGile:** FRO-30
+- **Итог:** Роут `/app/feed` (requiresAuth) + stub; публичный `/u/:nick` + stub; AppNav soft-well feed|topics|profile; таб «Профиль» → `/u/:me.nick`.
+- **Репо:** `feat/FRO-30` / [PR #54](https://github.com/NejaTive/Topic/pull/54) / (merge в develop)
+- **Заметки:** полная вёрстка S10/S13 не входит.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~3 мин · всего ~6 мин
+
+### 11.10.2026 — Реализовать Users profile API
+
+- **YouGile:** BAC-19
+- **Итог:** `GET /api/users/:nick` с optional auth: nick case-insensitive; 404 если нет; гость `isFollowing: null` / `isSelf: false`; с сессией — корректные `isSelf`/`isFollowing`; topics только public (`updatedAt desc`, без privacy) + counts; OpenAPI + gen:api (`isFollowing: boolean | null`).
+- **Репо:** `feat/BAC-19` / [PR #53](https://github.com/NejaTive/Topic/pull/53) / (merge в develop)
+- **Заметки:** POST/DELETE follow и GET /feed не входят; previewCovers — топ-3 ranked (null без обложки).
+- **Доработка после ревью:** да (цикл 2/3; OpenAPI isFollowing Boolean)
+- **Длительность:** реализация ~4 мин · ревью ~6 мин · всего ~10 мин
+
+### 11.10.2026 — Реализовать Follow API
+
+- **YouGile:** BAC-18
+- **Итог:** `POST`/`DELETE /api/users/:nick/follow` под AuthGuard: 204 идемпотентно (upsert / deleteMany); self → 400; без сессии → 401; nick не найден → 404; без тела; OpenAPI + gen:api.
+- **Репо:** `feat/BAC-18` / [PR #52](https://github.com/NejaTive/Topic/pull/52) / (merge в develop)
+- **Заметки:** GET profile / feed / списки подписчиков не входят; nick нормализуется trim+lowercase.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~4 мин · всего ~6 мин
+
+### 11.10.2026 — Реализовать Feed API
+
+- **YouGile:** BAC-17
+- **Итог:** `GET /api/feed` под AuthGuard: `{ followingCount, items }` — public-топики авторов из following, без своих; поля id/shareId/title/updatedAt/previewCovers/ownerNick; `updatedAt desc`; OpenAPI + gen:api.
+- **Репо:** `feat/BAC-17` / [PR #51](https://github.com/NejaTive/Topic/pull/51) / (merge в develop)
+- **Заметки:** пагинация и HTTP follow (BAC-18) не входят; follow для проверки — прямой INSERT в Follow.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
+### 11.10.2026 — Добавить модель Follow в Prisma
+
+- **YouGile:** BAC-20
+- **Итог:** Модель `Follow` (followerId/followingId, createdAt) + связи User `following`/`followers`; `@@unique` на пару, индексы, Cascade с обеих сторон; миграция `20261011112815_add_follow`.
+- **Репо:** `feat/BAC-20` / [PR #50](https://github.com/NejaTive/Topic/pull/50) / (merge в develop)
+- **Заметки:** HTTP endpoints не входят; CHECK self-follow отложен на сервис.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~15 мин · ревью ~3 мин · всего ~18 мин
+
 ### 09.10.2026 — CI/CD — ускорение Deploy
 
 - **YouGile:** BAC-16

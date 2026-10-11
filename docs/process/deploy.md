@@ -73,8 +73,8 @@ curl -fsS --resolve "${PUBLIC_HOST}:443:127.0.0.1" "https://${PUBLIC_HOST}/api/h
 ## Релизный поток
 
 1. Фичи мержатся в `develop` (PR).
-2. Promote: skill **`publish-prod`** (`.cursor/skills/engineering/publish-prod/`, или вручную) — перед PR в `main` выставить semver в корневом `package.json` и в `apps/api` / `apps/web` → PR / merge `develop` → `main`.
-3. **Версия:** annotated git tag `vX.Y.Z` на merge-commit в `main` (номер = `package.json` `version`). Файл `VERSION` / health·UI / теги GHCR `:X.Y.Z` — отложено.
+2. Promote: skill **`publish-prod`** (`.cursor/skills/engineering/publish-prod/`, или вручную) — перед PR в `main`: semver в корневом `package.json` и в `apps/api` / `apps/web` + секция в корневом [`CHANGELOG.md`](../../CHANGELOG.md) (текстовый список изменений) → PR / merge `develop` → `main`.
+3. **Версия:** annotated git tag `vX.Y.Z` на merge-commit в `main` (номер = `package.json` `version`) → **GitHub Release** с тем же списком, что в CHANGELOG. Файл `VERSION` / health·UI / теги GHCR `:X.Y.Z` — отложено.
 4. Workflow `Deploy` собирает образы, синхронизирует `compose.prod.yaml`, поднимает стек, ждёт HTTPS `/api/health` (через `--resolve` на `PUBLIC_HOST`).
 
 ## Откат

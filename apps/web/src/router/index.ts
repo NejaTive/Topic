@@ -35,16 +35,6 @@ export const router = createRouter({
       ],
     },
     {
-      path: '/share/no-access',
-      name: RouteName.ShareForbidden,
-      component: () => import('@/pages/AccessDeniedPage.vue'),
-    },
-    {
-      path: '/share/not-found',
-      name: RouteName.ShareNotFound,
-      component: () => import('@/pages/NotFoundPage.vue'),
-    },
-    {
       path: '/app',
       component: MainLayout,
       meta: { requiresAuth: true },
@@ -52,6 +42,11 @@ export const router = createRouter({
         {
           path: '',
           redirect: { name: RouteName.AppTopics },
+        },
+        {
+          path: 'feed',
+          name: RouteName.AppFeed,
+          component: () => import('@/pages/FeedPage.vue'),
         },
         {
           path: 'topics',
@@ -78,10 +73,37 @@ export const router = createRouter({
           name: RouteName.AppTopicDetail,
           component: () => import('@/pages/TopicDetailPage.vue'),
         },
+      ],
+    },
+    {
+      path: '/share/no-access',
+      name: RouteName.ShareForbidden,
+      component: () => import('@/pages/AccessDeniedPage.vue'),
+    },
+    {
+      path: '/share/not-found',
+      name: RouteName.ShareNotFound,
+      component: () => import('@/pages/NotFoundPage.vue'),
+    },
+    {
+      path: '/t/:shareId',
+      component: MainLayout,
+      children: [
         {
-          path: '/t/:shareId',
+          path: '',
           name: RouteName.ShareView,
           component: () => import('@/pages/ShareViewPage.vue'),
+        },
+      ],
+    },
+    {
+      path: '/u/:nick',
+      component: MainLayout,
+      children: [
+        {
+          path: '',
+          name: RouteName.UserProfile,
+          component: () => import('@/pages/ProfilePage.vue'),
         },
       ],
     },
