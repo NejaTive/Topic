@@ -245,6 +245,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/{nick}/follow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["UsersController_follow"];
+        delete: operations["UsersController_unfollow"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -485,6 +501,18 @@ export interface components {
              */
             followingCount: number;
             items: components["schemas"]["FeedItemDto"][];
+        };
+        FollowBadRequestResponseDto: {
+            /** @example Нельзя подписаться на себя */
+            message: string;
+            /** @example 400 */
+            statusCode: number;
+        };
+        UserNotFoundResponseDto: {
+            /** @example Пользователь не найден */
+            message: string;
+            /** @example 404 */
+            statusCode: number;
         };
     };
     responses: never;
@@ -1316,6 +1344,84 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    UsersController_follow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                nick: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    UsersController_unfollow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                nick: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserNotFoundResponseDto"];
                 };
             };
         };

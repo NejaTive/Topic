@@ -8,6 +8,7 @@ import { ItemsModule } from './items/items.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { StorageModule } from './storage/storage.module';
 import { TopicsModule } from './topics/topics.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TopicsModule } from './topics/topics.module';
     TopicsModule,
     ItemsModule,
     FeedModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
