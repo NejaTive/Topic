@@ -56,7 +56,7 @@ function onRetry() {
     </li>
   </ul>
 
-  <div class="fixed inset-x-0 bottom-23 z-30 flex justify-center">
+  <div v-if="isMobileView" class="fixed inset-x-0 bottom-23 z-30 flex justify-center">
     <TButton class="shadow-float" @click="goCreate">Создать топик</TButton>
   </div>
 </template>
