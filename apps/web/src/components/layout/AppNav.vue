@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { RouteName } from '@/router/route-names';
+import { useSessionStore } from '@/stores/session';
 
 export type AppNavPlacement = 'auto' | 'bottom' | 'top';
 export type AppNavActive = 'feed' | 'topics' | 'profile';
@@ -8,6 +10,7 @@ export type AppNavActive = 'feed' | 'topics' | 'profile';
 interface AppNavProps {
   placement?: AppNavPlacement;
   active?: AppNavActive;
+  feedTo?: string;
   topicsTo?: string;
   brandTo?: string;
   fixed?: boolean;
@@ -16,16 +19,37 @@ interface AppNavProps {
 const props = withDefaults(defineProps<AppNavProps>(), {
   placement: 'auto',
   active: undefined,
+  feedTo: '/app/feed',
   topicsTo: '/app/topics',
   brandTo: '/app/topics',
   fixed: true,
 });
 
 const route = useRoute();
+const session = useSessionStore();
+
+const profileTo = computed(() => {
+  const nick = session.user?.nick;
+  if (!nick) return { name: RouteName.AppTopics };
+  return { name: RouteName.UserProfile, params: { nick } };
+});
+
+const isFeed = computed(() => {
+  if (route.path.startsWith('/app/feed')) return true;
+  return !props.fixed && props.active === 'feed';
+});
 
 const isTopics = computed(() => {
   if (route.path.startsWith('/app/topics')) return true;
   return !props.fixed && props.active === 'topics';
+});
+
+const isProfile = computed(() => {
+  if (route.name === RouteName.UserProfile) {
+    const nick = route.params.nick;
+    return typeof nick === 'string' && nick === session.user?.nick;
+  }
+  return !props.fixed && props.active === 'profile';
 });
 
 const rootClass = computed(() => {
@@ -62,12 +86,8 @@ const showDesktopChrome = computed(() => props.placement === 'top' || props.plac
 const tabClass =
   'flex flex-col items-center gap-1 rounded-md px-2 py-1 text-caption outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring';
 
-const tabDisabledClass = 'cursor-not-allowed text-subtle';
-
 const desktopLinkBase =
   'rounded-md text-label outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring';
-
-const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subtle';
 </script>
 
 <template>
@@ -78,14 +98,15 @@ const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subt
         class="flex w-full items-center justify-around"
         :class="placement === 'auto' ? 'md:hidden' : undefined"
       >
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          title="Скоро"
-          :class="[tabClass, tabDisabledClass]"
+        <RouterLink
+          :to="feedTo"
+          :class="[tabClass, isFeed ? 'text-accent' : 'text-muted']"
+          :aria-current="isFeed ? 'page' : undefined"
         >
-          <span class="flex size-8 items-center justify-center rounded-md bg-transparent">
+          <span
+            class="flex size-8 items-center justify-center rounded-md"
+            :class="isFeed ? 'bg-accent-soft' : 'bg-transparent'"
+          >
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M9 6.75H23C23.6904 6.75 24.25 7.30964 24.25 8V11C24.25 11.6904 23.6904 12.25 23 12.25H9C8.30964 12.25 7.75 11.6904 7.75 11V8C7.75 7.30964 8.30964 6.75 9 6.75Z"
@@ -101,8 +122,8 @@ const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subt
               />
             </svg>
           </span>
-          <span class="font-medium">Лента</span>
-        </button>
+          <span :class="isFeed ? 'font-semibold' : 'font-medium'">Лента</span>
+        </RouterLink>
 
         <RouterLink
           :to="topicsTo"
@@ -131,14 +152,15 @@ const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subt
           <span :class="isTopics ? 'font-semibold' : 'font-medium'">Мои топики</span>
         </RouterLink>
 
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          title="Скоро"
-          :class="[tabClass, tabDisabledClass]"
+        <RouterLink
+          :to="profileTo"
+          :class="[tabClass, isProfile ? 'text-accent' : 'text-muted']"
+          :aria-current="isProfile ? 'page' : undefined"
         >
-          <span class="flex size-8 items-center justify-center rounded-md bg-transparent">
+          <span
+            class="flex size-8 items-center justify-center rounded-md"
+            :class="isProfile ? 'bg-accent-soft' : 'bg-transparent'"
+          >
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M16 5.75C17.7949 5.75 19.25 7.20507 19.25 9C19.25 10.7949 17.7949 12.25 16 12.25C14.2051 12.25 12.75 10.7949 12.75 9C12.75 7.20507 14.2051 5.75 16 5.75Z"
@@ -154,8 +176,8 @@ const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subt
               />
             </svg>
           </span>
-          <span class="font-medium">Профиль</span>
-        </button>
+          <span :class="isProfile ? 'font-semibold' : 'font-medium'">Профиль</span>
+        </RouterLink>
       </div>
 
       <div
@@ -172,15 +194,18 @@ const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subt
           </RouterLink>
 
           <div class="flex items-center gap-6">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              title="Скоро"
-              :class="[desktopLinkBase, desktopDisabledClass]"
+            <RouterLink
+              :to="feedTo"
+              :class="[
+                desktopLinkBase,
+                isFeed
+                  ? 'bg-accent-soft px-3 py-2 font-semibold text-accent'
+                  : 'px-0 py-2 font-medium text-muted hover:text-ink',
+              ]"
+              :aria-current="isFeed ? 'page' : undefined"
             >
               Лента
-            </button>
+            </RouterLink>
 
             <RouterLink
               :to="topicsTo"
@@ -197,15 +222,18 @@ const desktopDisabledClass = 'cursor-not-allowed px-0 py-2 font-medium text-subt
           </div>
         </div>
 
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          title="Скоро"
-          :class="[desktopLinkBase, desktopDisabledClass]"
+        <RouterLink
+          :to="profileTo"
+          :class="[
+            desktopLinkBase,
+            isProfile
+              ? 'bg-accent-soft px-3 py-2 font-semibold text-accent'
+              : 'px-0 py-2 font-medium text-muted hover:text-ink',
+          ]"
+          :aria-current="isProfile ? 'page' : undefined"
         >
           Профиль
-        </button>
+        </RouterLink>
       </div>
     </div>
   </nav>

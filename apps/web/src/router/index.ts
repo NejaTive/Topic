@@ -54,6 +54,11 @@ export const router = createRouter({
           redirect: { name: RouteName.AppTopics },
         },
         {
+          path: 'feed',
+          name: RouteName.AppFeed,
+          component: () => import('@/pages/FeedPage.vue'),
+        },
+        {
           path: 'topics',
           name: RouteName.AppTopics,
           component: () => import('@/pages/TopicsPage.vue'),
@@ -82,6 +87,17 @@ export const router = createRouter({
           path: '/t/:shareId',
           name: RouteName.ShareView,
           component: () => import('@/pages/ShareViewPage.vue'),
+        },
+      ],
+    },
+    {
+      path: '/u/:nick',
+      component: MainLayout,
+      children: [
+        {
+          path: '',
+          name: RouteName.UserProfile,
+          component: () => import('@/pages/ProfilePage.vue'),
         },
       ],
     },
