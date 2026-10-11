@@ -4,27 +4,6 @@ import { RouterLink, useRoute } from 'vue-router';
 import { RouteName } from '@/router/route-names';
 import { useSessionStore } from '@/stores/session';
 
-export type AppNavPlacement = 'auto' | 'bottom' | 'top';
-export type AppNavActive = 'feed' | 'topics' | 'profile';
-
-interface AppNavProps {
-  placement?: AppNavPlacement;
-  active?: AppNavActive;
-  feedTo?: string;
-  topicsTo?: string;
-  brandTo?: string;
-  fixed?: boolean;
-}
-
-const props = withDefaults(defineProps<AppNavProps>(), {
-  placement: 'auto',
-  active: undefined,
-  feedTo: '/app/feed',
-  topicsTo: '/app/topics',
-  brandTo: '/app/topics',
-  fixed: true,
-});
-
 const route = useRoute();
 const session = useSessionStore();
 
@@ -34,54 +13,13 @@ const profileTo = computed(() => {
   return { name: RouteName.UserProfile, params: { nick } };
 });
 
-const isFeed = computed(() => {
-  if (route.path.startsWith('/app/feed')) return true;
-  return !props.fixed && props.active === 'feed';
-});
-
-const isTopics = computed(() => {
-  if (route.path.startsWith('/app/topics')) return true;
-  return !props.fixed && props.active === 'topics';
-});
-
+const isFeed = computed(() => route.path.startsWith('/app/feed'));
+const isTopics = computed(() => route.path.startsWith('/app/topics'));
 const isProfile = computed(() => {
-  if (route.name === RouteName.UserProfile) {
-    const nick = route.params.nick;
-    return typeof nick === 'string' && nick === session.user?.nick;
-  }
-  return !props.fixed && props.active === 'profile';
+  if (route.name !== RouteName.UserProfile) return false;
+  const nick = route.params.nick;
+  return typeof nick === 'string' && nick === session.user?.nick;
 });
-
-const rootClass = computed(() => {
-  if (!props.fixed) {
-    return 'relative w-full';
-  }
-  switch (props.placement) {
-    case 'bottom':
-      return 'fixed inset-x-3 bottom-3 z-40';
-    case 'top':
-      return 'fixed inset-x-3 top-3 z-40';
-    case 'auto':
-    default:
-      return 'fixed inset-x-3 bottom-3 z-40 md:bottom-auto md:top-3';
-  }
-});
-
-const shellClass = computed(() => {
-  const base = 'mx-auto flex items-center rounded-lg border border-line bg-surface shadow-float';
-  switch (props.placement) {
-    case 'bottom':
-      return `${base} h-17 max-w-91.5 justify-around px-0.5`;
-    case 'top':
-      return `${base} h-16 max-w-201 justify-between px-6 lg:max-w-314`;
-    case 'auto':
-    default:
-      return `${base} h-17 max-w-91.5 justify-around px-0.5 md:h-16 md:max-w-201 md:justify-between md:px-6 lg:max-w-314`;
-  }
-});
-
-const showMobileChrome = computed(() => props.placement === 'bottom' || props.placement === 'auto');
-const showDesktopChrome = computed(() => props.placement === 'top' || props.placement === 'auto');
 
 const tabClass =
   'flex flex-col items-center gap-1 rounded-md px-2 py-1 text-caption outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring';
@@ -91,15 +29,16 @@ const desktopLinkBase =
 </script>
 
 <template>
-  <nav :class="rootClass" aria-label="Основная навигация">
-    <div :class="shellClass">
-      <div
-        v-if="showMobileChrome"
-        class="flex w-full items-center justify-around"
-        :class="placement === 'auto' ? 'md:hidden' : undefined"
-      >
+  <nav
+    class="fixed inset-x-3 bottom-3 z-40 md:bottom-auto md:top-3"
+    aria-label="Основная навигация"
+  >
+    <div
+      class="mx-auto flex h-17 max-w-91.5 items-center justify-around rounded-lg border border-line bg-surface px-0.5 shadow-float md:h-16 md:max-w-201 md:justify-between md:px-6 lg:max-w-314"
+    >
+      <div class="flex w-full items-center justify-around md:hidden">
         <RouterLink
-          :to="feedTo"
+          :to="{ name: RouteName.AppFeed }"
           :class="[tabClass, isFeed ? 'text-accent' : 'text-muted']"
           :aria-current="isFeed ? 'page' : undefined"
         >
@@ -110,13 +49,13 @@ const desktopLinkBase =
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M9 6.75H23C23.6904 6.75 24.25 7.30964 24.25 8V11C24.25 11.6904 23.6904 12.25 23 12.25H9C8.30964 12.25 7.75 11.6904 7.75 11V8C7.75 7.30964 8.30964 6.75 9 6.75Z"
-                :fill="isFeed ? 'bg-accent-soft' : 'bg-transparent'"
+                :fill="isFeed ? 'var(--color-accent-soft)' : 'transparent'"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
               <path
                 d="M9 17.75H23C23.6904 17.75 24.25 18.3096 24.25 19V22C24.25 22.6904 23.6904 23.25 23 23.25H9C8.30964 23.25 7.75 22.6904 7.75 22V19C7.75 18.3096 8.30964 17.75 9 17.75Z"
-                :fill="isFeed ? 'bg-accent-soft' : 'bg-transparent'"
+                :fill="isFeed ? 'var(--color-accent-soft)' : 'transparent'"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
@@ -126,7 +65,7 @@ const desktopLinkBase =
         </RouterLink>
 
         <RouterLink
-          :to="topicsTo"
+          :to="{ name: RouteName.AppTopics }"
           :class="[tabClass, isTopics ? 'text-accent' : 'text-muted']"
           :aria-current="isTopics ? 'page' : undefined"
         >
@@ -164,13 +103,13 @@ const desktopLinkBase =
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M16 5.75C17.7949 5.75 19.25 7.20507 19.25 9C19.25 10.7949 17.7949 12.25 16 12.25C14.2051 12.25 12.75 10.7949 12.75 9C12.75 7.20507 14.2051 5.75 16 5.75Z"
-                :fill="isProfile ? 'bg-accent-soft' : 'bg-transparent'"
+                :fill="isProfile ? 'var(--color-accent-soft)' : 'transparent'"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
               <path
                 d="M11.5 17.75H20.5C22.0188 17.75 23.25 18.9812 23.25 20.5C23.25 22.0188 22.0188 23.25 20.5 23.25H11.5C9.98122 23.25 8.75 22.0188 8.75 20.5C8.75 18.9812 9.98122 17.75 11.5 17.75Z"
-                :fill="isProfile ? 'bg-accent-soft' : 'bg-transparent'"
+                :fill="isProfile ? 'var(--color-accent-soft)' : 'transparent'"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
@@ -180,14 +119,10 @@ const desktopLinkBase =
         </RouterLink>
       </div>
 
-      <div
-        v-if="showDesktopChrome"
-        class="w-full items-center justify-between"
-        :class="placement === 'auto' ? 'hidden md:flex' : 'flex'"
-      >
+      <div class="hidden w-full items-center justify-between md:flex">
         <div class="flex items-center gap-24">
           <RouterLink
-            :to="brandTo"
+            :to="{ name: RouteName.AppTopics }"
             class="rounded-md text-[22px] font-bold leading-tight text-ink outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
             Topic
@@ -195,7 +130,7 @@ const desktopLinkBase =
 
           <div class="flex items-center gap-6">
             <RouterLink
-              :to="feedTo"
+              :to="{ name: RouteName.AppFeed }"
               :class="[
                 desktopLinkBase,
                 isFeed
@@ -208,7 +143,7 @@ const desktopLinkBase =
             </RouterLink>
 
             <RouterLink
-              :to="topicsTo"
+              :to="{ name: RouteName.AppTopics }"
               :class="[
                 desktopLinkBase,
                 isTopics

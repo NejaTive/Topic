@@ -11,7 +11,7 @@ defineProps<ErrorStateViewProps>();
 
 <template>
   <div class="min-h-dvh bg-bg">
-    <GuestNav cta-mode="error" />
+    <GuestNav />
 
     <main
       class="mx-auto flex min-h-dvh w-full max-w-91.5 flex-col items-center justify-center px-3 pb-28 pt-6 text-center md:max-w-201 md:pb-10 md:pt-20 lg:max-w-314"

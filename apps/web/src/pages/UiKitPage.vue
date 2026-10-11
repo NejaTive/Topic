@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { AppNav, GuestNav } from '@/components/layout';
+import { RouterLink } from 'vue-router';
 import {
   TButton,
   TInput,
@@ -103,8 +103,6 @@ function showCoverErrorDemo() {
       Button / Input)
     </p>
 
-    <AppNav />
-
     <section class="mt-10 space-y-4">
       <h2 class="text-title">TMainChip · подсказки S04</h2>
       <div class="flex flex-wrap gap-2">
@@ -206,31 +204,18 @@ function showCoverErrorDemo() {
     <section class="mt-10 space-y-4">
       <h2 class="text-title">GuestNav · S09 / S11–S12</h2>
       <p class="text-body-sm text-muted">
-        Floating dock: bottom (M) / top (D). S09 share — Primary «Присоединиться»; error — «На
-        главную» (S11/S12).
+        Floating dock auto (M bottom / D top), CTA «Присоединиться» → `/`. Live:
+        <RouterLink class="text-accent" to="/t/demo">/t/…</RouterLink>
+        или S11/S12.
       </p>
-      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
-        <GuestNav :fixed="false" placement="bottom" cta-mode="share" />
-      </div>
-      <div class="max-w-210 rounded-lg border border-line bg-bg p-3">
-        <GuestNav :fixed="false" placement="top" cta-mode="share" />
-      </div>
-      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
-        <GuestNav :fixed="false" placement="bottom" cta-mode="error" />
-      </div>
     </section>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">AppNav · placement samples</h2>
+      <h2 class="text-title">AppNav</h2>
       <p class="text-body-sm text-muted">
-        Fixed auto-dock на краях viewport. Ниже — inline bottom (M) и top (D).
+        Floating dock auto (M bottom / D top). Live в
+        <RouterLink class="text-accent" to="/app/topics">/app/topics</RouterLink>.
       </p>
-      <div class="max-w-97.5 rounded-lg border border-line bg-bg p-3">
-        <AppNav :fixed="false" placement="bottom" active="topics" />
-      </div>
-      <div class="rounded-lg border border-line bg-bg p-3">
-        <AppNav :fixed="false" placement="top" active="topics" />
-      </div>
     </section>
 
     <section class="mt-10 space-y-4">
