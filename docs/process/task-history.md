@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — Сверстать S10 — публичный профиль
+
+- **YouGile:** FRO-29
+- **Итог:** ProfilePage `/u/:nick`: @nick + счётчики, public Topic row без privacy, empty «Пока нет открытых топиков», CTA Подписаться/Отписаться (mobile низ / desktop шапка), isSelf без CTA, клик → `/t/:shareId`, 404 → NotFound; invalidate `users.*` на login/register/logout.
+- **Репо:** `feat/FRO-29` / [PR #57](https://github.com/NejaTive/Topic/pull/57) / (merge в develop)
+- **Заметки:** списки подписчиков / S13 / edit профиля не входят.
+- **Доработка после ревью:** да (цикл 2/3; invalidate users после auth)
+- **Длительность:** реализация ~3 мин · ревью ~9 мин · всего ~12 мин
+
 ### 11.10.2026 — Сверстать S13 — лента
 
 - **YouGile:** FRO-28

@@ -12,6 +12,7 @@ export function useRegisterMutation() {
     onSuccess: (user) => {
       session.setUser(user);
       queryClient.setQueryData(queryKeys.auth.me(), user);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
     },
   });
 }
@@ -25,6 +26,7 @@ export function useLoginMutation() {
     onSuccess: (user) => {
       session.setUser(user);
       queryClient.setQueryData(queryKeys.auth.me(), user);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
     },
   });
 }
@@ -39,11 +41,13 @@ export function useLogoutMutation() {
       session.clear();
       queryClient.setQueryData(queryKeys.auth.me(), null);
       queryClient.removeQueries({ queryKey: queryKeys.topics.list() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
     },
     onError: () => {
       session.clear();
       queryClient.setQueryData(queryKeys.auth.me(), null);
       queryClient.removeQueries({ queryKey: queryKeys.topics.list() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.users.all() });
     },
   });
 }

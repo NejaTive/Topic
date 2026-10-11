@@ -13,6 +13,7 @@ export const queryKeys = {
     detail: (shareId: string) => ['share', 'detail', shareId] as const,
   },
   users: {
+    all: () => ['users'] as const,
     profile: (nick: string) => ['users', 'profile', nick] as const,
   },
   feed: {
