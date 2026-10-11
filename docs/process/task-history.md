@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — Реализовать Feed API
+
+- **YouGile:** BAC-17
+- **Итог:** `GET /api/feed` под AuthGuard: `{ followingCount, items }` — public-топики авторов из following, без своих; поля id/shareId/title/updatedAt/previewCovers/ownerNick; `updatedAt desc`; OpenAPI + gen:api.
+- **Репо:** `feat/BAC-17` / [PR #51](https://github.com/NejaTive/Topic/pull/51) / (merge в develop)
+- **Заметки:** пагинация и HTTP follow (BAC-18) не входят; follow для проверки — прямой INSERT в Follow.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
 ### 11.10.2026 — Добавить модель Follow в Prisma
 
 - **YouGile:** BAC-20
