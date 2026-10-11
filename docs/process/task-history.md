@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — Реализовать Users profile API
+
+- **YouGile:** BAC-19
+- **Итог:** `GET /api/users/:nick` с optional auth: nick case-insensitive; 404 если нет; гость `isFollowing: null` / `isSelf: false`; с сессией — корректные `isSelf`/`isFollowing`; topics только public (`updatedAt desc`, без privacy) + counts; OpenAPI + gen:api (`isFollowing: boolean | null`).
+- **Репо:** `feat/BAC-19` / [PR #53](https://github.com/NejaTive/Topic/pull/53) / (merge в develop)
+- **Заметки:** POST/DELETE follow и GET /feed не входят; previewCovers — топ-3 ranked (null без обложки).
+- **Доработка после ревью:** да (цикл 2/3; OpenAPI isFollowing Boolean)
+- **Длительность:** реализация ~4 мин · ревью ~6 мин · всего ~10 мин
+
 ### 11.10.2026 — Реализовать Follow API
 
 - **YouGile:** BAC-18
