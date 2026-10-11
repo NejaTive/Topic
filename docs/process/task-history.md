@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — Сверстать S13 — лента
+
+- **YouGile:** FRO-28
+- **Итог:** FeedPage: GET /feed → List / Empty / Empty·subscribed; TTopicRow без privacy в ленте, ownerNick → `/u/:nick`, клик → `/t/:shareId`; soft-well «Лента» на `/app/feed`.
+- **Репо:** `feat/FRO-28` / [PR #56](https://github.com/NejaTive/Topic/pull/56) / (merge в develop)
+- **Заметки:** фильтры и count элементов в meta не входят (нет в DTO).
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~6 мин · ревью ~5 мин · всего ~11 мин
+
 ### 11.10.2026 — Social API-клиент — users / follow / feed
 
 - **YouGile:** FRO-31
