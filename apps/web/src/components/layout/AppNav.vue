@@ -110,13 +110,13 @@ const desktopLinkBase =
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M9 6.75H23C23.6904 6.75 24.25 7.30964 24.25 8V11C24.25 11.6904 23.6904 12.25 23 12.25H9C8.30964 12.25 7.75 11.6904 7.75 11V8C7.75 7.30964 8.30964 6.75 9 6.75Z"
-                fill="white"
+                :fill="isFeed ? 'bg-accent-soft' : 'bg-transparent'"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
               <path
                 d="M9 17.75H23C23.6904 17.75 24.25 18.3096 24.25 19V22C24.25 22.6904 23.6904 23.25 23 23.25H9C8.30964 23.25 7.75 22.6904 7.75 22V19C7.75 18.3096 8.30964 17.75 9 17.75Z"
-                fill="white"
+                :fill="isFeed ? 'bg-accent-soft' : 'bg-transparent'"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
@@ -164,13 +164,13 @@ const desktopLinkBase =
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M16 5.75C17.7949 5.75 19.25 7.20507 19.25 9C19.25 10.7949 17.7949 12.25 16 12.25C14.2051 12.25 12.75 10.7949 12.75 9C12.75 7.20507 14.2051 5.75 16 5.75Z"
-                fill="white"
+                :fill="isProfile ? 'bg-accent-soft' : 'bg-transparent'"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
               <path
                 d="M11.5 17.75H20.5C22.0188 17.75 23.25 18.9812 23.25 20.5C23.25 22.0188 22.0188 23.25 20.5 23.25H11.5C9.98122 23.25 8.75 22.0188 8.75 20.5C8.75 18.9812 9.98122 17.75 11.5 17.75Z"
-                fill="white"
+                :fill="isProfile ? 'bg-accent-soft' : 'bg-transparent'"
                 stroke="currentColor"
                 stroke-width="1.5"
               />

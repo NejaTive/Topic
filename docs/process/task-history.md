@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — Фиксы: Share для гостя, назад в топиках, FAB только mobile
+
+- **YouGile:** FRO-32
+- **Итог:** `/t/:shareId` вне requiresAuth `/app` (гость + GuestNav); ContentPageWrapper нормализует RouteName в `{ name }` для «← назад»; FAB «Создать топик» на S03 только mobile; AppNav fill иконок Лента/Профиль по active.
+- **Репо:** `fix/FRO-32` / [PR #58](https://github.com/NejaTive/Topic/pull/58) / (merge в develop)
+- **Заметки:** manual-close; проверено владельцем вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 11.10.2026 — Сверстать S10 — публичный профиль
 
 - **YouGile:** FRO-29
