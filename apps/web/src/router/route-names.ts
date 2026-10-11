@@ -6,11 +6,13 @@ export enum RouteName {
   ShareView = 'share-view',
   ShareForbidden = 'share-forbidden',
   ShareNotFound = 'share-not-found',
+  AppFeed = 'app-feed',
   AppTopics = 'app-topics',
   AppTopicCreate = 'app-topic-create',
   AppTopicItemCreate = 'app-topic-item-create',
   AppTopicItemDetail = 'app-topic-item-detail',
   AppTopicDetail = 'app-topic-detail',
+  UserProfile = 'user-profile',
   DevUiKit = 'dev-ui-kit',
   NotFound = 'not-found',
 }

@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — AppNav — табы Лента и Профиль + роуты
+
+- **YouGile:** FRO-30
+- **Итог:** Роут `/app/feed` (requiresAuth) + stub; публичный `/u/:nick` + stub; AppNav soft-well feed|topics|profile; таб «Профиль» → `/u/:me.nick`.
+- **Репо:** `feat/FRO-30` / [PR #54](https://github.com/NejaTive/Topic/pull/54) / (merge в develop)
+- **Заметки:** полная вёрстка S10/S13 не входит.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~3 мин · всего ~6 мин
+
 ### 11.10.2026 — Реализовать Users profile API
 
 - **YouGile:** BAC-19
