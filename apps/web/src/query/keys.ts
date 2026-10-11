@@ -12,4 +12,10 @@ export const queryKeys = {
   share: {
     detail: (shareId: string) => ['share', 'detail', shareId] as const,
   },
+  users: {
+    profile: (nick: string) => ['users', 'profile', nick] as const,
+  },
+  feed: {
+    list: () => ['feed', 'list'] as const,
+  },
 };

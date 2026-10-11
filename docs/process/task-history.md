@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — Social API-клиент — users / follow / feed
+
+- **YouGile:** FRO-31
+- **Итог:** `api/social.ts` (getUserProfile / followUser / unfollowUser / getFeed) + Vue Query composables и keys; credentials через общий `apiClient`; typecheck ок.
+- **Репо:** `feat/FRO-31` / [PR #55](https://github.com/NejaTive/Topic/pull/55) / (merge в develop)
+- **Заметки:** S10/S13 UI не входят; schema paths уже были после BAC-17/18/19.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
 ### 11.10.2026 — AppNav — табы Лента и Профиль + роуты
 
 - **YouGile:** FRO-30
