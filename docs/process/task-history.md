@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — Добавить модель Follow в Prisma
+
+- **YouGile:** BAC-20
+- **Итог:** Модель `Follow` (followerId/followingId, createdAt) + связи User `following`/`followers`; `@@unique` на пару, индексы, Cascade с обеих сторон; миграция `20261011112815_add_follow`.
+- **Репо:** `feat/BAC-20` / [PR #50](https://github.com/NejaTive/Topic/pull/50) / (merge в develop)
+- **Заметки:** HTTP endpoints не входят; CHECK self-follow отложен на сервис.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~15 мин · ревью ~3 мин · всего ~18 мин
+
 ### 09.10.2026 — CI/CD — ускорение Deploy
 
 - **YouGile:** BAC-16

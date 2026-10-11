@@ -28,6 +28,23 @@ model User {
   createdAt    DateTime  @default(now())
   sessions     Session[]
   topics       Topic[]
+  following    Follow[]  @relation("UserFollowing")
+  followers    Follow[]  @relation("UserFollowers")
+}
+
+/// Односторонняя подписка: follower → following.
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+  @@index([followerId])
 }
 
 /// Opaque-сессия (tokenHash в БД; cookie с токеном — на уровне app).
