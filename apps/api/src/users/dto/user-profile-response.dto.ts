@@ -40,12 +40,14 @@ export class UserProfileDto {
   topicsCount!: number;
 
   @ApiProperty({
+    type: Boolean,
     example: false,
     description: 'Сессия есть и me.id === владелец профиля',
   })
   isSelf!: boolean;
 
   @ApiProperty({
+    type: Boolean,
     example: true,
     nullable: true,
     description: 'null без сессии; иначе подписан ли me на владельца',

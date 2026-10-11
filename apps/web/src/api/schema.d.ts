@@ -560,7 +560,7 @@ export interface components {
              * @description null без сессии; иначе подписан ли me на владельца
              * @example true
              */
-            isFollowing: Record<string, never> | null;
+            isFollowing: boolean | null;
             topics: components["schemas"]["ProfileTopicDto"][];
         };
         UserNotFoundResponseDto: {
