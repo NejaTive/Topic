@@ -115,7 +115,7 @@ async function onSubmit() {
 
 <template>
   <ContentPageWrapper :route-to="RouteName.AppTopics" text-to="Мои топики" title="Новый топик">
-    <form class="mt-6 flex flex-col gap-5" @submit.prevent="onSubmit">
+    <form class="flex flex-col gap-5" @submit.prevent="onSubmit">
       <div class="flex flex-col gap-2">
         <TInput
           v-model="title"
@@ -162,7 +162,20 @@ async function onSubmit() {
       </fieldset>
 
       <p v-if="formError" class="text-caption text-danger" role="alert">{{ formError }}</p>
-      <TButton type="submit" :loading="isSubmitting">Создать</TButton>
+
+      <div class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block">
+        <div
+          class="flex w-full max-w-91.5 flex-col gap-3 px-3 md:w-auto md:max-w-none md:flex-row md:items-center md:px-0"
+        >
+          <TButton
+            type="submit"
+            class="w-full shadow-float md:w-auto md:shadow-none"
+            :loading="isSubmitting"
+          >
+            Создать
+          </TButton>
+        </div>
+      </div>
     </form>
   </ContentPageWrapper>
 </template>

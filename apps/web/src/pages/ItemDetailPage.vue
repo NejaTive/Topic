@@ -219,15 +219,11 @@ function onRetry() {
     :route-to="{ name: RouteName.AppTopicDetail, params: { id: topicId } }"
     :text-to="topicTitle"
   >
-    <TLoader v-if="topicQuery.isPending.value || itemQuery.isPending.value" class="mt-6" />
-    <TError
-      v-else-if="topicQuery.isError.value || itemQuery.isError.value"
-      class="mt-6"
-      @retry="onRetry"
-    />
+    <TLoader v-if="topicQuery.isPending.value || itemQuery.isPending.value" />
+    <TError v-else-if="topicQuery.isError.value || itemQuery.isError.value" @retry="onRetry" />
 
     <template v-else-if="item">
-      <form class="flex flex-col gap-5 mt-6" @submit.prevent="onSave">
+      <form class="flex flex-col gap-5" @submit.prevent="onSave">
         <TInput
           v-model="title"
           label="Название"
@@ -252,20 +248,33 @@ function onRetry() {
           {{ actionError }}
         </p>
 
-        <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
-          <TButton
-            type="submit"
-            :loading="
-              updateItem.isPending.value ||
-              uploadCover.isPending.value ||
-              deleteCover.isPending.value
-            "
+        <div
+          class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block"
+        >
+          <div
+            class="flex w-full max-w-91.5 flex-col gap-3 px-3 md:w-auto md:max-w-none md:flex-row md:items-center md:px-0"
           >
-            Сохранить
-          </TButton>
-          <TButton type="button" variant="danger-ghost" :disabled="isBusy" @click="onDelete">
-            Удалить
-          </TButton>
+            <TButton
+              type="submit"
+              class="w-full shadow-float md:w-auto md:shadow-none"
+              :loading="
+                updateItem.isPending.value ||
+                uploadCover.isPending.value ||
+                deleteCover.isPending.value
+              "
+            >
+              Сохранить
+            </TButton>
+            <TButton
+              type="button"
+              variant="danger-ghost"
+              class="w-full md:w-auto"
+              :disabled="isBusy"
+              @click="onDelete"
+            >
+              Удалить
+            </TButton>
+          </div>
         </div>
       </form>
     </template>
