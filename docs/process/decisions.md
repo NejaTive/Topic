@@ -639,7 +639,7 @@
 - Текст `#E4E4E7` / `#A1A1AA` / `#71717A`; линии `#27272A`.
 - Danger `#F66F81` только destructive; warning `#F9B44E`; success `#3DD68C`.
 - Privacy: private warning / unlisted info(purple) / public success; selected = soft + обводка.
-- Rank rows: green `row` в тоне brand soft; exploration clay — `feat/palette-clay`.
+- Rank rows: green `row` в тоне brand soft; exploration `feat/palette-clay` удалена (12.10.2026).
 
 ## 12.10.2026
 
@@ -667,3 +667,9 @@
 - Confirm-модалка вместо `window.confirm`: удаление топика/элемента, выход из аккаунта.
 - UI-kit SCSS: scrim + glass; M bottom sheet ≤390, D centered ≤480; confirm `danger-ghost`.
 - Пока `confirmLoading` — нельзя закрыть scrim/Escape.
+
+### MVP зафиксирован
+
+- Этап **5** и Must MVP ✅ закрыты владельцем (12.10.2026): Auth, Topics, Share, Social (follow + лента + S10), UI-полировка.
+- **5f** (хвост из `ideas.md`) **не** входит в MVP — post-MVP отдельным решением.
+- Трекер: [`stages-todo.md`](stages-todo.md); итог этапа — [`../stages/stage-5-brainstorm.md`](../stages/stage-5-brainstorm.md).

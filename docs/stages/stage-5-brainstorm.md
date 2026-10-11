@@ -1,8 +1,8 @@
 # Этап 5 — Закрытие MVP (follow + лента)
 
-> Статус: 🔄 в работе (с 09.10.2026), фазы **5a–5d** ✅; дальше **5e**.  
-> Опора: [`stage-1-brainstorm.md`](stage-1-brainstorm.md) (S10, Follow, S13); hi-fi отложен на этапе 2 → возврат здесь.  
-> Этап 4 ✅ ([`stage-4-brainstorm.md`](stage-4-brainstorm.md)); **5e** — после **5b–5d** и зависимостей карточек на доске.
+> Статус: ✅ закрыт владельцем (**12.10.2026**).  
+> Опора: [`stage-1-brainstorm.md`](stage-1-brainstorm.md) (S10, Follow, S13); hi-fi на этапе 2 / **5b**.  
+> Этап 4 ✅ ([`stage-4-brainstorm.md`](stage-4-brainstorm.md)). MVP Must-срез зафиксирован; **5f** не входил в закрытие.
 
 ---
 
@@ -11,7 +11,7 @@
 1. Закрыть Must MVP по **подписке и ленте**: публичный профиль (S10), follow, лента public-топиков (S13).
 2. Добить **hi-fi** S10/S13 (wireframes уже есть на этапе 2) и оживить табы «Лента» / «Профиль» в AppNav.
 3. Нарезать и реализовать соцсрез в YouGile (BAC + FRO) без смены стека.
-4. В хвосте (**5f**) выбрать и закрыть **1–2** пункта из [`../backlog/ideas.md`](../backlog/ideas.md) — состав позже, отдельным решением владельца.
+4. Хвост (**5f**) из [`../backlog/ideas.md`](../backlog/ideas.md) — **не делали** при закрытии MVP (post-MVP / отдельное решение).
 
 ---
 
@@ -61,8 +61,8 @@
 | **5b** | Дизайн: hi-fi S10 + S13 (M+D), empty states, Подписаться/Отписаться, карточка ленты; оживить табы nav | ✅ S13 + S10 (List / Empty / Subscribed / Own), M+D |
 | **5c** | Контракт API/модель: `Follow`, subscribe/unsubscribe, лента public topics по following (в docs и/или AC) | ✅ аппрув владельца 09.10.2026 |
 | **5d** | Нарезка YouGile (эпик Social / Follow+Feed): BAC + FRO с AC | ✅ 09.10.2026 |
-| **5e** | Реализация по agent-workflow | ⬜ после 5b–5d |
-| **5f** | Хвост MVP: выбрать и закрыть **1–2** пункта из `ideas.md` | ⬜ последними; состав — отдельно |
+| **5e** | Реализация по agent-workflow (Social BAC/FRO + UI) | ✅ 09–12.10.2026 (доски пусты; FRO-35 и др.) |
+| **5f** | Хвост из `ideas.md` (1–2 пункта) | ⏭ не в MVP (отложено 12.10.2026) |
 
 ---
 
@@ -239,7 +239,8 @@ model Follow {
 
 ---
 
-## Следующий шаг
+## Итог закрытия (12.10.2026)
 
-1. **5e** — реализация по agent-workflow («возьми задачу» / прогон).
-2. **5f** — состав из `ideas.md` отдельно.
+- Must MVP: Auth, Topics (CRUD + DnD + privacy), Share S09, Social (S10 + follow + S13), PWA-shell, RU UI.
+- YouGile BAC/FRO — открытых карточек нет.
+- **5f** / post-MVP (`ideas`, OG, rate-limit, домен, тесты…) — вне контракта; брать только явным «пересматриваем» / новой нарезкой.
