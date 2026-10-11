@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — Реализовать Follow API
+
+- **YouGile:** BAC-18
+- **Итог:** `POST`/`DELETE /api/users/:nick/follow` под AuthGuard: 204 идемпотентно (upsert / deleteMany); self → 400; без сессии → 401; nick не найден → 404; без тела; OpenAPI + gen:api.
+- **Репо:** `feat/BAC-18` / [PR #52](https://github.com/NejaTive/Topic/pull/52) / (merge в develop)
+- **Заметки:** GET profile / feed / списки подписчиков не входят; nick нормализуется trim+lowercase.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~4 мин · всего ~6 мин
+
 ### 11.10.2026 — Реализовать Feed API
 
 - **YouGile:** BAC-17
