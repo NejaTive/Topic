@@ -59,11 +59,11 @@ function onCardKeydown(event: KeyboardEvent) {
 
 <template>
   <div
-    class="group flex w-full max-w-89.5 items-center gap-3 rounded-md border bg-surface px-3 py-2 transition-colors outline-none select-none"
+    class="group flex w-full max-w-89.5 items-center gap-3 rounded-md border border-row-line bg-row px-3 py-2 transition-colors outline-none select-none"
     :class="[
       dragging
-        ? 'border-accent shadow-float'
-        : 'border-line hover:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
+        ? 'border-row-line bg-row-hover shadow-float'
+        : 'hover:bg-row-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
       readonly ? 'cursor-default' : 'cursor-pointer',
     ]"
     :data-state="dragging ? 'dragging' : 'default'"
@@ -81,7 +81,7 @@ function onCardKeydown(event: KeyboardEvent) {
       {{ rank }}
     </span>
 
-    <div class="h-14 w-11 shrink-0 overflow-hidden rounded-sm bg-line" aria-hidden="true">
+    <div class="h-14 w-11 shrink-0 overflow-hidden rounded-sm bg-surface-sunken" aria-hidden="true">
       <img
         v-if="coverUrl"
         :src="coverUrl"
@@ -97,12 +97,12 @@ function onCardKeydown(event: KeyboardEvent) {
 
     <span
       v-if="showHandle"
-      class="-my-2 -mr-3 flex w-11 shrink-0 items-center justify-center self-stretch rounded-r-md border-l border-line bg-surface-sunken pl-2 pr-3 text-muted transition-colors touch-none"
+      class="-my-2 -mr-3 flex w-11 shrink-0 items-center justify-center self-stretch rounded-r-md border-l border-row-line bg-row-hover pl-2 pr-3 text-muted transition-colors touch-none"
       :class="[
         dragEnabled
-          ? 'cursor-grab active:cursor-grabbing hover:bg-line hover:text-ink'
+          ? 'cursor-grab active:cursor-grabbing hover:bg-row-line hover:text-ink'
           : 'cursor-default',
-        dragging ? 'bg-accent-soft text-accent' : null,
+        dragging ? 'bg-row-line text-ink' : null,
       ]"
       aria-hidden="true"
       data-slot="drag-handle"

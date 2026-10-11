@@ -73,10 +73,10 @@ onScopeDispose(stopAutoScroll);
 
 <template>
   <div class="page-shell">
-    <div v-if="slots.header" class="page-shell__header">
-      <slot name="header" />
-    </div>
     <div ref="bodyRef" class="page-shell__body">
+      <div v-if="slots.header" class="page-shell__header">
+        <slot name="header" />
+      </div>
       <slot />
     </div>
     <slot name="overlay" />
@@ -93,7 +93,6 @@ onScopeDispose(stopAutoScroll);
 }
 
 .page-shell__header {
-  flex-shrink: 0;
   padding-bottom: 16px;
 }
 
@@ -105,6 +104,7 @@ onScopeDispose(stopAutoScroll);
   padding-bottom: 88px;
 
   @media (min-width: 768px) {
+    padding-top: 88px;
     padding-bottom: 0;
   }
 }

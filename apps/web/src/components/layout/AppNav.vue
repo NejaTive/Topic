@@ -1,8 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onScopeDispose,
+  ref,
+  watch,
+  type ComponentPublicInstance,
+} from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { RouteName } from '@/router/route-names';
 import { useSessionStore } from '@/stores/session';
+
+type NavTab = 'feed' | 'topics' | 'profile';
+type LinkRef = HTMLElement | ComponentPublicInstance | null;
 
 const route = useRoute();
 const session = useSessionStore();
@@ -21,11 +32,116 @@ const isProfile = computed(() => {
   return typeof nick === 'string' && nick === session.user?.nick;
 });
 
+const activeTab = computed<NavTab | null>(() => {
+  if (isFeed.value) return 'feed';
+  if (isTopics.value) return 'topics';
+  if (isProfile.value) return 'profile';
+  return null;
+});
+
+const mobileTabsRef = ref<HTMLElement | null>(null);
+const iconFeedRef = ref<HTMLElement | null>(null);
+const iconTopicsRef = ref<HTMLElement | null>(null);
+const iconProfileRef = ref<HTMLElement | null>(null);
+
+const desktopNavRef = ref<HTMLElement | null>(null);
+const deskFeedRef = ref<LinkRef>(null);
+const deskTopicsRef = ref<LinkRef>(null);
+const deskProfileRef = ref<LinkRef>(null);
+
+const mobilePillReady = ref(false);
+const desktopPillReady = ref(false);
+const mobilePillStyle = ref<{ transform: string }>({ transform: 'translate(0px, 0px)' });
+const desktopPillStyle = ref<{ transform: string; width: string; height: string }>({
+  transform: 'translate(0px, 0px)',
+  width: '0px',
+  height: '0px',
+});
+
 const tabClass =
-  'flex flex-col items-center gap-1 rounded-md px-2 py-1 text-caption outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring';
+  'relative z-10 flex flex-col items-center gap-1 rounded-md px-2 py-1 text-caption font-semibold outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring';
 
 const desktopLinkBase =
-  'rounded-md text-label outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring';
+  'relative z-10 rounded-md px-3 py-2 text-label font-semibold outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring';
+
+function rootEl(target: LinkRef): HTMLElement | null {
+  if (!target) return null;
+  if (target instanceof HTMLElement) return target;
+  const el = target.$el;
+  return el instanceof HTMLElement ? el : null;
+}
+
+function mobileTarget(tab: NavTab) {
+  if (tab === 'feed') return iconFeedRef.value;
+  if (tab === 'topics') return iconTopicsRef.value;
+  return iconProfileRef.value;
+}
+
+function desktopTarget(tab: NavTab) {
+  if (tab === 'feed') return rootEl(deskFeedRef.value);
+  if (tab === 'topics') return rootEl(deskTopicsRef.value);
+  return rootEl(deskProfileRef.value);
+}
+
+function updateMobilePill() {
+  const tab = activeTab.value;
+  const container = mobileTabsRef.value;
+  if (!tab || !container) return;
+
+  const target = mobileTarget(tab);
+  if (!target) return;
+
+  const c = container.getBoundingClientRect();
+  const r = target.getBoundingClientRect();
+  mobilePillStyle.value = {
+    transform: `translate(${r.left - c.left}px, ${r.top - c.top}px)`,
+  };
+}
+
+function updateDesktopPill() {
+  const tab = activeTab.value;
+  const container = desktopNavRef.value;
+  if (!tab || !container) return;
+
+  const target = desktopTarget(tab);
+  if (!target) return;
+
+  const c = container.getBoundingClientRect();
+  const r = target.getBoundingClientRect();
+  desktopPillStyle.value = {
+    transform: `translate(${r.left - c.left}px, ${r.top - c.top}px)`,
+    width: `${r.width}px`,
+    height: `${r.height}px`,
+  };
+}
+
+function updatePills() {
+  updateMobilePill();
+  updateDesktopPill();
+}
+
+let resizeObserver: ResizeObserver | null = null;
+
+onMounted(() => {
+  updatePills();
+  requestAnimationFrame(() => {
+    mobilePillReady.value = true;
+    desktopPillReady.value = true;
+  });
+
+  resizeObserver = new ResizeObserver(() => updatePills());
+  if (mobileTabsRef.value) resizeObserver.observe(mobileTabsRef.value);
+  if (desktopNavRef.value) resizeObserver.observe(desktopNavRef.value);
+});
+
+onScopeDispose(() => {
+  resizeObserver?.disconnect();
+});
+
+watch(activeTab, async () => {
+  await nextTick();
+  updatePills();
+});
 </script>
 
 <template>
@@ -34,34 +150,39 @@ const desktopLinkBase =
     aria-label="Основная навигация"
   >
     <div
-      class="mx-auto flex h-17 max-w-91.5 items-center justify-around rounded-lg border border-line bg-surface px-0.5 shadow-float md:h-16 md:max-w-201 md:justify-between md:px-6 lg:max-w-314"
+      class="glass mx-auto flex h-17 max-w-91.5 items-center justify-around rounded-lg px-0.5 shadow-float md:h-16 md:max-w-201 md:justify-between md:px-6 lg:max-w-314"
     >
-      <div class="flex w-full items-center justify-around md:hidden">
+      <div ref="mobileTabsRef" class="relative flex w-full items-center justify-around md:hidden">
+        <span
+          v-show="activeTab"
+          class="pointer-events-none absolute top-0 left-0 size-8 rounded-md bg-accent-soft transition-transform duration-[220ms] ease-out motion-reduce:transition-none"
+          :class="{ 'duration-0': !mobilePillReady }"
+          :style="mobilePillStyle"
+          aria-hidden="true"
+        />
+
         <RouterLink
           :to="{ name: RouteName.AppFeed }"
           :class="[tabClass, isFeed ? 'text-accent' : 'text-muted']"
           :aria-current="isFeed ? 'page' : undefined"
         >
-          <span
-            class="flex size-8 items-center justify-center rounded-md"
-            :class="isFeed ? 'bg-accent-soft' : 'bg-transparent'"
-          >
+          <span ref="iconFeedRef" class="flex size-8 items-center justify-center rounded-md">
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M9 6.75H23C23.6904 6.75 24.25 7.30964 24.25 8V11C24.25 11.6904 23.6904 12.25 23 12.25H9C8.30964 12.25 7.75 11.6904 7.75 11V8C7.75 7.30964 8.30964 6.75 9 6.75Z"
-                :fill="isFeed ? 'var(--color-accent-soft)' : 'transparent'"
+                fill="transparent"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
               <path
                 d="M9 17.75H23C23.6904 17.75 24.25 18.3096 24.25 19V22C24.25 22.6904 23.6904 23.25 23 23.25H9C8.30964 23.25 7.75 22.6904 7.75 22V19C7.75 18.3096 8.30964 17.75 9 17.75Z"
-                :fill="isFeed ? 'var(--color-accent-soft)' : 'transparent'"
+                fill="transparent"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
             </svg>
           </span>
-          <span :class="isFeed ? 'font-semibold' : 'font-medium'">Лента</span>
+          <span>Лента</span>
         </RouterLink>
 
         <RouterLink
@@ -69,10 +190,7 @@ const desktopLinkBase =
           :class="[tabClass, isTopics ? 'text-accent' : 'text-muted']"
           :aria-current="isTopics ? 'page' : undefined"
         >
-          <span
-            class="flex size-8 items-center justify-center rounded-md"
-            :class="isTopics ? 'bg-accent-soft' : 'bg-transparent'"
-          >
+          <span ref="iconTopicsRef" class="flex size-8 items-center justify-center rounded-md">
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M7 10C7 9.44772 7.44772 9 8 9H24C24.5523 9 25 9.44772 25 10C25 10.5523 24.5523 11 24 11H8C7.44772 11 7 10.5523 7 10Z"
@@ -88,7 +206,7 @@ const desktopLinkBase =
               />
             </svg>
           </span>
-          <span :class="isTopics ? 'font-semibold' : 'font-medium'">Мои топики</span>
+          <span>Мои топики</span>
         </RouterLink>
 
         <RouterLink
@@ -96,30 +214,35 @@ const desktopLinkBase =
           :class="[tabClass, isProfile ? 'text-accent' : 'text-muted']"
           :aria-current="isProfile ? 'page' : undefined"
         >
-          <span
-            class="flex size-8 items-center justify-center rounded-md"
-            :class="isProfile ? 'bg-accent-soft' : 'bg-transparent'"
-          >
+          <span ref="iconProfileRef" class="flex size-8 items-center justify-center rounded-md">
             <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
                 d="M16 5.75C17.7949 5.75 19.25 7.20507 19.25 9C19.25 10.7949 17.7949 12.25 16 12.25C14.2051 12.25 12.75 10.7949 12.75 9C12.75 7.20507 14.2051 5.75 16 5.75Z"
-                :fill="isProfile ? 'var(--color-accent-soft)' : 'transparent'"
+                fill="transparent"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
               <path
                 d="M11.5 17.75H20.5C22.0188 17.75 23.25 18.9812 23.25 20.5C23.25 22.0188 22.0188 23.25 20.5 23.25H11.5C9.98122 23.25 8.75 22.0188 8.75 20.5C8.75 18.9812 9.98122 17.75 11.5 17.75Z"
-                :fill="isProfile ? 'var(--color-accent-soft)' : 'transparent'"
+                fill="transparent"
                 stroke="currentColor"
                 stroke-width="1.5"
               />
             </svg>
           </span>
-          <span :class="isProfile ? 'font-semibold' : 'font-medium'">Профиль</span>
+          <span>Профиль</span>
         </RouterLink>
       </div>
 
-      <div class="hidden w-full items-center justify-between md:flex">
+      <div ref="desktopNavRef" class="relative hidden w-full items-center justify-between md:flex">
+        <span
+          v-show="activeTab"
+          class="pointer-events-none absolute top-0 left-0 rounded-md bg-accent-soft transition-[transform,width,height] duration-[220ms] ease-out motion-reduce:transition-none"
+          :class="{ 'duration-0': !desktopPillReady }"
+          :style="desktopPillStyle"
+          aria-hidden="true"
+        />
+
         <div class="flex items-center gap-24">
           <RouterLink
             :to="{ name: RouteName.AppTopics }"
@@ -130,26 +253,18 @@ const desktopLinkBase =
 
           <div class="flex items-center gap-6">
             <RouterLink
+              ref="deskFeedRef"
               :to="{ name: RouteName.AppFeed }"
-              :class="[
-                desktopLinkBase,
-                isFeed
-                  ? 'bg-accent-soft px-3 py-2 font-semibold text-accent'
-                  : 'px-0 py-2 font-medium text-muted hover:text-ink',
-              ]"
+              :class="[desktopLinkBase, isFeed ? 'text-accent' : 'text-muted hover:text-ink']"
               :aria-current="isFeed ? 'page' : undefined"
             >
               Лента
             </RouterLink>
 
             <RouterLink
+              ref="deskTopicsRef"
               :to="{ name: RouteName.AppTopics }"
-              :class="[
-                desktopLinkBase,
-                isTopics
-                  ? 'bg-accent-soft px-3 py-2 font-semibold text-accent'
-                  : 'px-0 py-2 font-medium text-muted hover:text-ink',
-              ]"
+              :class="[desktopLinkBase, isTopics ? 'text-accent' : 'text-muted hover:text-ink']"
               :aria-current="isTopics ? 'page' : undefined"
             >
               Мои топики
@@ -158,13 +273,9 @@ const desktopLinkBase =
         </div>
 
         <RouterLink
+          ref="deskProfileRef"
           :to="profileTo"
-          :class="[
-            desktopLinkBase,
-            isProfile
-              ? 'bg-accent-soft px-3 py-2 font-semibold text-accent'
-              : 'px-0 py-2 font-medium text-muted hover:text-ink',
-          ]"
+          :class="[desktopLinkBase, isProfile ? 'text-accent' : 'text-muted hover:text-ink']"
           :aria-current="isProfile ? 'page' : undefined"
         >
           Профиль

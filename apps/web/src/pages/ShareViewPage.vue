@@ -47,7 +47,12 @@ function onRetry() {
     <TError @retry="onRetry" />
   </PageShell>
 
-  <ContentPageWrapper v-else-if="share" :title="share.title">
+  <ContentPageWrapper
+    v-else-if="share"
+    :title="share.title"
+    :route-to="{ name: RouteName.UserProfile, params: { nick: share.ownerNick } }"
+    :text-to="`@${share.ownerNick}`"
+  >
     <p v-if="isEmptyRanked" class="text-title text-ink">Пока нечего показать</p>
 
     <ul v-else class="flex flex-col gap-3" aria-label="Рейтинг">

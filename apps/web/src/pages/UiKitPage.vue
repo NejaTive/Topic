@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import {
+  TApproveModal,
   TButton,
   TInput,
   TCoverUpload,
@@ -18,6 +19,8 @@ const email = ref('');
 const password = ref('secret');
 const errorEmail = ref('Некорректный email');
 const loading = ref(false);
+const approveOpen = ref(false);
+const approveLoading = ref(false);
 
 const selectedChip = ref<string | null>(null);
 const coverPreview = ref<string | null>(null);
@@ -50,7 +53,7 @@ const sampleRows: {
         ),
       'data:image/svg+xml,' +
         encodeURIComponent(
-          '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40"><rect fill="#EDF0ED" width="32" height="40"/></svg>',
+          '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40"><rect fill="#16161E" width="32" height="40"/></svg>',
         ),
     ],
   },
@@ -71,6 +74,14 @@ function toggleLoading() {
   window.setTimeout(() => {
     loading.value = false;
   }, 1500);
+}
+
+function onApproveConfirm() {
+  approveLoading.value = true;
+  window.setTimeout(() => {
+    approveLoading.value = false;
+    approveOpen.value = false;
+  }, 800);
 }
 
 function onCoverFile(file: File) {
@@ -226,18 +237,33 @@ function showCoverErrorDemo() {
     </section>
 
     <section class="mt-10 space-y-4">
+      <h2 class="text-title">TApproveModal</h2>
+      <TButton variant="danger-ghost" @click="approveOpen = true">Открыть approve</TButton>
+      <TApproveModal
+        v-model:open="approveOpen"
+        title="Удалить топик?"
+        description="Безвозвратно. Элементы тоже удалятся."
+        confirm-label="Удалить"
+        :confirm-loading="approveLoading"
+        @confirm="onApproveConfirm"
+      />
+    </section>
+
+    <section class="mt-10 space-y-4">
       <h2 class="text-title">TButton · md (44)</h2>
       <div class="flex flex-wrap gap-3">
         <TButton>Primary</TButton>
         <TButton variant="secondary">Secondary</TButton>
         <TButton variant="ghost">Ghost</TButton>
+        <TButton variant="danger">Danger</TButton>
         <TButton variant="danger-ghost">Danger ghost</TButton>
       </div>
       <div class="flex flex-wrap gap-3">
         <TButton disabled>Primary disabled</TButton>
         <TButton variant="secondary" disabled>Secondary disabled</TButton>
         <TButton variant="ghost" disabled>Ghost disabled</TButton>
-        <TButton variant="danger-ghost" disabled>Danger disabled</TButton>
+        <TButton variant="danger" disabled>Danger disabled</TButton>
+        <TButton variant="danger-ghost" disabled>Danger ghost disabled</TButton>
       </div>
       <div class="flex flex-wrap gap-3">
         <TButton :loading="loading" @click="toggleLoading">

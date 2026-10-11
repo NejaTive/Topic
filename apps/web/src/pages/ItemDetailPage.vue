@@ -3,7 +3,7 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import { TButton, TError, TInput, TLoader, TCoverUpload } from '@/components/ui-kit';
+import { TApproveModal, TButton, TError, TInput, TLoader, TCoverUpload } from '@/components/ui-kit';
 import {
   useDeleteItemCoverMutation,
   useDeleteItemMutation,
@@ -60,6 +60,7 @@ const coverError = ref<string | null>(null);
 const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 const actionError = ref('');
+const approveOpen = ref(false);
 
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
 const item = computed(() => itemQuery.data.value);
@@ -191,13 +192,16 @@ async function onSave() {
   }
 }
 
-async function onDelete() {
+function openDelete() {
   clearActionError();
+  approveOpen.value = true;
+}
 
-  const ok = window.confirm('Удалить элемент безвозвратно?');
-  if (!ok) return;
+async function onApproveDelete() {
+  clearActionError();
   try {
     await deleteItemMut.mutateAsync(itemId.value);
+    approveOpen.value = false;
     await router.replace({
       name: RouteName.AppTopicDetail,
       params: { id: topicId.value },
@@ -270,7 +274,7 @@ function onRetry() {
               variant="danger-ghost"
               class="w-full md:w-auto"
               :disabled="isBusy"
-              @click="onDelete"
+              @click="openDelete"
             >
               Удалить
             </TButton>
@@ -278,5 +282,14 @@ function onRetry() {
         </div>
       </form>
     </template>
+
+    <TApproveModal
+      v-model:open="approveOpen"
+      title="Удалить элемент?"
+      description="Безвозвратно."
+      confirm-label="Удалить"
+      :confirm-loading="deleteItemMut.isPending.value"
+      @confirm="onApproveDelete"
+    />
   </ContentPageWrapper>
 </template>

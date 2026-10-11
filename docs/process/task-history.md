@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 12.10.2026 — Dark green палитра, liquid-glass, nav slide и approve-modal
+
+- **YouGile:** FRO-35
+- **Итог:** Тёмная green-палитра и токены; liquid-glass на nav/карточках + скролл под dock; sliding soft-well AppNav; page-fade; TApproveModal (удаление/выход); follow/unfollow accent; назад на S09.
+- **Репо:** `feat/FRO-35` / [PR #61](https://github.com/NejaTive/Topic/pull/61) / (merge в develop)
+- **Заметки:** manual-close; проверено владельцем вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 11.10.2026 — App shell: PageShell, скролл списков, CTA снизу на mobile
 
 - **YouGile:** FRO-34

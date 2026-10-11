@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-export type TButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger-ghost';
+export type TButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-ghost';
 export type TButtonSize = 'md' | 'sm';
 
 interface TButtonProps {
@@ -43,6 +43,11 @@ const variantClass = computed(() => {
       ].join(' ');
     case 'ghost':
       return ['bg-transparent text-accent', 'hover:enabled:bg-accent-soft'].join(' ');
+    case 'danger':
+      return [
+        'bg-danger text-accent-on border border-transparent',
+        'hover:enabled:opacity-90',
+      ].join(' ');
     case 'danger-ghost':
       return ['bg-transparent text-danger', 'hover:enabled:bg-danger-soft'].join(' ');
     case 'primary':
@@ -56,7 +61,7 @@ const variantClass = computed(() => {
 
 const disabledClass = computed(() => {
   if (!props.disabled && !props.loading) return '';
-  if (props.variant === 'primary') {
+  if (props.variant === 'primary' || props.variant === 'danger') {
     return 'disabled:bg-surface-sunken disabled:text-subtle disabled:border-transparent';
   }
   if (props.variant === 'secondary') {

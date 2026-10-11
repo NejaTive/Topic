@@ -24,7 +24,7 @@ const emit = defineEmits<TEmptyStateEmits>();
 
 <template>
   <div
-    class="flex w-full flex-col items-center gap-3 rounded-lg border border-line bg-surface px-8 py-13 text-center"
+    class="glass flex w-full flex-col items-center gap-3 rounded-lg px-8 py-13 text-center"
     role="status"
   >
     <div

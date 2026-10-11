@@ -14,7 +14,11 @@ const isAuthed = computed(() => session.status === 'authed');
     <GuestNav v-else />
     <main class="app-shell__main">
       <div class="app-shell__page">
-        <RouterView />
+        <RouterView v-slot="{ Component, route }">
+          <Transition name="page-fade" mode="out-in">
+            <component :is="Component" :key="route.fullPath" />
+          </Transition>
+        </RouterView>
       </div>
     </main>
   </div>
@@ -48,10 +52,5 @@ const isAuthed = computed(() => session.status === 'authed');
   flex: 1;
   flex-direction: column;
   min-height: 0;
-  padding-top: 0px;
-
-  @media (min-width: 768px) {
-    padding-top: 88px;
-  }
 }
 </style>

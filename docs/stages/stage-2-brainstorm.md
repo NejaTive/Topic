@@ -67,28 +67,32 @@
 
 ### Направление
 
-Спокойно, современно, лично. Light. Deep teal, off-white фон. Не используем: purple/indigo glow, cream+terracotta+serif, dark-by-default, pill как дефолт, многослойные тени, emoji в UI.
+Спокойно, современно, лично. **Dark**: charcoal `#0C0C10`, brand green `#2F8F63`, secondary purple `#A879E6`. Danger только для удалить/выйти. Не используем: cream+terracotta+serif, pill как дефолт, многослойные тени, emoji в UI.
 
 ### Цвета (semantic)
 
 
 | Токен                       | Hex                   | Роль                                         |
 | --------------------------- | --------------------- | -------------------------------------------- |
-| `bg`                        | `#F6F7F5`             | фон страницы                                 |
-| `surface`                   | `#FFFFFF`             | карточки, строки, поля                       |
-| `surface-sunken`            | `#EDF0ED`             | hover строки, cover placeholder, disabled    |
-| `ink`                       | `#16201E`             | основной текст                               |
-| `muted`                     | `#5B6865`             | вторичный текст                              |
-| `subtle`                    | `#8A9693`             | placeholder, handle                          |
-| `line`                      | `#DDE3E0`             | границы                                      |
-| `line-strong`               | `#C3CCC8`             | границы полей, hover карточки                |
-| `accent` / `accent-hover`   | `#0F6B5C` / `#0B574B` | primary, ссылки, активный пункт              |
-| `accent-soft` / `accent-on` | `#E2F0EC` / `#FFFFFF` | фон chip public, drag-over / текст на accent |
-| `danger` / `danger-soft`    | `#B3342B` / `#FBEAE8` | ошибки, удаление                             |
-| `warning` / `warning-soft`  | `#8A5A00` / `#FBF1DC` | баннер «Топик изменился»                     |
-| `info` / `info-soft`        | `#2F4A68` / `#E8EEF5` | chip unlisted                                |
-| `rank-default` / `rank-top` | `#16201E` / `#0F6B5C` | номер ранга: 4+ / 1–3                        |
-| `focus-ring`                | `#0F6B5C`             | 2px, зазор 2px                               |
+| `bg`                        | `#0C0C10`             | фон страницы                                 |
+| `surface`                   | `#12121A`             | поля, плотные панели                         |
+| `surface-sunken`            | `#16161E`             | hover строки, cover placeholder, disabled    |
+| `surface-glass` / `hover`   | surface @ 62% / 78%   | liquid-glass fill (nav, карточки, панели)    |
+| `glass-line`                | white @ 12%           | обводка glass                                |
+| `ink`                       | `#E4E4E7`             | основной текст                               |
+| `muted`                     | `#A1A1AA`             | вторичный текст                              |
+| `subtle`                    | `#71717A`             | placeholder, handle                          |
+| `line`                      | `#27272A`             | границы                                      |
+| `line-strong`               | `#32363F`             | границы полей, hover карточки                |
+| `accent` / `accent-hover`   | `#2F8F63` / `#3DA87A` | primary (приглушённый green)                 |
+| `accent-soft` / `accent-on` | `#163024` / `#FFFFFF` | soft-well / текст на accent                  |
+| `danger` / `danger-soft`    | `#F66F81` / `#2A1218` | удалить, выйти, ошибки                       |
+| `warning` / `warning-soft`  | `#F9B44E` / `#2A2410` | баннер; privacy private                      |
+| `success` / `success-soft`  | `#3DD68C` / `#163024` | privacy public; copy ok                      |
+| `info` / `info-soft`        | `#A879E6` / `#1E1830` | privacy unlisted (purple)                    |
+| `row` / `hover` / `line`    | `#163024` / `#1E3D2E` / `#2F8F63` | строки рейтинга/inbox              |
+| `rank-default` / `rank-top` | `#E4E4E7` / `#2F8F63` | номер ранга: 4+ / 1–3                        |
+| `focus-ring`                | `#2F8F63`             | 2px, зазор 2px                               |
 
 
 ### Типографика
@@ -111,31 +115,33 @@
 | rank-l / rank-m / rank-s | 28/32 · 20/24 · 14/20 | Mono Medium         | —              |
 
 
-### Радиусы, тень
+### Радиусы, тень, glass
 
 - **Spacing в Variables / tokens не держим** — отступы в макете числом, без `space/`*.
 - **Радиусы:** `sm` 4 (chip, cover) · `md` 8 (кнопки, поля, строки) · `lg` 12 (карточки, модалка). Pill не используем.
 - **Контролы:** `md` 44 px (touch), `sm` 32 px.
-- **Тень:** одна — `shadow/float` = `0 4 16`, `#16201E` @ 8%. Только модалка и dragging-строка. Карточки и строки — граница `line`.
+- **Тень:** одна — `shadow/float` = `0 4 16`, `#000000` @ 40%. Модалка, dragging-строка, floating docks.
+- **Liquid-glass:** утилита `glass` — `surface-glass` + `backdrop-filter` blur `20px` saturate 1.15 + `glass-line`. Nav docks, TopicRow, EmptyState, auth-карточки, editor panels (md+). Инпуты / RankRow / secondary-кнопки — без glass. Без blur — непрозрачный `surface`.
+- **DnD drop-slot:** открытая щель (source + insert) — `row` @ 55% на `bg`, dashed `row-line`.
 
 ### Privacy chip
 
 
-| Значение | Подпись в UI | Фон / текст            | Иконка |
-| -------- | ------------ | ---------------------- | ------ |
-| private  | Приватный    | surface-sunken / muted | замок  |
-| unlisted | По ссылке    | info-soft / info       | ссылка |
-| public   | Публичный    | accent-soft / accent   | глобус |
+| Значение | Подпись в UI | Фон / текст                         | Selected              | Иконка |
+| -------- | ------------ | ----------------------------------- | --------------------- | ------ |
+| private  | Приватный    | `warning-soft` / `warning`          | + обводка `warning`   | замок  |
+| unlisted | По ссылке    | `info-soft` / `info`                | + обводка `info`      | ссылка |
+| public   | Публичный    | `success-soft` / `success`          | + обводка `success`   | глобус |
 
 
-Различаем иконкой и подписью, не только цветом.
+Различаем иконкой, подписью и смысловым цветом; selected = тот же fill + цветная обводка.
 
 ### Компоненты (UI-Kit `23:2306`)
 
 
 | Секция                     | Состав                                                                                                                                                                               |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 04.1 Button                | Primary / Secondary / Ghost / Danger ghost × default · hover · focus · disabled; Small (32)                                                                                          |
+| 04.1 Button                | Primary / Secondary / Ghost / Danger / Danger ghost × default · hover · focus · disabled; Small (32)                                                                                 |
 | 04.2 Input & Textarea      | default · hover · focus · filled · error · disabled; textarea default · focus                                                                                                        |
 | 04.3 Privacy chip & Banner | 3 chip; warning-баннер «Топик изменился» (Flow E)                                                                                                                                    |
 | 04.4 Rank row              | default · top-3 · hover · focus · dragging · drop indicator · с кнопками ↑↓ («позиция N») · mobile 358                                                                               |
@@ -143,7 +149,7 @@
 | 04.6 Navigation            | Floating dock: bottom tab 366×64 и top nav 1256×64 (inset 12, radius 12, stroke `line`; активная иконка — soft-well 32×32 `accent-soft`; по 2 активных варианта); состояния nav link |
 | 04.7 Cover upload          | empty · hover/drag-over · filled · error                                                                                                                                             |
 | 04.8 Empty state           | с CTA / без CTA                                                                                                                                                                      |
-| 04.9 Modal                 | desktop 480 на scrim; mobile bottom sheet 390                                                                                                                                        |
+| 04.9 Modal                 | `TApproveModal`: desktop 480 на scrim; mobile bottom sheet 390; destructive confirm (удалить / выйти)                                                                                |
 | 05 Usage rules             | Do / Don't; именование и передача                                                                                                                                                    |
 
 
