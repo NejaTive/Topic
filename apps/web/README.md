@@ -15,7 +15,7 @@ Vue 3 SPA (Vite + TypeScript + Vue Router + Tailwind v4).
 
 **UI-Kit (`@/components/ui-kit`):** префикс `T` (Topic). `TButton` (primary / secondary / ghost / danger-ghost; размеры `md` 44 и `sm` 32; `loading` блокирует клик); `TInput` (label, `v-model`, text/password/email, error снизу); `TPrivacyChip` (`private` / `unlisted` / `public`; `compact` = icon-only для M); `TTopicRow` (title, meta, optional privacy/ownerNick, optional covers, hover); `TRankRow` (cover thumb, title, rank badge top-3 accent, drag-handle, inbox «В рейтинг»; states default/hover/focus/dragging; max-width 358); `TCoverUpload` (empty/hover/filled/error, file input, emit `file` для multipart, copy «до 5 МБ»); `TMainChip` (Фильмы/Сериалы/Книги/Игры → emit `select` label в title). Без баннера «Топик изменился» (Flow E). Стили kit — SCSS + токены; focus — `outline-focus-ring`. Импорт: `import { TButton, TCoverUpload, TMainChip, TRankRow } from '@/components/ui-kit'`. Витрина: `/dev/ui-kit` (также демо `AppNav`/`GuestNav` из `@/components/layout`).
 
-**Layout (`@/components/layout`):** `AppNav` (floating dock: bottom M / top D / `auto`; табы Лента → `/app/feed`, Мои топики → `/app/topics`, Профиль → `/u/:me.nick`; soft-well по route); `GuestNav` (`ctaMode`: `share` / `error` / `guest`); `ContentPageWrapper`; `ErrorStateView`.
+**Layout (`@/components/layout`):** `AppNav` (fixed auto dock; табы Лента / Мои топики / Профиль; soft-well по route); `GuestNav` (CTA «Присоединиться» → `/`); `ContentPageWrapper`; `ErrorStateView`.
 
 **Topic (`@/components/topic`):** `RankRowDraggable` + `RankedDropZone` (DnD S05, `ItemDto`); `DnDAnimatedPreview` в `App.vue`.
 
