@@ -57,7 +57,7 @@ function onActivate(event: MouseEvent | KeyboardEvent) {
     :type="rootTag === 'button' ? 'button' : undefined"
     :role="rootTag === 'div' ? 'button' : undefined"
     :tabindex="rootTag === 'div' ? 0 : undefined"
-    class="group flex w-full min-h-20 cursor-pointer items-center gap-3 rounded-md border border-line bg-surface px-4 py-5 text-left transition-colors outline-none hover:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+    class="glass group flex w-full min-h-20 cursor-pointer items-center gap-3 rounded-md px-4 py-5 text-left transition-colors outline-none hover:bg-surface-glass-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
     @click="onActivate"
     @keydown="rootTag === 'div' ? onActivate($event) : undefined"
   >

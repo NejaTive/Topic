@@ -15,7 +15,7 @@ const brandClass =
 <template>
   <nav class="fixed inset-x-3 bottom-3 z-40 md:bottom-auto md:top-3" aria-label="Навигация гостя">
     <div
-      class="mx-auto flex h-16 max-w-91.5 items-center justify-between gap-2 rounded-lg border border-line bg-surface px-3 shadow-float md:max-w-201 md:gap-3 md:px-4 lg:max-w-314"
+      class="glass mx-auto flex h-16 max-w-91.5 items-center justify-between gap-2 rounded-lg px-3 shadow-float md:max-w-201 md:gap-3 md:px-4 lg:max-w-314"
     >
       <RouterLink to="/" :class="brandClass">Topic</RouterLink>
 

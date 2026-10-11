@@ -1,3 +1,4 @@
+export { default as TApproveModal } from './TApproveModal.vue';
 export { default as TButton } from './TButton.vue';
 export { default as TInput } from './TInput.vue';
 export { default as TCoverUpload, COVER_MAX_BYTES } from './TCoverUpload.vue';

@@ -632,3 +632,38 @@
 ### GuestNav — одна CTA
 
 - GuestNav: fixed auto dock; бренд и CTA → `/`; везде одна Primary **«Присоединиться»** (S09/S10 guest, S11/S12). Без «Войти» / «На главную» в nav (вход — с лендинга).
+
+### Палитра — dark green (jewel)
+
+- Dark UI: `bg` `#0C0C10`, `surface` `#12121A`, brand green `#2F8F63` / hover `#3DA87A` (ярче сырого Vue-green для CTA не берём), purple secondary `#A879E6`.
+- Текст `#E4E4E7` / `#A1A1AA` / `#71717A`; линии `#27272A`.
+- Danger `#F66F81` только destructive; warning `#F9B44E`; success `#3DD68C`.
+- Privacy: private warning / unlisted info(purple) / public success; selected = soft + обводка.
+- Rank rows: green `row` в тоне brand soft; exploration clay — `feat/palette-clay`.
+
+## 12.10.2026
+
+### Liquid-glass (nav + карточки)
+
+- Утилита `glass`: полупрозрачный `surface` (62%, hover 78%) + blur 20px + обводка white@12%.
+- Где: AppNav / GuestNav, TopicRow, EmptyState, Login/Register, inbox/ranked panels (md+).
+- Где нет: инпуты, secondary-кнопки, cover upload, RankRow (`row/*`).
+- Fallback без `backdrop-filter`: непрозрачный `surface`.
+- Скролл под dock: inset 88px внутри `PageShell` body (M bottom / D top), не padding layout; header в scroll-потоке, чтобы карточки уезжали под nav.
+- DnD drop-slot (источник + insert): fill `row` @ 55% + `bg` — темнее прежнего mix с `surface`.
+
+### AppNav — sliding soft-well
+
+- Mobile: pill 32×32 под иконкой; desktop: pill по размеру пункта (translate + width/height) ~220ms.
+- Актив = цвет; вес/padding стабильны (без layout jump). `prefers-reduced-motion` — без transition.
+
+### Page fade
+
+- Смена страницы: `page-fade` opacity ~120ms, `mode="out-in"` в MainLayout / AuthLayout.
+- `prefers-reduced-motion` — без transition.
+
+### TApproveModal
+
+- Confirm-модалка вместо `window.confirm`: удаление топика/элемента, выход из аккаунта.
+- UI-kit SCSS: scrim + glass; M bottom sheet ≤390, D centered ≤480; confirm `danger-ghost`.
+- Пока `confirmLoading` — нельзя закрыть scrim/Escape.

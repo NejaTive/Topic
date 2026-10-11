@@ -3,7 +3,14 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { SocialApiError } from '@/api/social';
 import { PageShell } from '@/components/layout';
-import { TButton, TError, TLoader, TEmptyState, TTopicRow } from '@/components/ui-kit';
+import {
+  TApproveModal,
+  TButton,
+  TError,
+  TLoader,
+  TEmptyState,
+  TTopicRow,
+} from '@/components/ui-kit';
 import { useLogoutMutation } from '@/composables/useAuthMutations';
 import { useFollowMutation, useUnfollowMutation } from '@/composables/useFollowMutations';
 import { useTailwindBreakpoints } from '@/composables/useTailwindBreakpoints';
@@ -32,6 +39,7 @@ const logoutMutation = useLogoutMutation();
 
 const copyFeedback = ref('');
 const copyError = ref('');
+const approveOpen = ref(false);
 
 const profile = computed(() => profileQuery.data.value);
 const topics = computed(() => profile.value?.topics ?? []);
@@ -116,9 +124,14 @@ async function onCopyLink() {
   }
 }
 
-async function onLogout() {
+function openLogout() {
+  approveOpen.value = true;
+}
+
+async function onApproveLogout() {
   try {
     await logoutMutation.mutateAsync();
+    approveOpen.value = false;
   } finally {
     void router.replace({ name: RouteName.Home });
   }
@@ -163,12 +176,7 @@ async function onLogout() {
           </div>
 
           <template v-if="showCta && !isMobileView">
-            <TButton
-              v-if="isFollowing"
-              variant="secondary"
-              :loading="followBusy"
-              @click="onUnfollow"
-            >
+            <TButton v-if="isFollowing" variant="danger" :loading="followBusy" @click="onUnfollow">
               Отписаться
             </TButton>
             <TButton v-else :loading="followBusy" @click="onFollow">Подписаться</TButton>
@@ -182,7 +190,7 @@ async function onLogout() {
               aria-label="Выйти"
               :disabled="logoutBusy"
               :aria-busy="logoutBusy || undefined"
-              @click="onLogout"
+              @click="openLogout"
             >
               <svg class="size-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path
@@ -207,7 +215,7 @@ async function onLogout() {
               variant="danger-ghost"
               class="shrink-0"
               :loading="logoutBusy"
-              @click="onLogout"
+              @click="openLogout"
             >
               Выйти
             </TButton>
@@ -215,7 +223,7 @@ async function onLogout() {
         </div>
 
         <p v-if="profile" class="mt-1 text-body-sm text-muted">{{ counters }}</p>
-        <p v-if="copyFeedback" class="mt-1 text-caption text-accent" role="status">
+        <p v-if="copyFeedback" class="mt-1 text-caption text-success" role="status">
           {{ copyFeedback }}
         </p>
         <p v-if="copyError" class="mt-1 text-caption text-danger" role="alert">{{ copyError }}</p>
@@ -251,7 +259,7 @@ async function onLogout() {
       >
         <TButton
           v-if="isFollowing"
-          variant="secondary"
+          variant="danger"
           class="shadow-float"
           :loading="followBusy"
           @click="onUnfollow"
@@ -263,5 +271,14 @@ async function onLogout() {
         </TButton>
       </div>
     </template>
+
+    <TApproveModal
+      v-model:open="approveOpen"
+      title="Выйти из аккаунта?"
+      description="Сессия на этом устройстве завершится."
+      confirm-label="Выйти"
+      :confirm-loading="logoutBusy"
+      @confirm="onApproveLogout"
+    />
   </PageShell>
 </template>

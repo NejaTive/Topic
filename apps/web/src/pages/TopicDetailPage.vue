@@ -7,7 +7,14 @@ import { ItemsApiError, type ItemDto } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
 import { ContentPageWrapper, PageShell } from '@/components/layout';
 import { RankedDropZone, RankRowDraggable } from '@/components/topic';
-import { TButton, TError, TLoader, TPrivacyChip, type PrivacyValue } from '@/components/ui-kit';
+import {
+  TApproveModal,
+  TButton,
+  TError,
+  TLoader,
+  TPrivacyChip,
+  type PrivacyValue,
+} from '@/components/ui-kit';
 import { useTailwindBreakpoints } from '@/composables/useTailwindBreakpoints';
 import {
   applyOptimisticInboxToRank,
@@ -45,6 +52,7 @@ const reorderMut = useReorderItemsMutation(() => topicId.value);
 const privacyOpen = ref(false);
 const actionError = ref('');
 const copyFeedback = ref('');
+const approveOpen = ref(false);
 
 const breakpoints = useTailwindBreakpoints();
 const isMdUp = breakpoints.greaterOrEqual('md');
@@ -122,12 +130,16 @@ async function onCopyLink() {
   }
 }
 
-async function onDeleteTopic() {
+function openDeleteTopic() {
   clearActionError();
-  const ok = window.confirm('Удалить топик безвозвратно?');
-  if (!ok) return;
+  approveOpen.value = true;
+}
+
+async function onApproveDeleteTopic() {
+  clearActionError();
   try {
     await deleteTopicMut.mutateAsync(topicId.value);
+    approveOpen.value = false;
     await router.replace({ name: RouteName.AppTopics });
   } catch (err) {
     applyApiError(err, 'Не удалось удалить топик');
@@ -289,8 +301,7 @@ function onRetry() {
           variant="danger-ghost"
           class="shrink-0"
           :disabled="busyDelete"
-          :loading="busyDelete"
-          @click="onDeleteTopic"
+          @click="openDeleteTopic"
         >
           Удалить топик
         </TButton>
@@ -316,7 +327,7 @@ function onRetry() {
         </button>
       </div>
 
-      <p v-if="copyFeedback" class="mt-2 text-caption text-accent" role="status">
+      <p v-if="copyFeedback" class="mt-2 text-caption text-success" role="status">
         {{ copyFeedback }}
       </p>
       <p v-if="actionError" class="mt-2 text-caption text-danger" role="alert">
@@ -325,10 +336,7 @@ function onRetry() {
     </template>
 
     <div class="flex flex-col gap-8 md:grid md:grid-cols-2 md:items-stretch md:gap-6">
-      <section
-        class="md:rounded-lg md:border md:border-line md:bg-surface md:p-5"
-        aria-labelledby="s05-inbox-heading"
-      >
+      <section class="md:glass md:rounded-lg md:p-5" aria-labelledby="s05-inbox-heading">
         <h2
           id="s05-inbox-heading"
           class="text-body-sm font-bold text-ink md:text-body md:font-bold"
@@ -442,5 +450,14 @@ function onRetry() {
         </p>
       </RankedDropZone>
     </div>
+
+    <TApproveModal
+      v-model:open="approveOpen"
+      title="Удалить топик?"
+      description="Безвозвратно. Элементы тоже удалятся."
+      confirm-label="Удалить"
+      :confirm-loading="busyDelete"
+      @confirm="onApproveDeleteTopic"
+    />
   </ContentPageWrapper>
 </template>
