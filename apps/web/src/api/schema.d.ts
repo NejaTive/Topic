@@ -245,6 +245,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/{nick}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UsersController_getProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users/{nick}/follow": {
         parameters: {
             query?: never;
@@ -502,16 +518,61 @@ export interface components {
             followingCount: number;
             items: components["schemas"]["FeedItemDto"][];
         };
-        FollowBadRequestResponseDto: {
-            /** @example Нельзя подписаться на себя */
-            message: string;
-            /** @example 400 */
-            statusCode: number;
+        ProfileTopicDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Opaque shareId; клик → /t/:shareId
+             * @example xY7k_mPq2RnVw8sZ
+             */
+            shareId: string;
+            /** @example Фильмы 2026 */
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * @description coverKey топ-3 ranked по rankPosition (или пустой массив). Элемент null — ranked без обложки.
+             * @example [
+             *       "covers/abc.webp",
+             *       null
+             *     ]
+             */
+            previewCovers: (string | null)[];
+        };
+        UserProfileDto: {
+            /** @example topic_fan */
+            nick: string;
+            /** @example 12 */
+            followersCount: number;
+            /** @example 5 */
+            followingCount: number;
+            /**
+             * @description Число public-топиков владельца
+             * @example 3
+             */
+            topicsCount: number;
+            /**
+             * @description Сессия есть и me.id === владелец профиля
+             * @example false
+             */
+            isSelf: boolean;
+            /**
+             * @description null без сессии; иначе подписан ли me на владельца
+             * @example true
+             */
+            isFollowing: Record<string, never> | null;
+            topics: components["schemas"]["ProfileTopicDto"][];
         };
         UserNotFoundResponseDto: {
             /** @example Пользователь не найден */
             message: string;
             /** @example 404 */
+            statusCode: number;
+        };
+        FollowBadRequestResponseDto: {
+            /** @example Нельзя подписаться на себя */
+            message: string;
+            /** @example 400 */
             statusCode: number;
         };
     };
@@ -1344,6 +1405,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    UsersController_getProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                nick: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserNotFoundResponseDto"];
                 };
             };
         };
