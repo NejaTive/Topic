@@ -5,7 +5,7 @@ import { computed, nextTick, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ItemsApiError, type ItemDto } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import { ContentPageWrapper } from '@/components/layout';
+import { ContentPageWrapper, PageShell } from '@/components/layout';
 import { RankedDropZone, RankRowDraggable } from '@/components/topic';
 import { TButton, TError, TLoader, TPrivacyChip, type PrivacyValue } from '@/components/ui-kit';
 import { useTailwindBreakpoints } from '@/composables/useTailwindBreakpoints';
@@ -220,8 +220,12 @@ function onRetry() {
 </script>
 
 <template>
-  <TLoader v-if="isPending" />
-  <TError v-else-if="isError" @retry="onRetry" />
+  <PageShell v-if="isPending">
+    <TLoader />
+  </PageShell>
+  <PageShell v-else-if="isError">
+    <TError @retry="onRetry" />
+  </PageShell>
 
   <ContentPageWrapper
     v-else-if="topic"
@@ -229,96 +233,98 @@ function onRetry() {
     text-to="Мои топики"
     :title="topic.title"
   >
-    <div class="mt-3 flex items-center justify-between gap-3 md:mt-4">
-      <div class="flex min-w-0 items-center gap-2">
-        <button
-          type="button"
-          class="cursor-pointer transition-opacity hover:enabled:opacity-70"
-          :aria-expanded="privacyOpen"
-          aria-haspopup="listbox"
-          aria-label="Приватность топика"
-          :disabled="busyPrivacy"
-          @click="togglePrivacyPicker"
-        >
-          <TPrivacyChip :privacy="topic.privacy" :selected="privacyOpen" />
-        </button>
+    <template #chrome>
+      <div class="mt-3 flex items-center justify-between gap-3 md:mt-4">
+        <div class="flex min-w-0 items-center gap-2">
+          <button
+            type="button"
+            class="cursor-pointer transition-opacity hover:enabled:opacity-70"
+            :aria-expanded="privacyOpen"
+            aria-haspopup="listbox"
+            aria-label="Приватность топика"
+            :disabled="busyPrivacy"
+            @click="togglePrivacyPicker"
+          >
+            <TPrivacyChip :privacy="topic.privacy" :selected="privacyOpen" />
+          </button>
 
-        <button
-          v-if="isUnlisted && !isMdUp"
-          type="button"
-          class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-sm text-info transition-colors hover:bg-info-soft"
-          aria-label="Скопировать ссылку"
-          @click="onCopyLink"
-        >
-          <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <rect
-              x="5.5"
-              y="5.5"
-              width="8"
-              height="8"
-              rx="1.5"
-              stroke="currentColor"
-              stroke-width="1.5"
-            />
-            <path
-              d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
+          <button
+            v-if="isUnlisted && !isMdUp"
+            type="button"
+            class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-sm text-info transition-colors hover:bg-info-soft"
+            aria-label="Скопировать ссылку"
+            @click="onCopyLink"
+          >
+            <svg class="size-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <rect
+                x="5.5"
+                y="5.5"
+                width="8"
+                height="8"
+                rx="1.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+
+          <TButton
+            v-if="isUnlisted && isMdUp"
+            variant="ghost"
+            size="sm"
+            class="shrink-0"
+            @click="onCopyLink"
+          >
+            Скопировать ссылку
+          </TButton>
+        </div>
 
         <TButton
-          v-if="isUnlisted && isMdUp"
-          variant="ghost"
-          size="sm"
+          variant="danger-ghost"
           class="shrink-0"
-          @click="onCopyLink"
+          :disabled="busyDelete"
+          :loading="busyDelete"
+          @click="onDeleteTopic"
         >
-          Скопировать ссылку
+          Удалить топик
         </TButton>
       </div>
 
-      <TButton
-        variant="danger-ghost"
-        class="shrink-0"
-        :disabled="busyDelete"
-        :loading="busyDelete"
-        @click="onDeleteTopic"
+      <div
+        v-if="privacyOpen"
+        class="mt-3 flex flex-wrap gap-2"
+        role="listbox"
+        aria-label="Выбор приватности"
       >
-        Удалить топик
-      </TButton>
-    </div>
+        <button
+          v-for="option in PRIVACY_OPTIONS"
+          :key="option"
+          type="button"
+          role="option"
+          class="cursor-pointer transition-opacity hover:enabled:opacity-70"
+          :aria-selected="topic.privacy === option"
+          :disabled="busyPrivacy"
+          @click="onPrivacySelect(option)"
+        >
+          <TPrivacyChip :privacy="option" :selected="topic.privacy === option" />
+        </button>
+      </div>
 
-    <div
-      v-if="privacyOpen"
-      class="mt-3 flex flex-wrap gap-2"
-      role="listbox"
-      aria-label="Выбор приватности"
-    >
-      <button
-        v-for="option in PRIVACY_OPTIONS"
-        :key="option"
-        type="button"
-        role="option"
-        class="cursor-pointer transition-opacity hover:enabled:opacity-70"
-        :aria-selected="topic.privacy === option"
-        :disabled="busyPrivacy"
-        @click="onPrivacySelect(option)"
-      >
-        <TPrivacyChip :privacy="option" :selected="topic.privacy === option" />
-      </button>
-    </div>
+      <p v-if="copyFeedback" class="mt-2 text-caption text-accent" role="status">
+        {{ copyFeedback }}
+      </p>
+      <p v-if="actionError" class="mt-2 text-caption text-danger" role="alert">
+        {{ actionError }}
+      </p>
+    </template>
 
-    <p v-if="copyFeedback" class="mt-2 text-caption text-accent" role="status">
-      {{ copyFeedback }}
-    </p>
-    <p v-if="actionError" class="mt-2 text-caption text-danger" role="alert">
-      {{ actionError }}
-    </p>
-
-    <div class="mt-8 flex flex-col gap-8 md:mt-6 md:grid md:grid-cols-2 md:items-stretch md:gap-6">
+    <div class="flex flex-col gap-8 md:grid md:grid-cols-2 md:items-stretch md:gap-6">
       <section
         class="md:rounded-lg md:border md:border-line md:bg-surface md:p-5"
         aria-labelledby="s05-inbox-heading"

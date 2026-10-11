@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 11.10.2026 — App shell: PageShell, скролл списков, CTA снизу на mobile
+
+- **YouGile:** FRO-34
+- **Итог:** `PageShell` + app-shell layout: фиксированная шапка, скролл у body списков, отступы от экрана/навигации; на mobile fixed CTA снизу на S04/S06/S07; временный автоскролл DnD в PageShell (библиотечный `makeAutoScroll` отложен).
+- **Репо:** `feat/FRO-34` / [PR #60](https://github.com/NejaTive/Topic/pull/60) / (merge в develop)
+- **Заметки:** manual-close; проверено владельцем вручную.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 11.10.2026 — S10: выход и копирование ссылки; упростить AppNav/GuestNav
 
 - **YouGile:** FRO-33

@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { RouterLink, type RouteLocationRaw } from 'vue-router';
 import { RouteName } from '@/router/route-names';
+import PageShell from './PageShell.vue';
 
 interface ContentPageWrapperProps {
   routeTo?: RouteName | RouteLocationRaw;
@@ -22,11 +23,14 @@ const linkTo = computed<RouteLocationRaw | undefined>(() => {
 </script>
 
 <template>
-  <div>
-    <RouterLink v-if="linkTo" :to="linkTo" class="text-label font-semibold text-accent">
-      ← {{ props.textTo }}
-    </RouterLink>
-    <h1 class="mt-4 text-h1 text-ink">{{ props.title }}</h1>
+  <PageShell>
+    <template #header>
+      <RouterLink v-if="linkTo" :to="linkTo" class="text-label font-semibold text-accent">
+        ← {{ props.textTo }}
+      </RouterLink>
+      <h1 class="mt-4 text-h1 text-ink">{{ props.title }}</h1>
+      <slot name="chrome" />
+    </template>
     <slot />
-  </div>
+  </PageShell>
 </template>

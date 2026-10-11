@@ -74,7 +74,7 @@ function onCardKeydown(event: KeyboardEvent) {
   >
     <span
       v-if="mode === 'ranked' && rank != null"
-      class="w-7 shrink-0 text-center text-rank-m tabular-nums"
+      class="w-7 shrink-0 text-center text-rank-m"
       :class="[rankToneClass, isTopThree ? 'font-mono font-bold' : 'font-medium']"
       :aria-label="`Место ${rank}`"
     >

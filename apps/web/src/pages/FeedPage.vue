@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { PageShell } from '@/components/layout';
 import { TError, TLoader, TEmptyState, TTopicRow } from '@/components/ui-kit';
 import { useFeedQuery } from '@/composables/useFeedQuery';
 import { previewCoverUrls } from '@/lib/cover-url';
@@ -38,37 +39,41 @@ function onRetry() {
 </script>
 
 <template>
-  <header>
-    <h1 class="text-h1 text-ink">Лента</h1>
-  </header>
+  <PageShell>
+    <template #header>
+      <header>
+        <h1 class="text-h1 text-ink">Лента</h1>
+      </header>
+    </template>
 
-  <div v-if="isPending || isError || isEmpty || isEmptySubscribed" class="max-w-84.5 mx-auto mt-10">
-    <TLoader v-if="isPending" />
-    <TError v-else-if="isError" @retry="onRetry" />
-    <TEmptyState
-      v-else-if="isEmpty"
-      title="Лента пуста"
-      description="Откройте профиль по ссылке и нажмите «Подписаться»"
-      :show-cta="false"
-    />
-    <TEmptyState
-      v-else-if="isEmptySubscribed"
-      title="Пока тихо"
-      description="У тех, на кого вы подписаны, пока нет топиков"
-      :show-cta="false"
-    />
-  </div>
-
-  <ul v-else-if="showList" class="mt-6 flex flex-col gap-3 md:mt-4" aria-label="Лента топиков">
-    <li v-for="item in items" :key="item.id">
-      <TTopicRow
-        :title="item.title"
-        :meta="formatFeedUpdatedAt(item.updatedAt)"
-        :covers="previewCoverUrls(item.previewCovers)"
-        :owner-nick="item.ownerNick"
-        @click="goShare(item.shareId)"
-        @owner-click="goProfile(item.ownerNick)"
+    <div v-if="isPending || isError || isEmpty || isEmptySubscribed" class="max-w-84.5 mx-auto">
+      <TLoader v-if="isPending" />
+      <TError v-else-if="isError" @retry="onRetry" />
+      <TEmptyState
+        v-else-if="isEmpty"
+        title="Лента пуста"
+        description="Откройте профиль по ссылке и нажмите «Подписаться»"
+        :show-cta="false"
       />
-    </li>
-  </ul>
+      <TEmptyState
+        v-else-if="isEmptySubscribed"
+        title="Пока тихо"
+        description="У тех, на кого вы подписаны, пока нет топиков"
+        :show-cta="false"
+      />
+    </div>
+
+    <ul v-else-if="showList" class="flex flex-col gap-3" aria-label="Лента топиков">
+      <li v-for="item in items" :key="item.id">
+        <TTopicRow
+          :title="item.title"
+          :meta="formatFeedUpdatedAt(item.updatedAt)"
+          :covers="previewCoverUrls(item.previewCovers)"
+          :owner-nick="item.ownerNick"
+          @click="goShare(item.shareId)"
+          @owner-click="goProfile(item.ownerNick)"
+        />
+      </li>
+    </ul>
+  </PageShell>
 </template>
