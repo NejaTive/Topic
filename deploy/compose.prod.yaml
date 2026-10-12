@@ -45,6 +45,9 @@ services:
 
   postgres:
     image: postgres:17-alpine
+    # Только localhost на VPS — SSH/TablePlus-туннель; в интернет не публиковать
+    ports:
+      - '127.0.0.1:5432:5432'
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

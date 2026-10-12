@@ -683,3 +683,10 @@
 - **VPS:** обновить `/opt/topic/.env`; выкат образа `topic-web` с новым Caddyfile (том `caddy_data` сохранить).
 - **Отменяет отложенное** «купленный домен» из 08–09.10.2026; HTTPS по IP остаётся запасным доступом, канон — домен.
 - Канон: `docs/process/deploy.md`, `deploy/Caddyfile`, `deploy/.env.example`.
+
+### Prod Postgres — localhost для админ-доступа
+
+- В `deploy/compose.prod.yaml` у `postgres`: `ports: ['127.0.0.1:5432:5432']` — только loopback на VPS, не в интернет.
+- Доступ владельца: SSH-туннель / TablePlus Over SSH → `127.0.0.1:5432`, SSL off; креды из `/opt/topic/.env`.
+- Закреплено в `develop` без bump версии (вариант B); на VPS уже применено вручную; в prod через CI — со следующим promote в `main`.
+- Канон: `docs/process/deploy.md`.
