@@ -243,4 +243,4 @@ model Follow {
 
 - Must MVP: Auth, Topics (CRUD + DnD + privacy), Share S09, Social (S10 + follow + S13), PWA-shell, RU UI.
 - YouGile BAC/FRO — открытых карточек нет.
-- **5f** / post-MVP (`ideas`, OG, rate-limit, домен, тесты…) — вне контракта; брать только явным «пересматриваем» / новой нарезкой.
+- **5f** / post-MVP (`ideas`, OG, rate-limit, тесты…) — вне контракта; брать только явным «пересматриваем» / новой нарезкой. Домен `topi-ki.ru` — отдельным решением 12.10.2026.
