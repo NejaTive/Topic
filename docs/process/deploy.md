@@ -1,15 +1,16 @@
 # Деплой Topic (VPS + GitHub Actions)
 
-Канон решения: [`decisions.md`](decisions.md) (08.10.2026 — prod-хостинг; 09.10.2026 — TLS на IP).
+Канон решения: [`decisions.md`](decisions.md) (08.10.2026 — prod-хостинг; 09.10.2026 — TLS на IP; 12.10.2026 — домен `topi-ki.ru`).
 
 ## Топология
 
-- **VPS:** Ubuntu 22.04, Docker Compose.
-- **Edge:** Caddy (`topic-web`) на `:80` + `:443` — SPA, `/api/*` → Nest, `/{S3_BUCKET}/*` → MinIO; HTTPS на публичный IPv4 (Let's Encrypt short-lived ~6 суток).
+- **VPS:** Ubuntu 22.04, Docker Compose. Публичный IP: `31.76.22.106`.
+- **Домен:** `topi-ki.ru` (канон); `www.topi-ki.ru` → 301 на apex (Caddy).
+- **Edge:** Caddy (`topic-web`) на `:80` + `:443` — SPA, `/api/*` → Nest, `/{S3_BUCKET}/*` → MinIO; HTTPS Let's Encrypt на имя домена (обычный ACME, не shortlived-IP).
 - **Обложки:** same-origin `/{bucket}/{key}` (`S3_PUBLIC_URL=.` у api); не `127.0.0.1:9000` в браузере.
 - **Данные:** Postgres + MinIO на том же VPS (тома Docker); том `caddy_data` — сертификаты (не терять при recreate).
 - **CI:** push в `main` → параллельный build/push `topic-api` + `topic-web` в GHCR → SSH → `compose pull api web` + `up`.
-- **Origin:** `https://<PUBLIC_HOST>/`; session cookie с `Secure`.
+- **Origin:** `https://topi-ki.ru/` (`PUBLIC_HOST` / `PUBLIC_BASE_URL`); session cookie с `Secure`.
 
 Каталог на сервере: `/opt/topic` (`compose.prod.yaml`, `.env`).
 
@@ -97,13 +98,13 @@ docker compose -f compose.prod.yaml up -d
 - топик + обложка (URL вида `https://<PUBLIC_HOST>/topic-covers/…`)
 - share-ссылка
 
-## Переход с HTTP (разово)
+## Переход на домен (разово)
 
-1. Открыть **443** на VPS / у провайдера.
-2. В `/opt/topic/.env` задать `PUBLIC_HOST`, `PUBLIC_BASE_URL=https://…`, `ACME_EMAIL`, `HTTPS_PORT=443`.
-3. После выката образа с новым Caddyfile — `compose up -d` (том `caddy_data` появится сам).
-4. Старые HTTP-закладки → обновить на HTTPS; перелогиниться.
+1. У регистратора DNS: `A` `@` → `31.76.22.106`, `A` (или CNAME) `www` → тот же IP / apex. Дождаться propagate.
+2. В `/opt/topic/.env`: `PUBLIC_HOST=topi-ki.ru`, `PUBLIC_BASE_URL=https://topi-ki.ru`, `ACME_EMAIL`, `HTTPS_PORT=443`.
+3. Выкат образа `topic-web` с Caddyfile без `shortlived` + блок `www` → 301 (том `caddy_data` сохранить).
+4. Smoke: `https://topi-ki.ru/`, `https://www.topi-ki.ru/` → редирект на apex; логин / обложки / share. Старые закладки по IP — обновить; перелогиниться.
 
 ## Вне текущего этапа
 
-Купленный домен (обычный LE на имя), rate-limit auth, внешний S3/managed Postgres, автотесты в CI.
+Rate-limit auth, внешний S3/managed Postgres, автотесты в CI.

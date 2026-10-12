@@ -484,13 +484,13 @@
 - **Хостинг:** VPS (PL), Ubuntu 22.04, Docker Compose в `/opt/topic`.
 - **Стек на сервере:** Caddy (образ `topic-web`: SPA + reverse proxy) + Nest (`topic-api`) + Postgres + MinIO (обложки на том же VPS).
 - **Сеть (было):** один origin по **HTTP/IP без TLS** на первом этапе; MinIO/Postgres наружу не публиковать.
-- **Сеть (с 09.10.2026):** HTTPS на IP без покупки домена — см. ниже «Prod TLS на IP».
+- **Сеть (с 09.10.2026):** HTTPS на IP (LE short-lived) — «Prod TLS на IP»; **с 12.10.2026 канон — домен** `topi-ki.ru` (см. «Prod — домен topi-ki.ru»).
 - **CI/CD:** GitHub Actions при push в **`main`** → GHCR (`topic-api`, `topic-web`) → SSH deploy. Канон: [`deploy.md`](deploy.md).
 - **Promote:** фичи через `develop`; релиз = merge в `main` (skill `publish-prod`, путь `.cursor/skills/engineering/publish-prod/`).
 - **Версии:** перед каждым promote `develop`→`main` (skill `publish-prod`) **обязательно** выставить semver в корневом `package.json` (`version`) и синхронизировать `apps/api` / `apps/web` с тем же номером; после merge в `main` — annotated git tag `vMAJOR.MINOR.PATCH` на merge-commit. Skill предлагает bump, владелец подтверждает (или задаёт номер / «следующая» в команде).
 - **История релизов (09.10.2026):** канон — корневой [`CHANGELOG.md`](../../CHANGELOG.md) (текстовые буллеты на версию); зеркало — **GitHub Release** на тег (`gh release create` в `publish-prod`). Не дублировать смысл в `task-history` (там карточки, не релизы).
-- **Отложено (остаток B и прочее):** файл `VERSION` / version в health·UI / теги образов GHCR `:X.Y.Z`; **купленный** домен; rate-limit auth, внешний object storage.
-- **Снято с отложенного (09.10.2026):** TLS + `Secure` cookie — путь **A** (HTTPS на IP), см. «Prod TLS на IP».
+- **Отложено (остаток B и прочее):** файл `VERSION` / version в health·UI / теги образов GHCR `:X.Y.Z`; rate-limit auth, внешний object storage.
+- **Снято с отложенного:** TLS + `Secure` cookie (09.10, путь A на IP); **купленный домен** (12.10, `topi-ki.ru`).
 - **Отмена (частично):** ранее (тот же день) откладывали bump `package.json` — **снято** 08.10.2026 по решению владельца.
 
 ### S05 — accent-обводка RankedDropZone (drag-over)
@@ -556,7 +556,7 @@
 - **Edge:** Caddy 2.11 в `topic-web`: site `{$PUBLIC_HOST}`, `tls { issuer acme { profile shortlived } }`, `default_sni`, порты **80 + 443**, тома `caddy_data` / `caddy_config`.
 - **App:** `PUBLIC_BASE_URL=https://…` → session cookie **`Secure`** (и clearCookie в том же духе).
 - **Владелец на VPS:** открыть **443** (ufw/панель), обновить `.env`, smoke `https://31.76.22.106/` (логин, обложки, share).
-- **Отложено по-прежнему:** купленный домен; при появлении домена — обычный LE на имя (не shortlived-IP).
+- **Снято (12.10.2026):** купленный домен — см. «Prod — домен topi-ki.ru» (обычный LE на имя; shortlived-IP больше не канон).
 - Канон: `docs/process/deploy.md`, `tech-stack.mdc`, stage-3 строка деплоя.
 
 ### CI/CD — ускорение деплоя
@@ -673,3 +673,13 @@
 - Этап **5** и Must MVP ✅ закрыты владельцем (12.10.2026): Auth, Topics, Share, Social (follow + лента + S10), UI-полировка.
 - **5f** (хвост из `ideas.md`) **не** входит в MVP — post-MVP отдельным решением.
 - Трекер: [`stages-todo.md`](stages-todo.md); итог этапа — [`../stages/stage-5-brainstorm.md`](../stages/stage-5-brainstorm.md).
+
+### Prod — домен topi-ki.ru (вариант B)
+
+- **Решение владельца:** купленный домен **`topi-ki.ru`**; канон apex + **`www.topi-ki.ru` → 301** на apex.
+- **Origin:** `PUBLIC_HOST=topi-ki.ru`, `PUBLIC_BASE_URL=https://topi-ki.ru` (cookie `Secure` без изменений).
+- **TLS:** обычный Let's Encrypt на имя (не shortlived-IP). Профиль `shortlived` в Caddy снят.
+- **DNS (владелец у регистратора):** `A` для `@` и `www` → `31.76.22.106` (или `www` CNAME → apex, если регистратор позволяет).
+- **VPS:** обновить `/opt/topic/.env`; выкат образа `topic-web` с новым Caddyfile (том `caddy_data` сохранить).
+- **Отменяет отложенное** «купленный домен» из 08–09.10.2026; HTTPS по IP остаётся запасным доступом, канон — домен.
+- Канон: `docs/process/deploy.md`, `deploy/Caddyfile`, `deploy/.env.example`.
