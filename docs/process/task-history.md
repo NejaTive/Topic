@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 15.10.2026 — POST items/from-catalog (TMDB → Item + cover MinIO)
+
+- **YouGile:** BAC-23
+- **Итог:** `POST /api/topics/:topicId/items/from-catalog` body `{ provider: 'tmdb', providerId }`; только owner и `category===movies` (иначе 400/404); title (+ poster → sharp webp → MinIO) в inbox unranked без externalId; без постера — Item с `coverUrl: null`; OpenAPI + `schema.d.ts`.
+- **Репо:** `feat/BAC-23` / [PR #66](https://github.com/NejaTive/Topic/pull/66) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI S06 / дедуп по TMDB id не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
 ### 15.10.2026 — TMDB client + GET /api/catalog/movies/search
 
 - **YouGile:** BAC-22
