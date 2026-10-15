@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 15.10.2026 — Topic.category: Prisma enum + DTO/OpenAPI
+
+- **YouGile:** BAC-21
+- **Итог:** Prisma enum `TopicCategory` (`movies`|`custom`), поле `Topic.category` с дефолтом `custom` и миграцией existing→custom; create принимает optional category, update — нет; list/detail/share DTO + OpenAPI/`schema.d.ts` отдают category.
+- **Репо:** `feat/BAC-21` / [PR #64](https://github.com/NejaTive/Topic/pull/64) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); TMDB/UI/смена category после create не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
 ### 12.10.2026 — Dark green палитра, liquid-glass, nav slide и approve-modal
 
 - **YouGile:** FRO-35
