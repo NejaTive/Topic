@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 15.10.2026 — TMDB client + GET /api/catalog/movies/search
+
+- **YouGile:** BAC-22
+- **Итог:** Optional `TMDB_API_KEY`/`TMDB_ACCESS_TOKEN`; Nest `CatalogModule` + `TmdbClient` (Bearer или api_key, timeout 5s); `GET /api/catalog/movies/search` под AuthGuard, `language=ru`, fail-soft `[]`; OpenAPI + `gen:api`.
+- **Репо:** `feat/BAC-22` / [PR #65](https://github.com/NejaTive/Topic/pull/65) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); from-catalog/Item/MinIO/UI/series не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~4 мин · всего ~7 мин
+
 ### 15.10.2026 — Topic.category: Prisma enum + DTO/OpenAPI
 
 - **YouGile:** BAC-21
