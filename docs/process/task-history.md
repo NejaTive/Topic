@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 15.10.2026 — S06: поиск TMDB + from-catalog + ручной fallback
+
+- **YouGile:** FRO-38
+- **Итог:** На `ItemCreatePage` для `movies` — debounce-поиск TMDB, список (title/year/poster), выбор → `from-catalog` и редирект на топик; attribution TMDB; «Указать вручную» / «К поиску»; для `custom` — прежняя форма без поиска.
+- **Репо:** `feat/FRO-38` / [PR #69](https://github.com/NejaTive/Topic/pull/69) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI в коде/браузере без Figma; series/externalId не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~7 мин · всего ~10 мин
+
 ### 15.10.2026 — S04: чипы категории Фильмы / Своё
 
 - **YouGile:** FRO-37
