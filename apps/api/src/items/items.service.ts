@@ -1,23 +1,33 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { TmdbClient } from '../catalog/tmdb.client';
 import { Prisma, type Item } from '../generated/prisma/client';
-import { ItemPlacement } from '../generated/prisma/enums';
+import { ItemPlacement, TopicCategory } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import type { CreateItemDto } from './dto/create-item.dto';
+import type { FromCatalogItemDto } from './dto/from-catalog-item.dto';
 import type { ItemDto, ItemListDto } from './dto/item-response.dto';
 import type { ReorderItemsDto } from './dto/reorder-items.dto';
 import type { UpdateItemDto } from './dto/update-item.dto';
 
+const POSTER_FETCH_TIMEOUT_MS = 10_000;
+const ITEM_TITLE_MAX = 200;
+
 @Injectable()
 export class ItemsService {
+  private readonly logger = new Logger(ItemsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly tmdb: TmdbClient,
   ) {}
 
   async listForOwner(ownerId: string, topicId: string): Promise<ItemListDto> {
@@ -47,6 +57,69 @@ export class ItemsService {
         data: {
           topicId,
           title: dto.title.trim(),
+          placement: ItemPlacement.unranked,
+          rankPosition: null,
+        },
+      });
+      await tx.topic.update({
+        where: { id: topicId },
+        data: { updatedAt: new Date() },
+      });
+      return created;
+    });
+
+    return this.toDto(item);
+  }
+
+  async createFromCatalogForOwner(
+    ownerId: string,
+    topicId: string,
+    dto: FromCatalogItemDto,
+  ): Promise<ItemDto> {
+    const topic = await this.prisma.topic.findFirst({
+      where: { id: topicId, ownerId },
+      select: { id: true, category: true },
+    });
+    if (!topic) {
+      throw new NotFoundException({
+        message: 'Топик не найден',
+        statusCode: 404,
+      });
+    }
+    if (topic.category !== TopicCategory.movies) {
+      throw new BadRequestException({
+        message: 'Импорт из каталога доступен только для топиков категории «Фильмы»',
+        statusCode: 400,
+      });
+    }
+
+    if (!this.tmdb.isConfigured()) {
+      throw new ServiceUnavailableException({
+        message: 'Каталог фильмов временно недоступен',
+        statusCode: 503,
+      });
+    }
+
+    const movie = await this.tmdb.getMovie(dto.providerId);
+    if (!movie) {
+      throw new NotFoundException({
+        message: 'Фильм не найден в каталоге',
+        statusCode: 404,
+      });
+    }
+
+    const title = movie.title.slice(0, ITEM_TITLE_MAX);
+    let coverKey: string | null = null;
+    if (movie.imageUrl) {
+      coverKey = await this.tryUploadCoverFromUrl(movie.imageUrl);
+    }
+
+    const item = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.item.create({
+        data: {
+          topicId,
+          title,
+          coverKey,
           placement: ItemPlacement.unranked,
           rankPosition: null,
         },
@@ -334,6 +407,35 @@ export class ItemsService {
           data: { rankPosition: pos },
         });
       }
+    }
+  }
+
+  private async tryUploadCoverFromUrl(imageUrl: string): Promise<string | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), POSTER_FETCH_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(imageUrl, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        this.logger.warn(`poster fetch HTTP ${res.status}`);
+        return null;
+      }
+
+      const buffer = Buffer.from(await res.arrayBuffer());
+      if (!buffer.length) {
+        return null;
+      }
+
+      return await this.storage.uploadCover(buffer);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : 'unknown';
+      this.logger.warn(`poster → MinIO skipped: ${reason}`);
+      return null;
+    } finally {
+      clearTimeout(timer);
     }
   }
 

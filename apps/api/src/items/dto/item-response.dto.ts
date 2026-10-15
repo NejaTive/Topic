@@ -49,3 +49,13 @@ export class ItemNotFoundResponseDto {
   @ApiProperty({ example: 404 })
   statusCode!: number;
 }
+
+export class ItemBadRequestResponseDto {
+  @ApiProperty({
+    example: 'Импорт из каталога доступен только для топиков категории «Фильмы»',
+  })
+  message!: string;
+
+  @ApiProperty({ example: 400 })
+  statusCode!: number;
+}
