@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 15.10.2026 — S04: чипы категории Фильмы / Своё
+
+- **YouGile:** FRO-37
+- **Итог:** На создании топика чипы **Фильмы** | **Своё** (`movies`|`custom`) вместо name-hints; дефолт `custom`; выбор Фильмы префиллит название; `createTopic` всегда шлёт `category`.
+- **Репо:** `feat/FRO-37` / [PR #68](https://github.com/NejaTive/Topic/pull/68) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI по docs §UX S04 без Figma; S06/смена category на S05 не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~10 мин · ревью ~6 мин · всего ~16 мин
+
 ### 15.10.2026 — Catalog API-клиент: category + search + from-catalog
 
 - **YouGile:** FRO-36

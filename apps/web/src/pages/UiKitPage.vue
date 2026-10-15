@@ -115,7 +115,7 @@ function showCoverErrorDemo() {
     </p>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">TMainChip · подсказки S04</h2>
+      <h2 class="text-title">TMainChip · категория / подписи</h2>
       <div class="flex flex-wrap gap-2">
         <TMainChip
           v-for="label in MAIN_CHIP_LABELS"
