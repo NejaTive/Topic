@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import {
   createItem,
+  createItemFromCatalog,
   deleteItem,
   deleteItemCover,
   rankItem,
@@ -8,6 +9,7 @@ import {
   updateItem,
   uploadItemCover,
   type CreateItemBody,
+  type FromCatalogItemBody,
   type ItemDto,
   type UpdateItemBody,
 } from '@/api/items';
@@ -23,6 +25,19 @@ export function useCreateItemMutation(topicId: () => string) {
 
   return useMutation({
     mutationFn: (body: CreateItemBody) => createItem(topicId(), body),
+    onSuccess: (item: ItemDto) => {
+      const id = topicId();
+      queryClient.setQueryData(queryKeys.topics.item(id, item.id), item);
+      invalidateTopicLists(queryClient, id);
+    },
+  });
+}
+
+export function useCreateItemFromCatalogMutation(topicId: () => string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: FromCatalogItemBody) => createItemFromCatalog(topicId(), body),
     onSuccess: (item: ItemDto) => {
       const id = topicId();
       queryClient.setQueryData(queryKeys.topics.item(id, item.id), item);
