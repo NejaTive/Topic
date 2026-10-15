@@ -351,6 +351,8 @@ export interface components {
             /** @example Фильмы 2026 */
             title: string;
             /** @enum {string} */
+            category: "movies" | "custom";
+            /** @enum {string} */
             privacy: "private" | "unlisted" | "public";
             /** Format: date-time */
             updatedAt: string;
@@ -366,6 +368,12 @@ export interface components {
         CreateTopicDto: {
             /** @example Фильмы 2026 */
             title: string;
+            /**
+             * @description По умолчанию custom; смена после create в v1 не поддерживается
+             * @default custom
+             * @enum {string}
+             */
+            category: "movies" | "custom";
             /**
              * @description По умолчанию unlisted
              * @default unlisted
@@ -383,6 +391,8 @@ export interface components {
             shareId: string;
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "custom";
             /** @enum {string} */
             privacy: "private" | "unlisted" | "public";
             /** Format: date-time */
@@ -421,6 +431,8 @@ export interface components {
         ShareTopicDto: {
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "custom";
             /**
              * @description unlisted | public (private → 403, в тело не попадает)
              * @enum {string}
