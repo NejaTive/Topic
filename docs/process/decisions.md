@@ -708,3 +708,8 @@
 - После сравнения бесплатных API (OMDb, kino.is, Kinopoisk Unofficial, ПоискКино, no-key скрейперы) владелец выбрал **TMDB**.
 - Критерии: title + poster в search, `language=ru`, стабильность, свой image CDN, free non-commercial + attribution.
 - Детали и отвергнутые альтернативы — в [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) §«Провайдер: TMDB».
+
+### Нарезка YouGile — Catalog
+
+- Эпик **Catalog**: **BAC-21…23**, **FRO-36…38** в Бэклог; таблица и AC — [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) §«Нарезка YouGile».
+- При нарезке: дефолт category `custom`; year только в поиске; без смены category после create; from-catalog (A1); hi-fi не блокирует.

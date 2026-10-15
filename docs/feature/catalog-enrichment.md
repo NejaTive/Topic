@@ -37,8 +37,9 @@
 ### Topic
 
 - Новое поле: `category` — enum `movies` | `custom`.
-- Дефолт при создании: на выбор UX (предложение: `custom`, если не ткнули чип; либо обязательный выбор — уточнить в hi-fi).
+- Дефолт при создании: **`custom`** (если чип не выбран).
 - Существующие топики при миграции → `custom`.
+- Смена `category` после create в v1 не поддерживается.
 
 ### Item
 
@@ -104,23 +105,38 @@
 ## Этапы внедрения
 
 1. **Контракт и docs** — этот файл + decisions (✅).
-2. **Hi-fi** — S04 category chips; S06 search + manual fallback (Figma).
-3. **Backend:** миграция `Topic.category`; catalog search + from-catalog; env TMDB; OpenAPI.
-4. **Frontend:** S04/S06; query search; ветка по `category`.
+2. **Нарезка YouGile** — ✅ 15.10.2026 (см. ниже); hi-fi не блокирует.
+3. **Backend:** BAC-21 → BAC-22 → BAC-23.
+4. **Frontend:** FRO-36 → FRO-37 → FRO-38.
 5. **Проверка:** топик «Фильмы» → поиск → элемент с обложкой в MinIO; `custom` → как сейчас; без ключа TMDB — деградация без падения create.
 
-Нарезка YouGile — после hi-fi или параллельно BAC/FRO по готовности макета.
+## Нарезка YouGile ✅
+
+Эпик **Catalog** (стикер «Эпик Catalog» = `Catalog` на досках BAC/FRO). Карточки в колонке **Бэклог**. Отдельной hi-fi-карточки нет — UI по этому docs.
+
+| ID | Задача | Зависит от |
+|----|--------|------------|
+| **BAC-21** | `Topic.category` (`movies` \| `custom`): Prisma + миграция + CreateTopicDto / TopicDto / OpenAPI | — |
+| **BAC-22** | TMDB env + клиент + `GET /api/catalog/movies/search` | — |
+| **BAC-23** | `POST .../items/from-catalog` (TMDB → Item + cover MinIO) | BAC-21, BAC-22 |
+| **FRO-36** | Catalog API-клиент (category + search + from-catalog) | BAC-21, BAC-22, BAC-23 |
+| **FRO-37** | S04: чипы Фильмы / Своё | FRO-36 |
+| **FRO-38** | S06: поиск TMDB + from-catalog + ручной fallback | FRO-36, FRO-37 |
+
+Порядок исполнения: BAC-21 → BAC-22 → BAC-23 → FRO-36 → FRO-37 → FRO-38 (executor’ов не параллелить по умолчанию).
+
+### Зафиксировано при нарезке
+
+- Дефолт `category` без выбора чипа: **`custom`**.
+- Год — только в строке поиска на S06.
+- Смена `category` после create в v1 **нет** (только create; PATCH без поля).
+- Импорт: **A1** `from-catalog`.
 
 ## Не делаем в v1
 
 - Сериалы / игры / книги и прочие адаптеры.
 - Поля жанра, рейтинга TMDB, трейлеров на Item.
 - Хранение `externalSource` / `externalId` на Item.
-- Смена `category` у топика после создания (поведение: либо запрет, либо только `custom`↔`movies` без миграции элементов — решить отдельно).
+- Смена `category` у топика после создания.
 - OG-превью share-страницы `/t/:shareId` (другая фича).
-
-## Открытые вопросы (не блокеры плана)
-
-- Дефолт категории на S04, если пользователь не выбрал чип.
-- Можно ли переименовать топик `movies` как угодно (да — category не равна title).
-- Показывать ли year только в строке поиска или ещё где-то в UI элемента (v1: только поиск).
+- Отдельная Design/hi-fi карточка YouGile.
