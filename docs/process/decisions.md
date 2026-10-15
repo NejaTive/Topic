@@ -713,3 +713,9 @@
 
 - Эпик **Catalog**: **BAC-21…23**, **FRO-36…38** в Бэклог; таблица и AC — [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) §«Нарезка YouGile».
 - При нарезке: дефолт category `custom`; year только в поиске; без смены category после create; from-catalog (A1); hi-fi не блокирует.
+
+### Catalog — интеграционная ветка и UX без Figma (15.10.2026)
+
+- Интеграция эпика: **`feat/catalog-enrichment`** (не сразу в `develop`).
+- Карточки по-прежнему **одна ветка = одна задача** (`feat/BAC-21` …), но **PR base / merge → `feat/catalog-enrichment`**, не `develop`.
+- Hi-fi в Figma для Catalog **не делаем**: UI сразу в коде по [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) и UI-kit.
