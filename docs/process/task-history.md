@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 15.10.2026 — Catalog API-клиент: category + search + from-catalog
+
+- **YouGile:** FRO-36
+- **Итог:** Обёртки web API: `createTopic` с optional `category`, `searchCatalogMovies` + `CatalogApiError`, `createItemFromCatalog`; `CreateTopicInput` прокидывает category. Без UI S04/S06.
+- **Репо:** `feat/FRO-36` / [PR #67](https://github.com/NejaTive/Topic/pull/67) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); schema уже содержал контракт после BAC; UI не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
 ### 15.10.2026 — POST items/from-catalog (TMDB → Item + cover MinIO)
 
 - **YouGile:** BAC-23
