@@ -50,6 +50,44 @@ export class TmdbClient {
     url.searchParams.set('language', 'ru');
     url.searchParams.set('include_adult', 'false');
 
+    try {
+      const body = await this.tmdbGetJson<TmdbSearchResponse>(url);
+      if (!body) {
+        return [];
+      }
+      return (body.results ?? [])
+        .map((item) => this.mapHit(item))
+        .filter((hit): hit is TmdbMovieHit => hit !== null);
+    } catch (err) {
+      const reason = err instanceof Error ? err.name : 'unknown';
+      this.logger.warn(`TMDB search failed: ${reason}`);
+      return [];
+    }
+  }
+
+  async getMovie(providerId: string): Promise<TmdbMovieHit | null> {
+    const id = providerId.trim();
+    if (!id || !this.isConfigured()) {
+      return null;
+    }
+
+    const url = new URL(`${TMDB_API_BASE}/movie/${encodeURIComponent(id)}`);
+    url.searchParams.set('language', 'ru');
+
+    try {
+      const body = await this.tmdbGetJson<TmdbSearchMovie>(url);
+      if (!body) {
+        return null;
+      }
+      return this.mapHit(body);
+    } catch (err) {
+      const reason = err instanceof Error ? err.name : 'unknown';
+      this.logger.warn(`TMDB movie ${id} failed: ${reason}`);
+      return null;
+    }
+  }
+
+  private async tmdbGetJson<T>(url: URL): Promise<T | null> {
     const headers: Record<string, string> = {
       Accept: 'application/json',
     };
@@ -70,19 +108,16 @@ export class TmdbClient {
         signal: controller.signal,
       });
 
-      if (!res.ok) {
-        this.logger.warn(`TMDB search HTTP ${res.status}`);
-        return [];
+      if (res.status === 404) {
+        return null;
       }
 
-      const body = (await res.json()) as TmdbSearchResponse;
-      return (body.results ?? [])
-        .map((item) => this.mapHit(item))
-        .filter((hit): hit is TmdbMovieHit => hit !== null);
-    } catch (err) {
-      const reason = err instanceof Error ? err.name : 'unknown';
-      this.logger.warn(`TMDB search failed: ${reason}`);
-      return [];
+      if (!res.ok) {
+        this.logger.warn(`TMDB HTTP ${res.status} ${url.pathname}`);
+        return null;
+      }
+
+      return (await res.json()) as T;
     } finally {
       clearTimeout(timer);
     }

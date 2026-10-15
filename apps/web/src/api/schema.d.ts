@@ -165,6 +165,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/topics/{topicId}/items/from-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ItemsController_createFromCatalog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics/{topicId}/items/{itemId}": {
         parameters: {
             query?: never;
@@ -229,6 +245,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/catalog/movies/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CatalogController_searchMovies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/feed": {
         parameters: {
             query?: never;
@@ -272,22 +304,6 @@ export interface paths {
         put?: never;
         post: operations["UsersController_follow"];
         delete: operations["UsersController_unfollow"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/catalog/movies/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["CatalogController_searchMovies"];
-        put?: never;
-        post?: never;
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -502,6 +518,25 @@ export interface components {
              */
             orderedItemIds: string[];
         };
+        FromCatalogItemDto: {
+            /**
+             * @description Провайдер каталога (v1 — только TMDB)
+             * @example tmdb
+             * @enum {string}
+             */
+            provider: "tmdb";
+            /**
+             * @description Id фильма у провайдера; в Item не сохраняется
+             * @example 157336
+             */
+            providerId: string;
+        };
+        ItemBadRequestResponseDto: {
+            /** @example Импорт из каталога доступен только для топиков категории «Фильмы» */
+            message: string;
+            /** @example 400 */
+            statusCode: number;
+        };
         ItemNotFoundResponseDto: {
             /** @example Элемент не найден */
             message: string;
@@ -511,6 +546,25 @@ export interface components {
         UpdateItemDto: {
             /** @example Dune 2 */
             title?: string;
+        };
+        CatalogMovieDto: {
+            /**
+             * @description Id фильма у провайдера (TMDB); в Item v1 не сохраняется
+             * @example 157336
+             */
+            providerId: string;
+            /** @example Интерстеллар */
+            title: string;
+            /**
+             * @description Год из release_date; отсутствует, если даты нет
+             * @example 2014
+             */
+            year?: number;
+            /**
+             * @description Полный URL постера TMDB; null/omit если постера нет
+             * @example https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg
+             */
+            imageUrl?: string | null;
         };
         FeedItemDto: {
             /** Format: uuid */
@@ -602,25 +656,6 @@ export interface components {
             message: string;
             /** @example 400 */
             statusCode: number;
-        };
-        CatalogMovieDto: {
-            /**
-             * @description Id фильма у провайдера (TMDB); в Item v1 не сохраняется
-             * @example 157336
-             */
-            providerId: string;
-            /** @example Интерстеллар */
-            title: string;
-            /**
-             * @description Год из release_date; отсутствует, если даты нет
-             * @example 2014
-             */
-            year?: number;
-            /**
-             * @description Полный URL постера TMDB; null/omit если постера нет
-             * @example https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg
-             */
-            imageUrl?: string | null;
         };
     };
     responses: never;
@@ -1103,6 +1138,63 @@ export interface operations {
             };
         };
     };
+    ItemsController_createFromCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromCatalogItemDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            /** @description Топик не найден / фильм не найден в каталоге */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+            /** @description TMDB не сконфигурирован */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ItemsController_getOne: {
         parameters: {
             query?: never;
@@ -1429,6 +1521,36 @@ export interface operations {
             };
         };
     };
+    CatalogController_searchMovies: {
+        parameters: {
+            query?: {
+                /** @description Строка поиска; пустая / без ключа TMDB → [] */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogMovieDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
     FeedController_getFeed: {
         parameters: {
             query?: never;
@@ -1559,36 +1681,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserNotFoundResponseDto"];
-                };
-            };
-        };
-    };
-    CatalogController_searchMovies: {
-        parameters: {
-            query?: {
-                /** @description Строка поиска; пустая / без ключа TMDB → [] */
-                q?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CatalogMovieDto"][];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
                 };
             };
         };

@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBadRequestResponse,
   ApiBody,
   ApiConsumes,
   ApiCookieAuth,
@@ -24,6 +25,7 @@ import {
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiServiceUnavailableResponse,
   ApiTags,
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
@@ -37,7 +39,13 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { COVER_MAX_BYTES } from '../storage/storage.service';
 import { NotFoundResponseDto } from '../topics/dto/topic-response.dto';
 import { CreateItemDto } from './dto/create-item.dto';
-import { ItemDto, ItemListDto, ItemNotFoundResponseDto } from './dto/item-response.dto';
+import { FromCatalogItemDto } from './dto/from-catalog-item.dto';
+import {
+  ItemBadRequestResponseDto,
+  ItemDto,
+  ItemListDto,
+  ItemNotFoundResponseDto,
+} from './dto/item-response.dto';
 import { ReorderItemsDto } from './dto/reorder-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
@@ -91,6 +99,26 @@ export class ItemsController {
     @Body() dto: ReorderItemsDto,
   ): Promise<ItemListDto> {
     return this.items.reorderRankedOwned(user.id, topicId, dto);
+  }
+
+  @Post('from-catalog')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: ItemDto })
+  @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
+  @ApiBadRequestResponse({ type: ItemBadRequestResponseDto })
+  @ApiNotFoundResponse({
+    description: 'Топик не найден / фильм не найден в каталоге',
+    type: NotFoundResponseDto,
+  })
+  @ApiServiceUnavailableResponse({
+    description: 'TMDB не сконфигурирован',
+  })
+  createFromCatalog(
+    @CurrentUser() user: AuthUser,
+    @Param('topicId', ParseUUIDPipe) topicId: string,
+    @Body() dto: FromCatalogItemDto,
+  ): Promise<ItemDto> {
+    return this.items.createFromCatalogForOwner(user.id, topicId, dto);
   }
 
   @Get(':itemId')
