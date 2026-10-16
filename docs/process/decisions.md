@@ -699,7 +699,7 @@
 - Провайдер: **RAWG** (`GET /api/games?search=`, `GET /api/games/{id}`); секрет `RAWG_API_KEY` только на Nest.
 - **Meta вариант A:** тот же контракт строк, что у `movies`/`series` — `description` / `director` / `genre` / `country` / `sourceUrl`.
 - RAWG: `name`→title, `released`→year в поиске, `background_image`→cover, `description_raw`→description, первый developer→`director`, первый genre→`genre`, первая platform→`country`; `sourceUrl` = `https://rawg.io/games/{slug}`.
-- UI: лейбл `director` для games — **«Разработчик»**; `country` — **«Платформа»** (ключи API не меняем).
+- UI: лейбл `director` для games — **«Разработчик»**; поле `country` / «Платформа» **не показываем** на фронте (может оставаться в meta с RAWG).
 - `from-catalog`: `provider: 'tmdb' | 'rawg'` (movies/series → tmdb; games → rawg).
 - Attribution в UI поиска (ссылка на RAWG).
 - Смена `category` после create, IGDB, books, externalId — вне slice.

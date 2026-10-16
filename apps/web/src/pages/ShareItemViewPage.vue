@@ -25,7 +25,7 @@ const directorLabel = computed(() => {
   if (category.value === 'series') return 'Создатель';
   return 'Режиссёр';
 });
-const countryLabel = computed(() => (category.value === 'games' ? 'Платформа' : 'Страна'));
+const isGamesTopic = computed(() => category.value === 'games');
 const meta = computed(() => item.value?.meta ?? null);
 
 watch(
@@ -97,8 +97,8 @@ function onRetry() {
           <h2 class="text-label text-muted">{{ directorLabel }}</h2>
           <p class="text-body text-ink">{{ meta.director }}</p>
         </section>
-        <section v-if="meta.country" class="flex flex-col gap-1">
-          <h2 class="text-label text-muted">{{ countryLabel }}</h2>
+        <section v-if="!isGamesTopic && meta.country" class="flex flex-col gap-1">
+          <h2 class="text-label text-muted">Страна</h2>
           <p class="text-body text-ink">{{ meta.country }}</p>
         </section>
         <section v-if="meta.sourceUrl" class="flex flex-col gap-1">

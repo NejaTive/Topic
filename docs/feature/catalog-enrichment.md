@@ -47,7 +47,7 @@
 - Опциональный **`meta Json?`** — category-specific поля на том же `Item` (не отдельные колонки / таблицы).
   - **`movies` / `series` / `games` (вариант A):** одни и те же опциональные строки `description`, `director`, `genre`, `country` (singular; пустая строка → ключ отсутствует / `meta` null); `sourceUrl` — только server-set при from-catalog, в create/update с клиента игнорируется.
     - series: UI-лейбл `director` → «Создатель»; TMDB → `created_by[0]`.
-    - games: UI-лейблы `director` → «Разработчик», `country` → «Платформа»; RAWG → первый developer / genre / platform.
+    - games: UI-лейбл `director` → «Разработчик»; `country`/платформа в UI не показываем (RAWG может писать platform в meta).
   - **`custom`:** `meta` всегда `null`; передача `meta` в create/update → `400`.
   - Каталожный и ручной элемент в топике movies/series/games — один контракт редактируемых полей; `sourceUrl` только у импортированных.
   - Будущие категории (`books`, …): другие ключи в том же `meta`, валидация по `topic.category`.
@@ -86,7 +86,7 @@
 
 - Если `topic.category === 'movies' | 'series' | 'games'`: поле поиска → debounce → список из API → выбор → from-catalog (title + cover + meta); ссылка/кнопка «Указать вручную» → форма обложка → название → описание → жанр → режиссёр/создатель/разработчик → страна/платформа.
 - Если `custom`: только title + CoverUpload (без поиска и без meta-полей).
-- S07 (редактирование): те же meta-поля при `movies` | `series` | `games` (лейбл director: «Режиссёр» / «Создатель» / «Разработчик»; country: «Страна» / «Платформа» для games); `sourceUrl` — read-only ссылка «Источник», если есть. Список ранга / RankRow — без meta в первом slice (поля уже в API / ShareItemDto).
+- S07 (редактирование): meta при `movies` | `series` | `games` (лейбл director: «Режиссёр» / «Создатель» / «Разработчик»; country только movies/series — «Страна»; для games country в UI нет); `sourceUrl` — read-only ссылка «Источник», если есть. Список ранга / RankRow — без meta в первом slice (поля уже в API / ShareItemDto).
 
 ### Атрибуция
 
