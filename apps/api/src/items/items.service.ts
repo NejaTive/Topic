@@ -11,14 +11,22 @@ import {
 import { RawgClient } from '../catalog/rawg.client';
 import { TmdbClient } from '../catalog/tmdb.client';
 import { Prisma, type Item } from '../generated/prisma/client';
-import { ItemPlacement, TopicCategory, TopicPrivacy } from '../generated/prisma/enums';
+import {
+  ItemPlacement,
+  RecommendationStatus,
+  TopicCategory,
+  TopicPrivacy,
+} from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { UsersService } from '../users/users.service';
 import type { CopyFromShareDto } from './dto/copy-from-share.dto';
 import type { CreateItemDto } from './dto/create-item.dto';
 import type { FromCatalogItemDto } from './dto/from-catalog-item.dto';
 import type { ItemMetaDto } from './dto/item-meta.dto';
 import type { ItemDto, ItemListDto } from './dto/item-response.dto';
+import type { RecommendItemDto } from './dto/recommend-item.dto';
+import type { RecommendCreatedDto } from './dto/recommend-response.dto';
 import type { ReorderItemsDto } from './dto/reorder-items.dto';
 import type { UpdateItemDto } from './dto/update-item.dto';
 import {
@@ -50,7 +58,97 @@ export class ItemsService {
     private readonly storage: StorageService,
     private readonly tmdb: TmdbClient,
     private readonly rawg: RawgClient,
+    private readonly users: UsersService,
   ) {}
+
+  async recommendOwned(
+    ownerId: string,
+    itemId: string,
+    dto: RecommendItemDto,
+  ): Promise<RecommendCreatedDto> {
+    const hasIds = Array.isArray(dto.recipientIds);
+    const hasAll = dto.all === true;
+    if (hasIds === hasAll) {
+      throw new BadRequestException({
+        message: 'Укажите recipientIds (непустой массив) или all: true',
+        statusCode: 400,
+      });
+    }
+
+    const item = await this.prisma.item.findFirst({
+      where: { id: itemId, topic: { ownerId } },
+      include: { topic: { select: { category: true } } },
+    });
+    if (!item) {
+      throw new NotFoundException({
+        message: 'Элемент не найден',
+        statusCode: 404,
+      });
+    }
+
+    const mutual = await this.users.getMutualFollows(ownerId);
+    const mutualIds = new Set(mutual.items.map((u) => u.id));
+
+    let recipientIds: string[];
+    if (hasAll) {
+      recipientIds = mutual.items.map((u) => u.id);
+      if (recipientIds.length === 0) {
+        throw new BadRequestException({
+          message: 'Нет взаимных подписок',
+          statusCode: 400,
+        });
+      }
+    } else {
+      const unique = [...new Set(dto.recipientIds!)];
+      for (const id of unique) {
+        if (!mutualIds.has(id)) {
+          throw new BadRequestException({
+            message: 'Получатель должен быть взаимной подпиской',
+            statusCode: 400,
+          });
+        }
+      }
+      recipientIds = unique;
+    }
+
+    const pending = await this.prisma.recommendation.findMany({
+      where: {
+        fromUserId: ownerId,
+        sourceItemId: itemId,
+        status: RecommendationStatus.pending,
+        toUserId: { in: recipientIds },
+      },
+      select: { toUserId: true },
+    });
+    if (pending.length > 0) {
+      throw new ConflictException({
+        message: 'Уже рекомендовано',
+        statusCode: 409,
+      });
+    }
+
+    const meta = item.meta === null ? Prisma.DbNull : (item.meta as Prisma.InputJsonValue);
+
+    const created = await this.prisma.$transaction(
+      recipientIds.map((toUserId) =>
+        this.prisma.recommendation.create({
+          data: {
+            fromUserId: ownerId,
+            toUserId,
+            sourceItemId: item.id,
+            title: item.title,
+            coverKey: item.coverKey,
+            category: item.topic.category,
+            meta,
+            status: RecommendationStatus.pending,
+          },
+          select: { id: true },
+        }),
+      ),
+    );
+
+    return { ids: created.map((row) => row.id) };
+  }
 
   async listForOwner(ownerId: string, topicId: string): Promise<ItemListDto> {
     await this.findOwnedTopicOrThrow(ownerId, topicId);
