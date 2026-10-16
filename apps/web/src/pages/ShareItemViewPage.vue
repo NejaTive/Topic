@@ -177,27 +177,18 @@ function onRecommendSent() {
       {{ recommendFeedback }}
     </p>
 
-    <div
-      v-if="canCopy || canRecommend"
-      class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:mt-8 md:block"
-    >
-      <div class="flex w-full max-w-91.5 px-3 md:w-auto md:max-w-none md:px-0">
-        <TButton
-          v-if="canCopy"
-          class="w-full shadow-float md:w-auto md:shadow-none"
-          @click="onAddClick"
-        >
-          Добавить к себе
-        </TButton>
-        <TButton
-          v-else-if="canRecommend"
-          variant="secondary"
-          class="w-full shadow-float md:w-auto md:shadow-none"
-          @click="openRecommend"
-        >
-          Рекомендовать
-        </TButton>
-      </div>
+    <div v-if="canCopy || canRecommend" class="mt-8">
+      <TButton v-if="canCopy" class="w-full md:w-auto" @click="onAddClick">
+        Добавить к себе
+      </TButton>
+      <TButton
+        v-else-if="canRecommend"
+        variant="secondary"
+        class="w-full md:w-auto"
+        @click="openRecommend"
+      >
+        Рекомендовать
+      </TButton>
     </div>
 
     <CopyItemToTopicModal

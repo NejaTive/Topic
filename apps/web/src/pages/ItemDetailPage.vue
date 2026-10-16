@@ -352,42 +352,36 @@ function onRetry() {
           {{ recommendFeedback }}
         </p>
 
-        <div
-          class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block"
-        >
-          <div
-            class="flex w-full max-w-91.5 flex-col gap-3 px-3 md:w-auto md:max-w-none md:flex-row md:items-center md:px-0"
+        <div class="flex flex-col gap-3 md:flex-row md:items-center">
+          <TButton
+            type="submit"
+            class="w-full md:w-auto"
+            :loading="
+              updateItem.isPending.value ||
+              uploadCover.isPending.value ||
+              deleteCover.isPending.value
+            "
           >
-            <TButton
-              type="submit"
-              class="w-full shadow-float md:w-auto md:shadow-none"
-              :loading="
-                updateItem.isPending.value ||
-                uploadCover.isPending.value ||
-                deleteCover.isPending.value
-              "
-            >
-              Сохранить
-            </TButton>
-            <TButton
-              type="button"
-              variant="secondary"
-              class="w-full md:w-auto"
-              :disabled="isBusy"
-              @click="openRecommend"
-            >
-              Рекомендовать
-            </TButton>
-            <TButton
-              type="button"
-              variant="danger-ghost"
-              class="w-full md:w-auto"
-              :disabled="isBusy"
-              @click="openDelete"
-            >
-              Удалить
-            </TButton>
-          </div>
+            Сохранить
+          </TButton>
+          <TButton
+            type="button"
+            variant="secondary"
+            class="w-full md:w-auto"
+            :disabled="isBusy"
+            @click="openRecommend"
+          >
+            Рекомендовать
+          </TButton>
+          <TButton
+            type="button"
+            variant="danger-ghost"
+            class="w-full md:w-auto"
+            :disabled="isBusy"
+            @click="openDelete"
+          >
+            Удалить
+          </TButton>
         </div>
       </form>
     </template>

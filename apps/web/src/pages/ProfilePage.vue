@@ -175,11 +175,71 @@ async function onApproveLogout() {
             </button>
           </div>
 
-          <template v-if="showCta && !isMobileView">
-            <TButton v-if="isFollowing" variant="danger" :loading="followBusy" @click="onUnfollow">
-              Отписаться
-            </TButton>
-            <TButton v-else :loading="followBusy" @click="onFollow">Подписаться</TButton>
+          <template v-if="showCta">
+            <template v-if="isMobileView">
+              <button
+                v-if="isFollowing"
+                type="button"
+                class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-danger-soft text-danger transition-colors hover:opacity-80 disabled:pointer-events-none disabled:opacity-50"
+                aria-label="Отписаться"
+                :disabled="followBusy"
+                :aria-busy="followBusy || undefined"
+                @click="onUnfollow"
+              >
+                <svg
+                  class="size-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                  <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                  <path d="M3 3l18 18" />
+                </svg>
+              </button>
+              <button
+                v-else
+                type="button"
+                class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-accent-soft text-accent transition-colors hover:opacity-80 disabled:pointer-events-none disabled:opacity-50"
+                aria-label="Подписаться"
+                :disabled="followBusy"
+                :aria-busy="followBusy || undefined"
+                @click="onFollow"
+              >
+                <svg
+                  class="size-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                  <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                </svg>
+              </button>
+            </template>
+            <template v-else>
+              <TButton
+                v-if="isFollowing"
+                variant="danger"
+                size="sm"
+                class="shrink-0"
+                :loading="followBusy"
+                @click="onUnfollow"
+              >
+                Отписаться
+              </TButton>
+              <TButton v-else size="sm" class="shrink-0" :loading="followBusy" @click="onFollow">
+                Подписаться
+              </TButton>
+            </template>
           </template>
 
           <template v-else-if="isSelf">
@@ -193,21 +253,23 @@ async function onApproveLogout() {
               @click="openLogout"
             >
               <svg class="size-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path
-                  d="M8.5 4.5H5.5A1.5 1.5 0 0 0 4 6v8a1.5 1.5 0 0 0 1.5 1.5h3"
-                  fill="var(--color-danger-soft)"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M11 13.5 14.5 10 11 6.5M14.5 10H8"
-                  fill="var(--color-danger-soft)"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+                <g transform="translate(2 0)">
+                  <path
+                    d="M8.5 4.5H5.5A1.5 1.5 0 0 0 4 6v8a1.5 1.5 0 0 0 1.5 1.5h3"
+                    fill="var(--color-danger-soft)"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M11 13.5 14.5 10 11 6.5M14.5 10H8"
+                    fill="var(--color-danger-soft)"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </g>
               </svg>
             </button>
             <TButton
@@ -252,26 +314,6 @@ async function onApproveLogout() {
         />
       </li>
     </ul>
-
-    <template #overlay>
-      <div
-        v-if="showCta && isMobileView"
-        class="fixed inset-x-0 bottom-23 z-30 flex justify-center"
-      >
-        <TButton
-          v-if="isFollowing"
-          variant="danger"
-          class="shadow-float"
-          :loading="followBusy"
-          @click="onUnfollow"
-        >
-          Отписаться
-        </TButton>
-        <TButton v-else class="shadow-float" :loading="followBusy" @click="onFollow">
-          Подписаться
-        </TButton>
-      </div>
-    </template>
 
     <TApproveModal
       v-model:open="approveOpen"
