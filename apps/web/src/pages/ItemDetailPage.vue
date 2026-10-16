@@ -3,6 +3,7 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
+import RecommendItemModal from '@/components/recommendations/RecommendItemModal.vue';
 import {
   TApproveModal,
   TButton,
@@ -72,7 +73,10 @@ const coverError = ref<string | null>(null);
 const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 const actionError = ref('');
+const recommendFeedback = ref('');
 const approveOpen = ref(false);
+const recommendOpen = ref(false);
+let recommendFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
 const category = computed(() => topicQuery.data.value?.category);
@@ -126,6 +130,7 @@ function revokeLocalPreview() {
 
 onUnmounted(() => {
   revokeLocalPreview();
+  if (recommendFeedbackTimer) clearTimeout(recommendFeedbackTimer);
 });
 
 function clearFormErrors() {
@@ -243,6 +248,21 @@ function openDelete() {
   approveOpen.value = true;
 }
 
+function openRecommend() {
+  clearActionError();
+  recommendFeedback.value = '';
+  recommendOpen.value = true;
+}
+
+function onRecommendSent() {
+  recommendFeedback.value = 'Рекомендация отправлена';
+  if (recommendFeedbackTimer) clearTimeout(recommendFeedbackTimer);
+  recommendFeedbackTimer = setTimeout(() => {
+    recommendFeedback.value = '';
+    recommendFeedbackTimer = null;
+  }, 2500);
+}
+
 async function onApproveDelete() {
   clearActionError();
   try {
@@ -328,6 +348,9 @@ function onRetry() {
         <p v-if="actionError" class="text-caption text-danger">
           {{ actionError }}
         </p>
+        <p v-if="recommendFeedback" class="text-caption text-muted">
+          {{ recommendFeedback }}
+        </p>
 
         <div
           class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block"
@@ -345,6 +368,15 @@ function onRetry() {
               "
             >
               Сохранить
+            </TButton>
+            <TButton
+              type="button"
+              variant="secondary"
+              class="w-full md:w-auto"
+              :disabled="isBusy"
+              @click="openRecommend"
+            >
+              Рекомендовать
             </TButton>
             <TButton
               type="button"
@@ -368,5 +400,6 @@ function onRetry() {
       :confirm-loading="deleteItemMut.isPending.value"
       @confirm="onApproveDelete"
     />
+    <RecommendItemModal v-model:open="recommendOpen" :item-id="itemId" @sent="onRecommendSent" />
   </ContentPageWrapper>
 </template>
