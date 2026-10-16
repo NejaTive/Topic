@@ -30,7 +30,9 @@ const linkTo = computed<RouteLocationRaw | undefined>(() => {
           ← {{ props.textTo }}
         </RouterLink>
       </slot>
-      <h1 class="mt-4 text-h1 text-ink">{{ props.title }}</h1>
+      <slot name="title">
+        <h1 class="mt-4 text-h1 text-ink">{{ props.title }}</h1>
+      </slot>
       <slot name="chrome" />
     </template>
     <slot />

@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 16.10.2026 — S05: inline переименование топика
+
+- **YouGile:** FRO-44
+- **Итог:** `ContentPageWrapper` слот `#title`; `useUpdateTopicTitleMutation` → `updateTopic({ title })` + invalidate detail/list; на S05 клик по названию → `TInput` + Сохранить / Отмена (`danger-ghost`); trim/пустое и `TopicsApiError`.
+- **Репо:** `feat/FRO-44` / [PR #79](https://github.com/NejaTive/Topic/pull/79) → `develop`
+- **Заметки:** клик по title в `h1`; Отмена как «Удалить топик»; пустое → «Укажите название». Ревьюер aborted — закрытие по запросу владельца.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~20 мин · ревью — · всего ~20 мин
+
 ### 16.10.2026 — S04/S06/S07: чип Игры + поиск RAWG + meta
 
 - **YouGile:** FRO-43
