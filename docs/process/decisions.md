@@ -693,6 +693,12 @@
 
 ## 17.10.2026
 
+### UI polish — error chrome + empty profile (self)
+
+- **404 / no-access:** `ErrorStateView` показывает `AppNav` при `session === authed`, иначе `GuestNav` (не «Присоединиться» для залогиненного).
+- **Профиль:** счётчик и список — только **public** топики (так и задумано); для `isSelf` + empty — пояснение про «Мои топики» + CTA «Создать топик».
+- Не трогаем: empty-state typo, desktop full-width CTA, placeholder «Интерстеллар» на custom.
+
 ### YouGile — параллельные executor’ы по умолчанию
 
 - **Пересматриваем** инвариант «executor’ы не параллелить по умолчанию».
