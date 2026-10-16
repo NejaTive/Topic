@@ -569,7 +569,7 @@ export interface components {
             providerId: string;
         };
         ItemBadRequestResponseDto: {
-            /** @example Импорт из каталога доступен только для топиков категории «Фильмы» */
+            /** @example Импорт из каталога доступен только для топиков категорий «Фильмы» и «Сериалы» */
             message: string;
             /** @example 400 */
             statusCode: number;
