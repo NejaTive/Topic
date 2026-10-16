@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, MaxLength, ValidateIf } from 'class-validator';
 
-/** Category-specific поля элемента. Для movies: description / director / genre / country / sourceUrl. */
+/** Category-specific поля. Для movies|series: description / director / genre / country / sourceUrl. */
 export class ItemMetaDto {
   @ApiPropertyOptional({
     type: String,

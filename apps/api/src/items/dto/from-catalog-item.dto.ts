@@ -12,7 +12,7 @@ export class FromCatalogItemDto {
 
   @ApiProperty({
     example: '157336',
-    description: 'Id фильма у провайдера; в Item не сохраняется',
+    description: 'Id фильма/сериала у провайдера; в Item не сохраняется',
     minLength: 1,
     maxLength: 32,
   })

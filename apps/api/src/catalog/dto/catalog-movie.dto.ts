@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 export class CatalogMovieDto {
   @ApiProperty({
     example: '157336',
-    description: 'Id фильма у провайдера (TMDB); в Item v1 не сохраняется',
+    description: 'Id у провайдера (TMDB movie/tv); в Item v1 не сохраняется',
   })
   providerId!: string;
 
@@ -12,7 +12,7 @@ export class CatalogMovieDto {
 
   @ApiPropertyOptional({
     example: 2014,
-    description: 'Год из release_date; отсутствует, если даты нет',
+    description: 'Год из release_date / first_air_date; отсутствует, если даты нет',
   })
   year?: number;
 

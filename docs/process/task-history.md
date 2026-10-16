@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 16.10.2026 — Категория series: Prisma + TMDB TV
+
+- **YouGile:** BAC-26
+- **Итог:** `TopicCategory` += `series`; TMDB `searchTv`/`getTv`; `GET /api/catalog/series/search`; `from-catalog` и Item meta для movies|series (`sourceUrl` на `/tv/{id}`); `custom` + meta → 400; OpenAPI/`schema.d.ts`.
+- **Репо:** `feat/BAC-26` / [PR #74](https://github.com/NejaTive/Topic/pull/74) → `develop`
+- **Заметки:** UI — FRO-41; docs catalog-enrichment (series) уже на develop.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~4 мин · ревью ~4 мин · всего ~8 мин
+
 ### 16.10.2026 — Item.meta.sourceUrl из from-catalog
 
 - **YouGile:** BAC-25
