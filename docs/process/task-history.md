@@ -33,6 +33,16 @@
 
 ## Записи
 
+<<<<<<< HEAD
+### 17.10.2026 — GET /me/mutual-follows
+
+- **YouGile:** BAC-30
+- **Итог:** `GET /api/me/mutual-follows` под AuthGuard — пересечение followers ∩ following, `{ items: [{ id, nick }] }`, orderBy nick; OpenAPI → `schema.d.ts`.
+- **Репо:** `feat/BAC-30` / [PR #84](https://github.com/NejaTive/Topic/pull/84) → `develop`
+- **Заметки:** smoke: 401 без cookie; взаимные / односторонние / empty / sort / unfollow одной стороны.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~6 мин · всего ~8 мин
+=======
 ### 17.10.2026 — Prisma Recommendation + status enum
 
 - **YouGile:** BAC-31
@@ -41,6 +51,7 @@
 - **Заметки:** HTTP API (BAC-30/29/28) и UI вне scope; CI на PR в репо нет (Deploy только на `main`).
 - **Доработка после ревью:** нет
 - **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+>>>>>>> origin/develop
 
 ### 17.10.2026 — Copy from share: элемент из чужого топика к себе
 
