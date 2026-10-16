@@ -33,7 +33,15 @@
 
 ## Записи
 
-<<<<<<< HEAD
+### 17.10.2026 — POST /items/:itemId/recommend
+
+- **YouGile:** BAC-29
+- **Итог:** `POST /api/items/:itemId/recommend` — body `{ recipientIds }` XOR `{ all: true }`; owner-only (любой placement; privacy не блокирует); mutual-follows; fan-out `Recommendation` pending со снимком; 201 `{ ids }`; OpenAPI → `schema.d.ts`.
+- **Репо:** `feat/BAC-29` / [PR #85](https://github.com/NejaTive/Topic/pull/85) → `develop`
+- **Заметки:** smoke: 401; XOR/пустой body 400; не-mutual / all@0 → 400; чужой/нет item → 404; private topic OK; повтор pending → 409. Unique index на pending-тройку — out of scope (гонка редкая). Параллельно починены conflict markers в этом файле (BAC-30∥BAC-31).
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~6 мин · всего ~8 мин
+
 ### 17.10.2026 — GET /me/mutual-follows
 
 - **YouGile:** BAC-30
@@ -42,7 +50,7 @@
 - **Заметки:** smoke: 401 без cookie; взаимные / односторонние / empty / sort / unfollow одной стороны.
 - **Доработка после ревью:** нет
 - **Длительность:** реализация ~2 мин · ревью ~6 мин · всего ~8 мин
-=======
+
 ### 17.10.2026 — Prisma Recommendation + status enum
 
 - **YouGile:** BAC-31
@@ -51,7 +59,6 @@
 - **Заметки:** HTTP API (BAC-30/29/28) и UI вне scope; CI на PR в репо нет (Deploy только на `main`).
 - **Доработка после ревью:** нет
 - **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
->>>>>>> origin/develop
 
 ### 17.10.2026 — Copy from share: элемент из чужого топика к себе
 
