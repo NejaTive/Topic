@@ -453,6 +453,11 @@ export interface components {
             genre?: string | null;
             /** @example США */
             country?: string | null;
+            /**
+             * @description Публичная ссылка на источник (TMDB); только server-set в from-catalog, в create/update с клиента игнорируется
+             * @example https://www.themoviedb.org/movie/157336
+             */
+            sourceUrl?: string | null;
         };
         ShareItemDto: {
             /** Format: uuid */

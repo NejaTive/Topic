@@ -3,17 +3,25 @@ import type { ItemMetaDto } from './dto/item-meta.dto';
 
 const META_FIELD_MAX = 100;
 const META_DESCRIPTION_MAX = 2000;
+const META_SOURCE_URL_MAX = 500;
 
 export type MoviesMeta = {
   description?: string;
   director?: string;
   genre?: string;
   country?: string;
+  sourceUrl?: string;
 };
 
 export function metaToDto(value: Prisma.JsonValue | null | undefined): ItemMetaDto | null {
   const parsed = parseMoviesMeta(value);
-  if (!parsed.description && !parsed.director && !parsed.genre && !parsed.country) {
+  if (
+    !parsed.description &&
+    !parsed.director &&
+    !parsed.genre &&
+    !parsed.country &&
+    !parsed.sourceUrl
+  ) {
     return null;
   }
   return {
@@ -21,6 +29,7 @@ export function metaToDto(value: Prisma.JsonValue | null | undefined): ItemMetaD
     director: parsed.director ?? null,
     genre: parsed.genre ?? null,
     country: parsed.country ?? null,
+    sourceUrl: parsed.sourceUrl ?? null,
   };
 }
 
@@ -42,9 +51,13 @@ export function parseMoviesMeta(value: Prisma.JsonValue | null | undefined): Mov
     ...(typeof record.country === 'string' && record.country.trim()
       ? { country: record.country.trim().slice(0, META_FIELD_MAX) }
       : {}),
+    ...(typeof record.sourceUrl === 'string' && record.sourceUrl.trim()
+      ? { sourceUrl: record.sourceUrl.trim().slice(0, META_SOURCE_URL_MAX) }
+      : {}),
   };
 }
 
+/** Патч с клиента: sourceUrl не принимаем — только server-set. */
 export function normalizeMoviesMetaPatch(patch: ItemMetaDto): MoviesMeta {
   const next: MoviesMeta = {};
   if (patch.description !== undefined) {
@@ -66,6 +79,7 @@ export function normalizeMoviesMetaPatch(patch: ItemMetaDto): MoviesMeta {
   return next;
 }
 
+/** Патч с клиента: sourceUrl не меняем (сохраняем текущий). */
 export function applyMoviesMetaPatch(current: MoviesMeta, patch: ItemMetaDto): MoviesMeta {
   const next: MoviesMeta = { ...current };
   if (patch.description !== undefined) {
@@ -97,8 +111,13 @@ export function moviesMetaToJson(meta: MoviesMeta): Prisma.InputJsonValue | type
   if (meta.director) out.director = meta.director;
   if (meta.genre) out.genre = meta.genre;
   if (meta.country) out.country = meta.country;
+  if (meta.sourceUrl) out.sourceUrl = meta.sourceUrl;
   if (Object.keys(out).length === 0) {
     return Prisma.DbNull;
   }
   return out;
+}
+
+export function tmdbMovieSourceUrl(providerId: string): string {
+  return `https://www.themoviedb.org/movie/${providerId.trim()}`.slice(0, META_SOURCE_URL_MAX);
 }

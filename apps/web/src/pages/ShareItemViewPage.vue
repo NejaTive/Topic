@@ -92,6 +92,17 @@ function onRetry() {
           <h2 class="text-label text-muted">Страна</h2>
           <p class="text-body text-ink">{{ meta.country }}</p>
         </section>
+        <section v-if="meta.sourceUrl" class="flex flex-col gap-1">
+          <h2 class="text-label text-muted">Источник</h2>
+          <a
+            :href="meta.sourceUrl"
+            class="text-body text-accent break-all"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ meta.sourceUrl }}
+          </a>
+        </section>
       </div>
     </div>
   </ContentPageWrapper>

@@ -45,9 +45,9 @@
 
 - Общие поля: `title` + опциональный cover (upload или скачивание при импорте из поиска).
 - Опциональный **`meta Json?`** — category-specific поля на том же `Item` (не отдельные колонки / таблицы).
-  - **`movies`:** опциональные строки `description`, `director`, `genre`, `country` (singular; пустая строка → ключ отсутствует / `meta` null).
+  - **`movies`:** опциональные строки `description`, `director`, `genre`, `country` (singular; пустая строка → ключ отсутствует / `meta` null); `sourceUrl` — только server-set при from-catalog (TMDB page), в create/update с клиента игнорируется.
   - **`custom`:** `meta` всегда `null`; передача `meta` в create/update → `400`.
-  - Каталожный и ручной элемент в топике «Фильмы» — один контракт полей.
+  - Каталожный и ручной элемент в топике «Фильмы» — один контракт редактируемых полей; `sourceUrl` только у импортированных.
   - Будущие категории (`series`, `books`, …): другие ключи в том же `meta`, валидация по `topic.category`.
 
 ## API (Nest)
@@ -65,7 +65,7 @@
    Предпочтение плана: **A1** (меньше дыр, один транзакционный UX).
 
 3. Ручной путь: `POST .../items` + optional cover multipart; для `movies` — опциональный `meta: { director?, genre?, country? }`.
-4. `from-catalog` дополняет `meta` из TMDB details (`overview` → description; `append_to_response=credits`: первый Director, первый genre, первая production country).
+4. `from-catalog` дополняет `meta` из TMDB details (`overview` → description; `append_to_response=credits`: первый Director, первый genre, первая production country; `sourceUrl` → `https://www.themoviedb.org/movie/{providerId}`).
 
 Ошибки поиска: fail-soft (пустой список / сообщение), ручное создание не блокировать. Rate-limit / таймаут к TMDB — на Nest.
 
@@ -81,7 +81,7 @@
 
 - Если `topic.category === 'movies'`: поле поиска → debounce → список из API → выбор → from-catalog (title + cover + meta); ссылка/кнопка «Указать вручную» → форма обложка → название → описание → жанр → режиссёр → страна.
 - Если `custom`: только title + CoverUpload (без поиска и без meta-полей).
-- S07 (редактирование): те же meta-поля при `movies`. Список ранга / RankRow / S09 UI — без meta в первом slice (поля уже в API / ShareItemDto).
+- S07 (редактирование): те же meta-поля при `movies`; `sourceUrl` — read-only ссылка «Источник», если есть. Список ранга / RankRow — без meta в первом slice (поля уже в API / ShareItemDto).
 
 ### Атрибуция
 
