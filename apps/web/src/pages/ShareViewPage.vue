@@ -37,6 +37,13 @@ watch(
 function onRetry() {
   shareQuery.refetch();
 }
+
+function goItem(itemId: string) {
+  void router.push({
+    name: RouteName.ShareItemView,
+    params: { shareId: shareId.value, itemId },
+  });
+}
 </script>
 
 <template>
@@ -60,11 +67,11 @@ function onRetry() {
         <TRankRow
           class="max-w-none! w-full"
           mode="ranked"
-          readonly
           :show-drag-handle="false"
           :rank="item.rankPosition"
           :title="item.title"
           :cover-url="item.coverUrl ?? undefined"
+          @click="goItem(item.id)"
         />
       </li>
     </ul>
