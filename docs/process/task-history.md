@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — GET /recommendations + accept/dismiss
+
+- **YouGile:** BAC-28
+- **Итог:** `GET /api/recommendations` (pending для me, `createdAt desc`, снимок + `fromNick` + `id`); `POST …/:id/accept` `{ topicId }` и `…/dismiss`; общий `copySnapshotToInbox` с copy-from-share (meta + clone cover best-effort); accept из снимка при `sourceItemId=null`; OpenAPI → `schema.d.ts`.
+- **Репо:** `feat/BAC-28` / [PR #86](https://github.com/NejaTive/Topic/pull/86) → `develop`
+- **Заметки:** smoke: 401; empty/pending GET + order; accept 201; category 400; чужой/повтор/после dismiss 404; sourceUrl 409; accept после удаления sourceItem; dismiss 204. UI/prefetch/уведомления — out of scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~3 мин · всего ~6 мин
+
 ### 17.10.2026 — POST /items/:itemId/recommend
 
 - **YouGile:** BAC-29
