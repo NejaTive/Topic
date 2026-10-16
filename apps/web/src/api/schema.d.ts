@@ -261,6 +261,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/catalog/series/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CatalogController_searchSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/feed": {
         parameters: {
             query?: never;
@@ -383,7 +399,7 @@ export interface components {
             /** @example Фильмы 2026 */
             title: string;
             /** @enum {string} */
-            category: "movies" | "custom";
+            category: "movies" | "series" | "custom";
             /** @enum {string} */
             privacy: "private" | "unlisted" | "public";
             /** Format: date-time */
@@ -405,7 +421,7 @@ export interface components {
              * @default custom
              * @enum {string}
              */
-            category: "movies" | "custom";
+            category: "movies" | "series" | "custom";
             /**
              * @description По умолчанию unlisted
              * @default unlisted
@@ -424,7 +440,7 @@ export interface components {
             /** @example Фильмы 2026 */
             title: string;
             /** @enum {string} */
-            category: "movies" | "custom";
+            category: "movies" | "series" | "custom";
             /** @enum {string} */
             privacy: "private" | "unlisted" | "public";
             /** Format: date-time */
@@ -481,7 +497,7 @@ export interface components {
             /** @example Фильмы 2026 */
             title: string;
             /** @enum {string} */
-            category: "movies" | "custom";
+            category: "movies" | "series" | "custom";
             /**
              * @description unlisted | public (private → 403, в тело не попадает)
              * @enum {string}
@@ -526,7 +542,7 @@ export interface components {
         CreateItemDto: {
             /** @example Dune 2 */
             title: string;
-            /** @description Только для топиков category=movies; иначе 400 */
+            /** @description Только для топиков category=movies|series; иначе 400 */
             meta?: components["schemas"]["ItemMetaDto"];
         };
         ReorderItemsDto: {
@@ -547,7 +563,7 @@ export interface components {
              */
             provider: "tmdb";
             /**
-             * @description Id фильма у провайдера; в Item не сохраняется
+             * @description Id фильма/сериала у провайдера; в Item не сохраняется
              * @example 157336
              */
             providerId: string;
@@ -567,19 +583,19 @@ export interface components {
         UpdateItemDto: {
             /** @example Dune 2 */
             title?: string;
-            /** @description Частичный merge; только для category=movies; иначе 400 */
+            /** @description Частичный merge; только для category=movies|series; иначе 400 */
             meta?: components["schemas"]["ItemMetaDto"];
         };
         CatalogMovieDto: {
             /**
-             * @description Id фильма у провайдера (TMDB); в Item v1 не сохраняется
+             * @description Id у провайдера (TMDB movie/tv); в Item v1 не сохраняется
              * @example 157336
              */
             providerId: string;
             /** @example Интерстеллар */
             title: string;
             /**
-             * @description Год из release_date; отсутствует, если даты нет
+             * @description Год из release_date / first_air_date; отсутствует, если даты нет
              * @example 2014
              */
             year?: number;
@@ -1545,6 +1561,36 @@ export interface operations {
         };
     };
     CatalogController_searchMovies: {
+        parameters: {
+            query?: {
+                /** @description Строка поиска; пустая / без ключа TMDB → [] */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogMovieDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    CatalogController_searchSeries: {
         parameters: {
             query?: {
                 /** @description Строка поиска; пустая / без ключа TMDB → [] */

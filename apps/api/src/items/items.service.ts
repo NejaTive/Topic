@@ -24,6 +24,7 @@ import {
   normalizeMoviesMetaPatch,
   parseMoviesMeta,
   tmdbMovieSourceUrl,
+  tmdbTvSourceUrl,
 } from './item-meta';
 
 const POSTER_FETCH_TIMEOUT_MS = 10_000;
@@ -97,40 +98,49 @@ export class ItemsService {
         statusCode: 404,
       });
     }
-    if (topic.category !== TopicCategory.movies) {
+    if (topic.category !== TopicCategory.movies && topic.category !== TopicCategory.series) {
       throw new BadRequestException({
-        message: 'Импорт из каталога доступен только для топиков категории «Фильмы»',
+        message: 'Импорт из каталога доступен только для топиков категорий «Фильмы» и «Сериалы»',
         statusCode: 400,
       });
     }
 
     if (!this.tmdb.isConfigured()) {
       throw new ServiceUnavailableException({
-        message: 'Каталог фильмов временно недоступен',
+        message: 'Каталог временно недоступен',
         statusCode: 503,
       });
     }
 
-    const movie = await this.tmdb.getMovie(dto.providerId);
-    if (!movie) {
+    const hit =
+      topic.category === TopicCategory.series
+        ? await this.tmdb.getTv(dto.providerId)
+        : await this.tmdb.getMovie(dto.providerId);
+    if (!hit) {
       throw new NotFoundException({
-        message: 'Фильм не найден в каталоге',
+        message:
+          topic.category === TopicCategory.series
+            ? 'Сериал не найден в каталоге'
+            : 'Фильм не найден в каталоге',
         statusCode: 404,
       });
     }
 
-    const title = movie.title.slice(0, ITEM_TITLE_MAX);
+    const title = hit.title.slice(0, ITEM_TITLE_MAX);
     let coverKey: string | null = null;
-    if (movie.imageUrl) {
-      coverKey = await this.tryUploadCoverFromUrl(movie.imageUrl);
+    if (hit.imageUrl) {
+      coverKey = await this.tryUploadCoverFromUrl(hit.imageUrl);
     }
 
     const meta = moviesMetaToJson({
-      description: movie.description,
-      director: movie.director,
-      genre: movie.genre,
-      country: movie.country,
-      sourceUrl: tmdbMovieSourceUrl(dto.providerId),
+      description: hit.description,
+      director: hit.director,
+      genre: hit.genre,
+      country: hit.country,
+      sourceUrl:
+        topic.category === TopicCategory.series
+          ? tmdbTvSourceUrl(dto.providerId)
+          : tmdbMovieSourceUrl(dto.providerId),
     });
 
     const item = await this.prisma.$transaction(async (tx) => {
@@ -408,9 +418,9 @@ export class ItemsService {
     if (meta === undefined) {
       return Prisma.DbNull;
     }
-    if (category !== TopicCategory.movies) {
+    if (category !== TopicCategory.movies && category !== TopicCategory.series) {
       throw new BadRequestException({
-        message: 'Поля meta доступны только для топиков категории «Фильмы»',
+        message: 'Поля meta доступны только для топиков категорий «Фильмы» и «Сериалы»',
         statusCode: 400,
       });
     }
@@ -422,9 +432,9 @@ export class ItemsService {
     existing: Prisma.JsonValue,
     patch: ItemMetaDto,
   ): Prisma.InputJsonValue | typeof Prisma.DbNull {
-    if (category !== TopicCategory.movies) {
+    if (category !== TopicCategory.movies && category !== TopicCategory.series) {
       throw new BadRequestException({
-        message: 'Поля meta доступны только для топиков категории «Фильмы»',
+        message: 'Поля meta доступны только для топиков категорий «Фильмы» и «Сериалы»',
         statusCode: 400,
       });
     }

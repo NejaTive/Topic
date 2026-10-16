@@ -9,4 +9,8 @@ export class CatalogService {
   searchMovies(q: string | undefined): Promise<CatalogMovieDto[]> {
     return this.tmdb.searchMovies(q ?? '');
   }
+
+  searchSeries(q: string | undefined): Promise<CatalogMovieDto[]> {
+    return this.tmdb.searchTv(q ?? '');
+  }
 }

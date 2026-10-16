@@ -121,3 +121,7 @@ export function moviesMetaToJson(meta: MoviesMeta): Prisma.InputJsonValue | type
 export function tmdbMovieSourceUrl(providerId: string): string {
   return `https://www.themoviedb.org/movie/${providerId.trim()}`.slice(0, META_SOURCE_URL_MAX);
 }
+
+export function tmdbTvSourceUrl(providerId: string): string {
+  return `https://www.themoviedb.org/tv/${providerId.trim()}`.slice(0, META_SOURCE_URL_MAX);
+}
