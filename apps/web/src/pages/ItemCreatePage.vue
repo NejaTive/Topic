@@ -78,7 +78,6 @@ const directorLabel = computed(() => {
   if (isSeriesTopic.value) return 'Создатель';
   return 'Режиссёр';
 });
-const countryLabel = computed(() => (isGamesTopic.value ? 'Платформа' : 'Страна'));
 const searchLabel = computed(() => {
   if (isGamesTopic.value) return 'Поиск игры';
   if (isSeriesTopic.value) return 'Поиск сериала';
@@ -291,7 +290,7 @@ async function onSubmit() {
           ...(description.value.trim() ? { description: description.value.trim() } : {}),
           ...(director.value.trim() ? { director: director.value.trim() } : {}),
           ...(genre.value.trim() ? { genre: genre.value.trim() } : {}),
-          ...(country.value.trim() ? { country: country.value.trim() } : {}),
+          ...(!isGamesTopic.value && country.value.trim() ? { country: country.value.trim() } : {}),
         }
       : undefined;
     const item = await createItem.mutateAsync({
@@ -475,11 +474,12 @@ async function onSubmit() {
             :disabled="isSubmitting"
           />
           <TInput
+            v-if="!isGamesTopic"
             v-model="country"
-            :label="countryLabel"
+            label="Страна"
             type="text"
             autocomplete="off"
-            :placeholder="isGamesTopic ? 'Например, PC' : 'Например, США'"
+            placeholder="Например, США"
             :disabled="isSubmitting"
           />
         </template>

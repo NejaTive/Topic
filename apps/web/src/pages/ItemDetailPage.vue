@@ -84,7 +84,7 @@ const directorLabel = computed(() => {
   if (category.value === 'series') return 'Создатель';
   return 'Режиссёр';
 });
-const countryLabel = computed(() => (category.value === 'games' ? 'Платформа' : 'Страна'));
+const isGamesTopic = computed(() => category.value === 'games');
 const item = computed(() => itemQuery.data.value);
 
 const remoteCoverUrl = computed(() => item.value?.coverUrl ?? null);
@@ -201,7 +201,7 @@ async function onSave() {
           description: description.value.trim(),
           director: director.value.trim(),
           genre: genre.value.trim(),
-          country: country.value.trim(),
+          ...(!isGamesTopic.value ? { country: country.value.trim() } : {}),
         }
       : undefined;
     const prevMeta = item.value?.meta;
@@ -210,7 +210,7 @@ async function onSave() {
       (nextMeta!.description !== (prevMeta?.description ?? '') ||
         nextMeta!.director !== (prevMeta?.director ?? '') ||
         nextMeta!.genre !== (prevMeta?.genre ?? '') ||
-        nextMeta!.country !== (prevMeta?.country ?? ''));
+        (!isGamesTopic.value && nextMeta!.country !== (prevMeta?.country ?? '')));
 
     if (!item.value || trimmed !== item.value.title || metaChanged) {
       await updateItem.mutateAsync({
@@ -302,8 +302,9 @@ function onRetry() {
             :disabled="isBusy"
           />
           <TInput
+            v-if="!isGamesTopic"
             v-model="country"
-            :label="countryLabel"
+            label="Страна"
             type="text"
             autocomplete="off"
             :disabled="isBusy"
