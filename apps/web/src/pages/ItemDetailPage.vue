@@ -75,7 +75,9 @@ const actionError = ref('');
 const approveOpen = ref(false);
 
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
-const isMoviesTopic = computed(() => topicQuery.data.value?.category === 'movies');
+const category = computed(() => topicQuery.data.value?.category);
+const isCatalogTopic = computed(() => category.value === 'movies' || category.value === 'series');
+const directorLabel = computed(() => (category.value === 'series' ? 'Создатель' : 'Режиссёр'));
 const item = computed(() => itemQuery.data.value);
 
 const remoteCoverUrl = computed(() => item.value?.coverUrl ?? null);
@@ -187,7 +189,7 @@ async function onSave() {
   }
 
   try {
-    const nextMeta = isMoviesTopic.value
+    const nextMeta = isCatalogTopic.value
       ? {
           description: description.value.trim(),
           director: director.value.trim(),
@@ -197,7 +199,7 @@ async function onSave() {
       : undefined;
     const prevMeta = item.value?.meta;
     const metaChanged =
-      isMoviesTopic.value &&
+      isCatalogTopic.value &&
       (nextMeta!.description !== (prevMeta?.description ?? '') ||
         nextMeta!.director !== (prevMeta?.director ?? '') ||
         nextMeta!.genre !== (prevMeta?.genre ?? '') ||
@@ -282,12 +284,12 @@ function onRetry() {
           :disabled="isBusy"
         />
 
-        <template v-if="isMoviesTopic">
+        <template v-if="isCatalogTopic">
           <TTextarea v-model="description" label="Описание" :disabled="isBusy" />
           <TInput v-model="genre" label="Жанр" type="text" autocomplete="off" :disabled="isBusy" />
           <TInput
             v-model="director"
-            label="Режиссёр"
+            :label="directorLabel"
             type="text"
             autocomplete="off"
             :disabled="isBusy"
