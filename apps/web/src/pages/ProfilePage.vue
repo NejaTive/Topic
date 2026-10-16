@@ -88,6 +88,10 @@ function goShare(shareId: string) {
   router.push({ name: RouteName.ShareView, params: { shareId } });
 }
 
+function goCreateTopic() {
+  void router.push({ name: RouteName.AppTopicCreate });
+}
+
 function onRetry() {
   profileQuery.refetch();
 }
@@ -298,8 +302,12 @@ async function onApproveLogout() {
       <TEmptyState
         v-else-if="isEmpty"
         title="Пока нет открытых топиков"
-        description=""
-        :show-cta="false"
+        :description="
+          isSelf ? 'Приватные и «по ссылке» здесь не видны — они во вкладке «Мои топики».' : ''
+        "
+        :show-cta="isSelf"
+        cta-label="Создать топик"
+        @create="goCreateTopic"
       />
     </div>
 
