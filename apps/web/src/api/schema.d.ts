@@ -642,6 +642,8 @@ export interface components {
             shareId: string;
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
             /** Format: date-time */
             updatedAt: string;
             /**
@@ -676,6 +678,8 @@ export interface components {
             shareId: string;
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
             /** Format: date-time */
             updatedAt: string;
             /**

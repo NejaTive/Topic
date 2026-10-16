@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 16.10.2026 — Категория в списках + mobile cover stack; Своё disabled
+
+- **YouGile:** FRO-45
+- **Итог:** `category` в feed/profile API; `TCategoryChip` в `TTopicRow` (Topics/Feed/Profile); mobile album-stack обложек; на S04 чип «Своё» disabled, дефолт «Фильмы».
+- **Репо:** `feat/FRO-45` / [PR #81](https://github.com/NejaTive/Topic/pull/81) → `develop`
+- **Заметки:** manual-close; custom в API остаётся, UI создания временно без выбора.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 16.10.2026 — S05: inline переименование топика
 
 - **YouGile:** FRO-44

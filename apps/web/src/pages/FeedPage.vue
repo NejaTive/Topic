@@ -68,6 +68,7 @@ function onRetry() {
         <TTopicRow
           :title="item.title"
           :meta="formatFeedUpdatedAt(item.updatedAt)"
+          :category="item.category"
           :covers="previewCoverUrls(item.previewCovers)"
           :owner-nick="item.ownerNick"
           @click="goShare(item.shareId)"
