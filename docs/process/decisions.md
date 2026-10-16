@@ -693,6 +693,17 @@
 
 ## 16.10.2026
 
+### Категория series (сериалы) — TMDB TV, meta вариант A
+
+- **Пересматриваем** «вне v1» для сериалов из Catalog (15.10.2026): добавляем категорию **`series`**.
+- Провайдер: тот же **TMDB**, эндпоинты `/search/tv` и `/tv/{id}` (+ credits); ключ/токен без изменений.
+- **Meta вариант A:** тот же контракт строк, что у `movies` — `description` / `director` / `genre` / `country` / `sourceUrl` (без отдельного ключа `creator`).
+- TMDB: `name`→title, `first_air_date`→year в поиске, `overview`→description, `created_by[0].name`→`director`, первый genre / production country; `sourceUrl` = `https://www.themoviedb.org/tv/{providerId}`.
+- UI: лейбл поля `director` для series — **«Создатель»** (ключ API не меняем).
+- Смена `category` после create, сезоны/network, externalId — по-прежнему вне slice.
+- **YouGile:** по одной карточке BAC + FRO (эпик Catalog); PR → `develop`.
+- План: [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+
 ### S09 — read-only деталка элемента
 
 - Клик по RankRow на публичном share → **`/t/:shareId/items/:itemId`** (`ShareItemView`), без `requiresAuth`.
