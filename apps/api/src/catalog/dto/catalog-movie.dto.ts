@@ -20,7 +20,13 @@ export class CatalogMovieDto {
     type: String,
     nullable: true,
     example: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-    description: 'Полный URL постера TMDB; null/omit если постера нет',
+    description: 'Полный URL обложки провайдера; null/omit если нет',
   })
   imageUrl?: string | null;
+
+  @ApiPropertyOptional({
+    example: 'cyberpunk-2077',
+    description: 'Slug у RAWG (games); для дедупа sourceUrl; у TMDB отсутствует',
+  })
+  slug?: string;
 }

@@ -22,12 +22,14 @@ const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
 const CATEGORY_OPTIONS: CategoryOption[] = [
   { value: 'movies', label: 'Фильмы' },
   { value: 'series', label: 'Сериалы' },
+  { value: 'games', label: 'Игры' },
   { value: 'custom', label: 'Своё' },
 ];
 
 const TITLE_PREFILL: Partial<Record<TopicCategory, string>> = {
   movies: 'Фильмы',
   series: 'Сериалы',
+  games: 'Игры',
 };
 
 const CATEGORY_HINT =

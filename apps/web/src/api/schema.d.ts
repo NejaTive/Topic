@@ -622,10 +622,15 @@ export interface components {
              */
             year?: number;
             /**
-             * @description Полный URL постера TMDB; null/omit если постера нет
+             * @description Полный URL обложки провайдера; null/omit если нет
              * @example https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg
              */
             imageUrl?: string | null;
+            /**
+             * @description Slug у RAWG (games); для дедупа sourceUrl; у TMDB отсутствует
+             * @example cyberpunk-2077
+             */
+            slug?: string;
         };
         FeedItemDto: {
             /** Format: uuid */
