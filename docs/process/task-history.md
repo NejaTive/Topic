@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — API-клиент recommendations + mutual-follows
+
+- **YouGile:** FRO-48
+- **Итог:** `apps/web` API-модуль recommendations (mutual-follows, recommend, list, accept, dismiss) через общий `apiClient`; query keys; composables `useMutualFollowsQuery` / `useRecommendationsQuery` / recommend·accept·dismiss mutations (invalidate list + topics на accept).
+- **Репо:** `feat/FRO-48` / [PR #87](https://github.com/NejaTive/Topic/pull/87) → `develop`
+- **Заметки:** UI модалки/блок ленты — FRO-47/46; live HTTP smoke не гоняли (typecheck + сверка OpenAPI/паттерна social).
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~6 мин · всего ~8 мин
+
 ### 17.10.2026 — GET /recommendations + accept/dismiss
 
 - **YouGile:** BAC-28
