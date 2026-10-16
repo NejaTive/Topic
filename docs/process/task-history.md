@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — Favicon и PWA-иконки: знак ранга
+
+- **YouGile:** FRO-51
+- **Итог:** Favicon SVG/PNG + apple-touch; PWA 192/512 на том же знаке (полоски ранга + точка); подключено в `index.html` и PWA `includeAssets`.
+- **Репо:** `style/FRO-51` / [PR #92](https://github.com/NejaTive/Topic/pull/92) → `develop`
+- **Заметки:** manual-close; вариант B.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 17.10.2026 — Мобилка: убрать fixed CTA, иконки в шапке
 
 - **YouGile:** FRO-50
