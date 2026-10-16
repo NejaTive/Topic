@@ -181,19 +181,7 @@ async function onSubmit() {
 
       <p v-if="formError" class="text-caption text-danger" role="alert">{{ formError }}</p>
 
-      <div class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block">
-        <div
-          class="flex w-full max-w-91.5 flex-col gap-3 px-3 md:w-auto md:max-w-none md:flex-row md:items-center md:px-0"
-        >
-          <TButton
-            type="submit"
-            class="w-full shadow-float md:w-auto md:shadow-none"
-            :loading="isSubmitting"
-          >
-            Создать
-          </TButton>
-        </div>
-      </div>
+      <TButton type="submit" class="w-full md:w-auto" :loading="isSubmitting"> Создать </TButton>
     </form>
   </ContentPageWrapper>
 </template>
