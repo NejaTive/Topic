@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 16.10.2026 — Категория games: Prisma + RAWG
+
+- **YouGile:** BAC-27
+- **Итог:** `TopicCategory` += `games`; `RawgClient`; `GET /api/catalog/games/search`; `from-catalog` provider `tmdb|rawg` (games→rawg); meta + `sourceUrl` `https://rawg.io/games/{slug}`; OpenAPI/`schema.d.ts`; docs catalog-enrichment + decisions.
+- **Репо:** `feat/BAC-27` / [PR #77](https://github.com/NejaTive/Topic/pull/77) → `develop`
+- **Заметки:** UI — FRO-43; curl: search witcher → from-catalog meta/sourceUrl; provider mismatch 400; custom+meta 400; movies regression ок.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~25 мин · ревью ~7 мин · всего ~32 мин
+
 ### 16.10.2026 — Поиск: блок дубликата уже в списке
 
 - **YouGile:** FRO-42
