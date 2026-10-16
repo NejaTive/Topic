@@ -5,6 +5,7 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import {
   CatalogApiError,
+  searchCatalogGames,
   searchCatalogMovies,
   searchCatalogSeries,
   type CatalogMovie,
@@ -67,16 +68,32 @@ const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 
 const category = computed(() => topicQuery.data.value?.category);
-const isCatalogTopic = computed(() => category.value === 'movies' || category.value === 'series');
+const isCatalogTopic = computed(
+  () => category.value === 'movies' || category.value === 'series' || category.value === 'games',
+);
 const isSeriesTopic = computed(() => category.value === 'series');
-const directorLabel = computed(() => (isSeriesTopic.value ? 'Создатель' : 'Режиссёр'));
-const searchLabel = computed(() => (isSeriesTopic.value ? 'Поиск сериала' : 'Поиск фильма'));
-const searchPlaceholder = computed(() =>
-  isSeriesTopic.value ? 'Например, Во все тяжкие' : 'Например, Интерстеллар',
-);
-const descriptionPlaceholder = computed(() =>
-  isSeriesTopic.value ? 'Кратко о сериале' : 'Кратко о фильме',
-);
+const isGamesTopic = computed(() => category.value === 'games');
+const directorLabel = computed(() => {
+  if (isGamesTopic.value) return 'Разработчик';
+  if (isSeriesTopic.value) return 'Создатель';
+  return 'Режиссёр';
+});
+const countryLabel = computed(() => (isGamesTopic.value ? 'Платформа' : 'Страна'));
+const searchLabel = computed(() => {
+  if (isGamesTopic.value) return 'Поиск игры';
+  if (isSeriesTopic.value) return 'Поиск сериала';
+  return 'Поиск фильма';
+});
+const searchPlaceholder = computed(() => {
+  if (isGamesTopic.value) return 'Например, Cyberpunk 2077';
+  if (isSeriesTopic.value) return 'Например, Во все тяжкие';
+  return 'Например, Интерстеллар';
+});
+const descriptionPlaceholder = computed(() => {
+  if (isGamesTopic.value) return 'Кратко об игре';
+  if (isSeriesTopic.value) return 'Кратко о сериале';
+  return 'Кратко о фильме';
+});
 const showCatalogSearch = computed(() => isCatalogTopic.value && entryMode.value === 'search');
 const showManualForm = computed(() => !isCatalogTopic.value || entryMode.value === 'manual');
 const backToSearch = computed(() => showManualForm.value && isCatalogTopic.value);
@@ -84,15 +101,16 @@ const backToSearch = computed(() => showManualForm.value && isCatalogTopic.value
 const trimmedSearch = computed(() => debouncedSearch.value.trim());
 
 const catalogSearch = useQuery({
-  queryKey: computed(() =>
-    isSeriesTopic.value
-      ? queryKeys.catalog.seriesSearch(trimmedSearch.value)
-      : queryKeys.catalog.moviesSearch(trimmedSearch.value),
-  ),
-  queryFn: () =>
-    isSeriesTopic.value
-      ? searchCatalogSeries(trimmedSearch.value)
-      : searchCatalogMovies(trimmedSearch.value),
+  queryKey: computed(() => {
+    if (isGamesTopic.value) return queryKeys.catalog.gamesSearch(trimmedSearch.value);
+    if (isSeriesTopic.value) return queryKeys.catalog.seriesSearch(trimmedSearch.value);
+    return queryKeys.catalog.moviesSearch(trimmedSearch.value);
+  }),
+  queryFn: () => {
+    if (isGamesTopic.value) return searchCatalogGames(trimmedSearch.value);
+    if (isSeriesTopic.value) return searchCatalogSeries(trimmedSearch.value);
+    return searchCatalogMovies(trimmedSearch.value);
+  },
   enabled: computed(() => showCatalogSearch.value && trimmedSearch.value.length > 0),
   retry: false,
   staleTime: 30_000,
@@ -125,24 +143,30 @@ const existingSourceUrls = computed(() => {
   return urls;
 });
 
-const duplicateFormMessage = computed(() =>
-  isSeriesTopic.value ? 'Этот сериал уже есть в списке' : 'Этот фильм уже есть в списке',
-);
+const duplicateFormMessage = computed(() => {
+  if (isGamesTopic.value) return 'Эта игра уже есть в списке';
+  if (isSeriesTopic.value) return 'Этот сериал уже есть в списке';
+  return 'Этот фильм уже есть в списке';
+});
 
 const isSubmitting = computed(
   () =>
     createItem.isPending.value || uploadCover.isPending.value || createFromCatalog.isPending.value,
 );
 
-function catalogSourceUrl(providerId: string): string {
-  const id = providerId.trim();
+function catalogSourceUrl(entry: CatalogMovie): string {
+  if (isGamesTopic.value) {
+    const slug = entry.slug?.trim() || entry.providerId.trim();
+    return `https://rawg.io/games/${slug}`;
+  }
+  const id = entry.providerId.trim();
   return isSeriesTopic.value
     ? `https://www.themoviedb.org/tv/${id}`
     : `https://www.themoviedb.org/movie/${id}`;
 }
 
-function isAlreadyInList(providerId: string): boolean {
-  return existingSourceUrls.value.has(catalogSourceUrl(providerId));
+function isAlreadyInList(entry: CatalogMovie): boolean {
+  return existingSourceUrls.value.has(catalogSourceUrl(entry));
 }
 
 watch(
@@ -220,13 +244,13 @@ function applyError(err: unknown, preferCover = false) {
 }
 
 async function onSelectCatalogItem(entry: CatalogMovie) {
-  if (isSubmitting.value || isAlreadyInList(entry.providerId)) return;
+  if (isSubmitting.value || isAlreadyInList(entry)) return;
   clearErrors();
   selectingProviderId.value = entry.providerId;
 
   try {
     await createFromCatalog.mutateAsync({
-      provider: 'tmdb',
+      provider: isGamesTopic.value ? 'rawg' : 'tmdb',
       providerId: entry.providerId,
     });
     await router.replace({
@@ -351,8 +375,8 @@ async function onSubmit() {
               type="button"
               class="flex w-full items-center gap-3 py-2.5 text-left transition-colors outline-none hover:enabled:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-60"
               role="option"
-              :disabled="isSubmitting || isAlreadyInList(entry.providerId)"
-              :aria-disabled="isAlreadyInList(entry.providerId) || undefined"
+              :disabled="isSubmitting || isAlreadyInList(entry)"
+              :aria-disabled="isAlreadyInList(entry) || undefined"
               :aria-busy="selectingProviderId === entry.providerId || undefined"
               @click="onSelectCatalogItem(entry)"
             >
@@ -369,10 +393,7 @@ async function onSubmit() {
               />
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-body text-ink">{{ entry.title }}</span>
-                <span
-                  v-if="isAlreadyInList(entry.providerId)"
-                  class="block text-caption text-muted"
-                >
+                <span v-if="isAlreadyInList(entry)" class="block text-caption text-muted">
                   Уже в списке
                 </span>
                 <span v-else-if="entry.year" class="block text-caption text-muted">{{
@@ -388,8 +409,17 @@ async function onSubmit() {
         </p>
 
         <p v-if="trimmedSearch.length > 0" class="text-caption text-muted">
-          Источник данных: TMDB. This product uses the TMDB API but is not endorsed or certified by
-          TMDB.
+          <template v-if="isGamesTopic">
+            Источник данных:
+            <a href="https://rawg.io" class="text-accent" target="_blank" rel="noopener noreferrer">
+              RAWG
+            </a>
+            .
+          </template>
+          <template v-else>
+            Источник данных: TMDB. This product uses the TMDB API but is not endorsed or certified
+            by TMDB.
+          </template>
         </p>
 
         <button
@@ -441,15 +471,15 @@ async function onSubmit() {
             :label="directorLabel"
             type="text"
             autocomplete="off"
-            placeholder="Например, Кристофер Нолан"
+            :placeholder="isGamesTopic ? 'Например, CD Projekt RED' : 'Например, Кристофер Нолан'"
             :disabled="isSubmitting"
           />
           <TInput
             v-model="country"
-            label="Страна"
+            :label="countryLabel"
             type="text"
             autocomplete="off"
-            placeholder="Например, США"
+            :placeholder="isGamesTopic ? 'Например, PC' : 'Например, США'"
             :disabled="isSubmitting"
           />
         </template>

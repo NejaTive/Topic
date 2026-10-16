@@ -3,6 +3,7 @@ import type { components } from './schema';
 
 export type CatalogMovie = components['schemas']['CatalogMovieDto'];
 export type CatalogSeries = components['schemas']['CatalogMovieDto'];
+export type CatalogGame = components['schemas']['CatalogMovieDto'];
 
 export class CatalogApiError extends Error {
   constructor(
@@ -51,6 +52,22 @@ export async function searchCatalogSeries(q = ''): Promise<CatalogSeries[]> {
   if (error || !data) {
     throw new CatalogApiError(
       errorMessage(error, 'Не удалось выполнить поиск сериалов'),
+      response.status,
+    );
+  }
+  return data;
+}
+
+export async function searchCatalogGames(q = ''): Promise<CatalogGame[]> {
+  const { data, error, response } = await apiClient.GET('/api/catalog/games/search', {
+    params: { query: { q } },
+  });
+  if (response.status === 401) {
+    throw new CatalogApiError('Требуется вход', 401);
+  }
+  if (error || !data) {
+    throw new CatalogApiError(
+      errorMessage(error, 'Не удалось выполнить поиск игр'),
       response.status,
     );
   }

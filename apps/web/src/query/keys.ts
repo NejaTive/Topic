@@ -22,5 +22,6 @@ export const queryKeys = {
   catalog: {
     moviesSearch: (q: string) => ['catalog', 'movies', 'search', q] as const,
     seriesSearch: (q: string) => ['catalog', 'series', 'search', q] as const,
+    gamesSearch: (q: string) => ['catalog', 'games', 'search', q] as const,
   },
 };

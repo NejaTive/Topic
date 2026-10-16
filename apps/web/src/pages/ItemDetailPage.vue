@@ -76,8 +76,15 @@ const approveOpen = ref(false);
 
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
 const category = computed(() => topicQuery.data.value?.category);
-const isCatalogTopic = computed(() => category.value === 'movies' || category.value === 'series');
-const directorLabel = computed(() => (category.value === 'series' ? 'Создатель' : 'Режиссёр'));
+const isCatalogTopic = computed(
+  () => category.value === 'movies' || category.value === 'series' || category.value === 'games',
+);
+const directorLabel = computed(() => {
+  if (category.value === 'games') return 'Разработчик';
+  if (category.value === 'series') return 'Создатель';
+  return 'Режиссёр';
+});
+const countryLabel = computed(() => (category.value === 'games' ? 'Платформа' : 'Страна'));
 const item = computed(() => itemQuery.data.value);
 
 const remoteCoverUrl = computed(() => item.value?.coverUrl ?? null);
@@ -296,7 +303,7 @@ function onRetry() {
           />
           <TInput
             v-model="country"
-            label="Страна"
+            :label="countryLabel"
             type="text"
             autocomplete="off"
             :disabled="isBusy"

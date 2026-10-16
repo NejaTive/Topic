@@ -17,8 +17,15 @@ const shareQuery = useShareQuery(shareId);
 const share = computed(() => shareQuery.data.value);
 const item = computed(() => share.value?.items.find((entry) => entry.id === itemId.value));
 const category = computed(() => share.value?.category);
-const showMeta = computed(() => category.value === 'movies' || category.value === 'series');
-const directorLabel = computed(() => (category.value === 'series' ? 'Создатель' : 'Режиссёр'));
+const showMeta = computed(
+  () => category.value === 'movies' || category.value === 'series' || category.value === 'games',
+);
+const directorLabel = computed(() => {
+  if (category.value === 'games') return 'Разработчик';
+  if (category.value === 'series') return 'Создатель';
+  return 'Режиссёр';
+});
+const countryLabel = computed(() => (category.value === 'games' ? 'Платформа' : 'Страна'));
 const meta = computed(() => item.value?.meta ?? null);
 
 watch(
@@ -91,7 +98,7 @@ function onRetry() {
           <p class="text-body text-ink">{{ meta.director }}</p>
         </section>
         <section v-if="meta.country" class="flex flex-col gap-1">
-          <h2 class="text-label text-muted">Страна</h2>
+          <h2 class="text-label text-muted">{{ countryLabel }}</h2>
           <p class="text-body text-ink">{{ meta.country }}</p>
         </section>
         <section v-if="meta.sourceUrl" class="flex flex-col gap-1">
