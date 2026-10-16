@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — Error chrome для authed + CTA на пустом своём профиле
+
+- **YouGile:** FRO-52
+- **Итог:** `ErrorStateView` показывает `AppNav` при authed (иначе `GuestNav`); на своём профиле без public-топиков — пояснение про «Мои топики» + CTA «Создать топик».
+- **Репо:** `fix/FRO-52` / [PR #93](https://github.com/NejaTive/Topic/pull/93) → `develop`
+- **Заметки:** manual-close; smoke: `/share/no-access` под сессией — AppNav; self profile empty — CTA.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 17.10.2026 — Favicon и PWA-иконки: знак ранга
 
 - **YouGile:** FRO-51
