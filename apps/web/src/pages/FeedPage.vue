@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import FeedRecommendationsSection from '@/components/feed/FeedRecommendationsSection.vue';
 import { PageShell } from '@/components/layout';
 import { TError, TLoader, TEmptyState, TTopicRow } from '@/components/ui-kit';
 import { useFeedQuery } from '@/composables/useFeedQuery';
@@ -45,6 +46,8 @@ function onRetry() {
         <h1 class="text-h1 text-ink">Лента</h1>
       </header>
     </template>
+
+    <FeedRecommendationsSection />
 
     <div v-if="isPending || isError || isEmpty || isEmptySubscribed" class="max-w-84.5 mx-auto">
       <TLoader v-if="isPending" />
