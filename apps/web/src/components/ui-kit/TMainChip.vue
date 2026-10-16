@@ -80,11 +80,11 @@ const emit = defineEmits<TMainChipEmits>();
 <template>
   <button
     type="button"
-    class="inline-flex h-8 items-center justify-center rounded-sm px-3 text-caption font-medium transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50"
+    class="inline-flex h-8 items-center justify-center rounded-sm border px-3 text-caption transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50"
     :class="
       selected
-        ? 'bg-warning-hover text-warning'
-        : 'bg-warning-soft text-warning hover:enabled:bg-warning-hover'
+        ? 'border-warning bg-warning-soft font-semibold text-warning'
+        : 'border-transparent bg-warning-soft font-medium text-warning hover:enabled:bg-warning-hover'
     "
     :aria-pressed="selected"
     :disabled="disabled"

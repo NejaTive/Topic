@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ItemPlacement } from '../../generated/prisma/enums';
+import { ItemMetaDto } from './item-meta.dto';
 
 export class ItemDto {
   @ApiProperty({ format: 'uuid' })
@@ -18,6 +19,13 @@ export class ItemDto {
     example: 'http://127.0.0.1:9000/topic-covers/covers/abc.webp',
   })
   coverUrl!: string | null;
+
+  @ApiPropertyOptional({
+    type: ItemMetaDto,
+    nullable: true,
+    description: 'Category-specific поля; null для custom / пустого meta',
+  })
+  meta!: ItemMetaDto | null;
 
   @ApiProperty({ enum: ItemPlacement })
   placement!: ItemPlacement;

@@ -2,12 +2,12 @@
 import { useQuery } from '@tanstack/vue-query';
 import { refDebounced } from '@vueuse/core';
 import { computed, onUnmounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { CatalogApiError, searchCatalogMovies, type CatalogMovie } from '@/api/catalog';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
 import { ContentPageWrapper } from '@/components/layout';
-import { TButton, TCoverUpload, TError, TInput, TLoader } from '@/components/ui-kit';
+import { TButton, TCoverUpload, TError, TInput, TLoader, TTextarea } from '@/components/ui-kit';
 import {
   useCreateItemFromCatalogMutation,
   useCreateItemMutation,
@@ -16,6 +16,9 @@ import {
 import { useTopicQuery } from '@/composables/useTopicQuery';
 import { queryKeys } from '@/query/keys';
 import { RouteName } from '@/router/route-names';
+
+const BACK_LINK_CLASS =
+  'cursor-pointer text-label font-semibold text-accent transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50';
 
 interface FieldErrors {
   title?: string;
@@ -46,16 +49,20 @@ const debouncedSearch = refDebounced(searchInput, SEARCH_DEBOUNCE_MS);
 const selectingProviderId = ref<string | null>(null);
 
 const title = ref('');
+const description = ref('');
+const director = ref('');
+const genre = ref('');
+const country = ref('');
 const coverFile = ref<File | null>(null);
 const coverPreviewUrl = ref<string | null>(null);
 const coverError = ref<string | null>(null);
 const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 
-const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
 const isMoviesTopic = computed(() => topicQuery.data.value?.category === 'movies');
 const showCatalogSearch = computed(() => isMoviesTopic.value && entryMode.value === 'search');
 const showManualForm = computed(() => !isMoviesTopic.value || entryMode.value === 'manual');
+const backToSearch = computed(() => showManualForm.value && isMoviesTopic.value);
 
 const trimmedSearch = computed(() => debouncedSearch.value.trim());
 
@@ -201,7 +208,18 @@ async function onSubmit() {
   }
 
   try {
-    const item = await createItem.mutateAsync({ title: trimmed });
+    const meta = isMoviesTopic.value
+      ? {
+          ...(description.value.trim() ? { description: description.value.trim() } : {}),
+          ...(director.value.trim() ? { director: director.value.trim() } : {}),
+          ...(genre.value.trim() ? { genre: genre.value.trim() } : {}),
+          ...(country.value.trim() ? { country: country.value.trim() } : {}),
+        }
+      : undefined;
+    const item = await createItem.mutateAsync({
+      title: trimmed,
+      ...(meta && Object.keys(meta).length > 0 ? { meta } : {}),
+    });
     pendingItemId.value = item.id;
 
     if (coverFile.value) {
@@ -228,11 +246,25 @@ async function onSubmit() {
 </script>
 
 <template>
-  <ContentPageWrapper
-    title="Добавить элемент"
-    :route-to="{ name: RouteName.AppTopicDetail, params: { id: topicId } }"
-    :text-to="topicTitle"
-  >
+  <ContentPageWrapper title="Добавить элемент">
+    <template #back>
+      <button
+        v-if="backToSearch"
+        type="button"
+        :class="BACK_LINK_CLASS"
+        :disabled="isSubmitting"
+        @click="switchToSearch"
+      >
+        ← Назад
+      </button>
+      <RouterLink
+        v-else
+        :to="{ name: RouteName.AppTopicDetail, params: { id: topicId } }"
+        class="text-label font-semibold text-accent"
+      >
+        ← Назад
+      </RouterLink>
+    </template>
     <TError v-if="topicQuery.isError.value" />
     <TLoader v-else-if="topicQuery.isPending.value" />
     <div v-else class="flex flex-col gap-5">
@@ -252,7 +284,7 @@ async function onSubmit() {
         <p v-else-if="showEmptyResults" class="text-caption text-muted" role="status">
           Ничего не найдено
         </p>
-        <p v-else-if="searchBusy" class="text-caption text-muted" role="status">Ищем…</p>
+        <TLoader v-else-if="searchBusy" />
 
         <ul
           v-if="searchResults.length > 0"
@@ -299,28 +331,24 @@ async function onSubmit() {
           TMDB.
         </p>
 
-        <TButton
+        <button
           type="button"
-          variant="ghost"
-          class="self-start"
+          class="self-start text-label font-semibold text-accent transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           :disabled="isSubmitting"
           @click="switchToManual"
         >
           Указать вручную
-        </TButton>
+        </button>
       </template>
 
       <form v-if="showManualForm" class="flex flex-col gap-5" @submit.prevent="onSubmit">
-        <TButton
-          v-if="isMoviesTopic"
-          type="button"
-          variant="ghost"
-          class="self-start"
+        <TCoverUpload
+          :preview-url="coverPreviewUrl"
+          :error="coverError"
           :disabled="isSubmitting"
-          @click="switchToSearch"
-        >
-          К поиску
-        </TButton>
+          @file="onCoverFile"
+          @clear="onCoverClear"
+        />
 
         <TInput
           v-model="title"
@@ -332,13 +360,38 @@ async function onSubmit() {
           :disabled="isSubmitting"
         />
 
-        <TCoverUpload
-          :preview-url="coverPreviewUrl"
-          :error="coverError"
-          :disabled="isSubmitting"
-          @file="onCoverFile"
-          @clear="onCoverClear"
-        />
+        <template v-if="isMoviesTopic">
+          <TTextarea
+            v-model="description"
+            label="Описание"
+            placeholder="Кратко о фильме"
+            :disabled="isSubmitting"
+          />
+          <TInput
+            v-model="genre"
+            label="Жанр"
+            type="text"
+            autocomplete="off"
+            placeholder="Например, Фантастика"
+            :disabled="isSubmitting"
+          />
+          <TInput
+            v-model="director"
+            label="Режиссёр"
+            type="text"
+            autocomplete="off"
+            placeholder="Например, Кристофер Нолан"
+            :disabled="isSubmitting"
+          />
+          <TInput
+            v-model="country"
+            label="Страна"
+            type="text"
+            autocomplete="off"
+            placeholder="Например, США"
+            :disabled="isSubmitting"
+          />
+        </template>
 
         <p v-if="formError" class="text-caption text-danger">
           {{ formError }}
