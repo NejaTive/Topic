@@ -21,10 +21,14 @@ const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
 
 const CATEGORY_OPTIONS: CategoryOption[] = [
   { value: 'movies', label: 'Фильмы' },
+  { value: 'series', label: 'Сериалы' },
   { value: 'custom', label: 'Своё' },
 ];
 
-const MOVIES_TITLE_PREFILL = 'Фильмы';
+const TITLE_PREFILL: Partial<Record<TopicCategory, string>> = {
+  movies: 'Фильмы',
+  series: 'Сериалы',
+};
 
 const CATEGORY_HINT =
   '«Категория» — при добавлении элементов можно искать название и обложку в каталоге. «Своё» — всё вводите вручную.';
@@ -48,8 +52,9 @@ function clearErrors() {
 
 function onCategorySelect(value: TopicCategory) {
   category.value = value;
-  if (value === 'movies') {
-    title.value = MOVIES_TITLE_PREFILL;
+  const prefill = TITLE_PREFILL[value];
+  if (prefill) {
+    title.value = prefill;
     if (fieldErrors.value.title) {
       fieldErrors.value = { ...fieldErrors.value, title: undefined };
     }

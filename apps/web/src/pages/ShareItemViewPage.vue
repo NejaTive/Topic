@@ -16,7 +16,9 @@ const shareQuery = useShareQuery(shareId);
 
 const share = computed(() => shareQuery.data.value);
 const item = computed(() => share.value?.items.find((entry) => entry.id === itemId.value));
-const isMovies = computed(() => share.value?.category === 'movies');
+const category = computed(() => share.value?.category);
+const showMeta = computed(() => category.value === 'movies' || category.value === 'series');
+const directorLabel = computed(() => (category.value === 'series' ? 'Создатель' : 'Режиссёр'));
 const meta = computed(() => item.value?.meta ?? null);
 
 watch(
@@ -75,7 +77,7 @@ function onRetry() {
         <img v-if="item.coverUrl" :src="item.coverUrl" alt="" class="size-full object-cover" />
       </div>
 
-      <div v-if="isMovies && meta" class="flex min-w-0 flex-1 flex-col gap-5">
+      <div v-if="showMeta && meta" class="flex min-w-0 flex-1 flex-col gap-5">
         <section v-if="meta.description" class="flex flex-col gap-1">
           <h2 class="text-label text-muted">Описание</h2>
           <p class="whitespace-pre-wrap text-body text-ink">{{ meta.description }}</p>
@@ -85,7 +87,7 @@ function onRetry() {
           <p class="text-body text-ink">{{ meta.genre }}</p>
         </section>
         <section v-if="meta.director" class="flex flex-col gap-1">
-          <h2 class="text-label text-muted">Режиссёр</h2>
+          <h2 class="text-label text-muted">{{ directorLabel }}</h2>
           <p class="text-body text-ink">{{ meta.director }}</p>
         </section>
         <section v-if="meta.country" class="flex flex-col gap-1">

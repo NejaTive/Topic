@@ -3,7 +3,12 @@ import { useQuery } from '@tanstack/vue-query';
 import { refDebounced } from '@vueuse/core';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import { CatalogApiError, searchCatalogMovies, type CatalogMovie } from '@/api/catalog';
+import {
+  CatalogApiError,
+  searchCatalogMovies,
+  searchCatalogSeries,
+  type CatalogMovie,
+} from '@/api/catalog';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
 import { ContentPageWrapper } from '@/components/layout';
@@ -59,16 +64,33 @@ const coverError = ref<string | null>(null);
 const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 
-const isMoviesTopic = computed(() => topicQuery.data.value?.category === 'movies');
-const showCatalogSearch = computed(() => isMoviesTopic.value && entryMode.value === 'search');
-const showManualForm = computed(() => !isMoviesTopic.value || entryMode.value === 'manual');
-const backToSearch = computed(() => showManualForm.value && isMoviesTopic.value);
+const category = computed(() => topicQuery.data.value?.category);
+const isCatalogTopic = computed(() => category.value === 'movies' || category.value === 'series');
+const isSeriesTopic = computed(() => category.value === 'series');
+const directorLabel = computed(() => (isSeriesTopic.value ? 'Создатель' : 'Режиссёр'));
+const searchLabel = computed(() => (isSeriesTopic.value ? 'Поиск сериала' : 'Поиск фильма'));
+const searchPlaceholder = computed(() =>
+  isSeriesTopic.value ? 'Например, Во все тяжкие' : 'Например, Интерстеллар',
+);
+const descriptionPlaceholder = computed(() =>
+  isSeriesTopic.value ? 'Кратко о сериале' : 'Кратко о фильме',
+);
+const showCatalogSearch = computed(() => isCatalogTopic.value && entryMode.value === 'search');
+const showManualForm = computed(() => !isCatalogTopic.value || entryMode.value === 'manual');
+const backToSearch = computed(() => showManualForm.value && isCatalogTopic.value);
 
 const trimmedSearch = computed(() => debouncedSearch.value.trim());
 
 const catalogSearch = useQuery({
-  queryKey: computed(() => queryKeys.catalog.moviesSearch(trimmedSearch.value)),
-  queryFn: () => searchCatalogMovies(trimmedSearch.value),
+  queryKey: computed(() =>
+    isSeriesTopic.value
+      ? queryKeys.catalog.seriesSearch(trimmedSearch.value)
+      : queryKeys.catalog.moviesSearch(trimmedSearch.value),
+  ),
+  queryFn: () =>
+    isSeriesTopic.value
+      ? searchCatalogSeries(trimmedSearch.value)
+      : searchCatalogMovies(trimmedSearch.value),
   enabled: computed(() => showCatalogSearch.value && trimmedSearch.value.length > 0),
   retry: false,
   staleTime: 30_000,
@@ -169,15 +191,15 @@ function applyError(err: unknown, preferCover = false) {
   formError.value = 'Не удалось добавить элемент';
 }
 
-async function onSelectMovie(movie: CatalogMovie) {
+async function onSelectCatalogItem(entry: CatalogMovie) {
   if (isSubmitting.value) return;
   clearErrors();
-  selectingProviderId.value = movie.providerId;
+  selectingProviderId.value = entry.providerId;
 
   try {
     await createFromCatalog.mutateAsync({
       provider: 'tmdb',
-      providerId: movie.providerId,
+      providerId: entry.providerId,
     });
     await router.replace({
       name: RouteName.AppTopicDetail,
@@ -208,7 +230,7 @@ async function onSubmit() {
   }
 
   try {
-    const meta = isMoviesTopic.value
+    const meta = isCatalogTopic.value
       ? {
           ...(description.value.trim() ? { description: description.value.trim() } : {}),
           ...(director.value.trim() ? { director: director.value.trim() } : {}),
@@ -271,10 +293,10 @@ async function onSubmit() {
       <template v-if="showCatalogSearch">
         <TInput
           v-model="searchInput"
-          label="Поиск фильма"
+          :label="searchLabel"
           type="text"
           autocomplete="off"
-          placeholder="Например, Интерстеллар"
+          :placeholder="searchPlaceholder"
           :disabled="isSubmitting"
         />
 
@@ -292,18 +314,18 @@ async function onSubmit() {
           role="listbox"
           aria-label="Результаты поиска"
         >
-          <li v-for="movie in searchResults" :key="movie.providerId">
+          <li v-for="entry in searchResults" :key="entry.providerId">
             <button
               type="button"
               class="flex w-full items-center gap-3 py-2.5 text-left transition-colors outline-none hover:enabled:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-60"
               role="option"
               :disabled="isSubmitting"
-              :aria-busy="selectingProviderId === movie.providerId || undefined"
-              @click="onSelectMovie(movie)"
+              :aria-busy="selectingProviderId === entry.providerId || undefined"
+              @click="onSelectCatalogItem(entry)"
             >
               <img
-                v-if="movie.imageUrl"
-                :src="movie.imageUrl"
+                v-if="entry.imageUrl"
+                :src="entry.imageUrl"
                 alt=""
                 class="h-15 w-10 shrink-0 rounded-sm bg-surface-sunken object-cover"
               />
@@ -313,9 +335,9 @@ async function onSubmit() {
                 aria-hidden="true"
               />
               <span class="min-w-0 flex-1">
-                <span class="block truncate text-body text-ink">{{ movie.title }}</span>
-                <span v-if="movie.year" class="block text-caption text-muted">{{
-                  movie.year
+                <span class="block truncate text-body text-ink">{{ entry.title }}</span>
+                <span v-if="entry.year" class="block text-caption text-muted">{{
+                  entry.year
                 }}</span>
               </span>
             </button>
@@ -355,16 +377,16 @@ async function onSubmit() {
           label="Название *"
           type="text"
           autocomplete="off"
-          placeholder="Например, Интерстеллар"
+          :placeholder="searchPlaceholder"
           :error="fieldErrors.title"
           :disabled="isSubmitting"
         />
 
-        <template v-if="isMoviesTopic">
+        <template v-if="isCatalogTopic">
           <TTextarea
             v-model="description"
             label="Описание"
-            placeholder="Кратко о фильме"
+            :placeholder="descriptionPlaceholder"
             :disabled="isSubmitting"
           />
           <TInput
@@ -377,7 +399,7 @@ async function onSubmit() {
           />
           <TInput
             v-model="director"
-            label="Режиссёр"
+            :label="directorLabel"
             type="text"
             autocomplete="off"
             placeholder="Например, Кристофер Нолан"
