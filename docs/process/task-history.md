@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 16.10.2026 — S04/S06/S07: категория Сериалы (поиск TV + meta)
+
+- **YouGile:** FRO-41
+- **Итог:** Чип «Сериалы» на S04; `searchCatalogSeries` / seriesSearch; S06 TV search → from-catalog + ручной fallback с meta; S07/ShareItemView — meta как movies, лейбл «Создатель», «Источник» при sourceUrl; TMDB attribution.
+- **Репо:** `feat/FRO-41` / [PR #75](https://github.com/NejaTive/Topic/pull/75) → `develop`
+- **Заметки:** UI-прогон browser: create series → search «Во все тяжкие» → meta/Создатель/Источник; movies «Режиссёр»; custom без catalog/meta. Share item — после rank.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~9 мин · всего ~12 мин
+
 ### 16.10.2026 — Категория series: Prisma + TMDB TV
 
 - **YouGile:** BAC-26
