@@ -277,6 +277,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RecommendationsController_listPending"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/recommendations/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RecommendationsController_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/recommendations/{id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RecommendationsController_dismiss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/catalog/movies/search": {
         parameters: {
             query?: never;
@@ -680,6 +728,35 @@ export interface components {
         RecommendCreatedDto: {
             /** @description ID созданных Recommendation (pending) */
             ids: string[];
+        };
+        RecommendationDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Dune 2 */
+            title: string;
+            /**
+             * @description Публичный URL обложки снимка или null
+             * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
+             */
+            coverUrl?: string | null;
+            /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
+            /** @description Снимок meta; null если пусто */
+            meta?: components["schemas"]["ItemMetaDto"] | null;
+            /** @example alice */
+            fromNick: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        RecommendationListDto: {
+            items: components["schemas"]["RecommendationDto"][];
+        };
+        AcceptRecommendationDto: {
+            /**
+             * Format: uuid
+             * @description Свой топик той же category, куда копировать в inbox
+             */
+            topicId: string;
         };
         CatalogMovieDto: {
             /**
@@ -1803,6 +1880,126 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ItemConflictResponseDto"];
+                };
+            };
+        };
+    };
+    RecommendationsController_listPending: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationListDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    RecommendationsController_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptRecommendationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemNotFoundResponseDto"];
+                };
+            };
+            /** @description Элемент с тем же sourceUrl уже есть в целевом топике */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemConflictResponseDto"];
+                };
+            };
+        };
+    };
+    RecommendationsController_dismiss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemNotFoundResponseDto"];
                 };
             };
         };
