@@ -100,6 +100,13 @@
 - **При возврате:** семантика A (есть хоть в одном топике) vs B (по топикам в picker; ближе к текущему флоу); лёгкий batch при auth.
 - **Источник:** обсуждение после copy-from-share; `decisions.md` 17.10.2026.
 
+### Рекомендации (mutual recommend)
+- **Статус:** нарезка YouGile / post-MVP (17.10.2026)
+- **Суть:** рекомендовать свой элемент взаимным подпискам; inbox «Мои рекомендации» сверху Ленты; accept = copy в inbox своего топика (как copy-from-share). Снимок карточки; private-топик ок (шарится item, не топик).
+- **Карточки:** BAC-31→28, FRO-48→46 (эпик Recommendations; порядок исполнения: Prisma → mutual → recommend → inbox → client → UI).
+- **Канон:** [`../feature/recommendations.md`](../feature/recommendations.md), [`../process/decisions.md`](../process/decisions.md) (17.10.2026).
+- **Источник:** обсуждение owner 17.10.2026.
+
 ---
 
 ## Быстрые заметки

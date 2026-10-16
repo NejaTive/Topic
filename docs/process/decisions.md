@@ -693,6 +693,19 @@
 
 ## 17.10.2026
 
+### Рекомендации — контракт v1 (mutual recommend)
+
+- Post-MVP фича: точечная рекомендация **элемента** (не топика) кругу взаимных подписок.
+- **Получатели:** только `followers ∩ following`. «Отправить всем» = всем из пересечения. Пикер: «Кому рекомендовать»; empty — «Пока нет взаимных подписок».
+- **Источник:** любой свой item (inbox/ranked), в т.ч. из **private**-топика.
+- **Получатель видит снимок** карточки (title/cover/category/meta + кто); чужой private/unlisted топик не открывается.
+- **UI:** блок «Мои рекомендации» **сверху Ленты** (`FeedPage`); ниже — текущая лента public-топиков.
+- **Accept:** как copy-from-share → picker своего топика той же `category` → copy в inbox. **Dismiss** — убрать из pending.
+- **Модель:** fan-out `Recommendation` (одна строка на получателя) + денормализованный снимок; `sourceItemId` nullable (`onDelete: SetNull`).
+- **API (черновик):** `GET /me/mutual-follows`, `POST /items/:itemId/recommend`, `GET /recommendations`, accept/dismiss.
+- **YouGile:** BAC-31 (Prisma) → BAC-30 (mutual) → BAC-29 (recommend) → BAC-28 (inbox/accept); FRO-48 (client) → FRO-47 / FRO-46 (UI); эпик-стикер **Recommendations**.
+- Канон: [`../feature/recommendations.md`](../feature/recommendations.md); идея в [`../backlog/ideas.md`](../backlog/ideas.md).
+
 ### Copy from share — флаг «уже есть у меня» отложен
 
 - Копирование элемента из чужого `/t/:shareId` в inbox своего топика той же категории — **есть** (`POST …/items/copy-from-share`).
