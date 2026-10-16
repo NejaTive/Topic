@@ -697,15 +697,22 @@
 
 - Клик по RankRow на публичном share → **`/t/:shareId/items/:itemId`** (`ShareItemView`), без `requiresAuth`.
 - Данные из уже существующего `GET /api/t/:shareId` (`ShareItemDto` + `category`); отдельный item-эндпоинт не делаем.
-- Только просмотр: обложка + title; для `movies` — meta (description / genre / director / country), если есть. Без edit CTA; владелец с S09 **не** уходит в S07.
+- Только просмотр: обложка + title; для `movies` — meta (description / genre / director / country / sourceUrl), если есть. Без edit CTA; владелец с S09 **не** уходит в S07.
 - Неверный `itemId` при валидном share → `NotFound`; 403/404 share — как на S09.
+
+### Item.meta.sourceUrl — ссылка на источник (from-catalog)
+
+- При `POST .../items/from-catalog` Nest пишет `meta.sourceUrl` = `https://www.themoviedb.org/movie/{providerId}`.
+- В create/update с клиента `sourceUrl` **игнорируется**; при PATCH остальных meta-полей текущий `sourceUrl` сохраняется.
+- Ручной create → без `sourceUrl`. UI: read-only ссылка «Источник» на S07 и ShareItemView.
+- Это не `externalId` для дедупа — только публичный URL.
 
 ### Item.meta — поля фильма (director / genre / country)
 
 - **Хранение:** на `Item` опциональный **`meta Json?`** (не плоские колонки) — один контейнер под category-specific поля.
-- **movies:** опциональные строки `description` (из TMDB `overview`), `director`, `genre`, `country` (singular); каталожный и ручной элемент — один контракт.
+- **movies:** опциональные строки `description` (из TMDB `overview`), `director`, `genre`, `country` (singular), `sourceUrl` (только from-catalog); каталожный и ручной элемент — один контракт редактируемых полей.
 - **custom:** `meta` всегда `null`; передача meta → `400`.
-- **TMDB from-catalog:** details + `credits` → первый Director / genre / production country.
+- **TMDB from-catalog:** details + `credits` → первый Director / genre / production country + `sourceUrl`.
 - **UI v1:** S06 (ручная форма) + S07; RankRow / S09 UI — позже (meta уже в `ItemDto` / `ShareItemDto`).
 - **YouGile:** BAC-24, FRO-39 (эпик Catalog); ветка `feat/catalog-enrichment`.
 - План/контракт: [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).

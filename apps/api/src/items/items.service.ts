@@ -23,6 +23,7 @@ import {
   moviesMetaToJson,
   normalizeMoviesMetaPatch,
   parseMoviesMeta,
+  tmdbMovieSourceUrl,
 } from './item-meta';
 
 const POSTER_FETCH_TIMEOUT_MS = 10_000;
@@ -129,6 +130,7 @@ export class ItemsService {
       director: movie.director,
       genre: movie.genre,
       country: movie.country,
+      sourceUrl: tmdbMovieSourceUrl(dto.providerId),
     });
 
     const item = await this.prisma.$transaction(async (tx) => {

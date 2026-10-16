@@ -299,6 +299,17 @@ function onRetry() {
             autocomplete="off"
             :disabled="isBusy"
           />
+          <div v-if="item.meta?.sourceUrl" class="flex flex-col gap-1">
+            <span class="text-label text-muted">Источник</span>
+            <a
+              :href="item.meta.sourceUrl"
+              class="text-body text-accent break-all"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ item.meta.sourceUrl }}
+            </a>
+          </div>
         </template>
 
         <p v-if="formError" class="text-caption text-danger">

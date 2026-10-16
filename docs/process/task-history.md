@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 16.10.2026 — Item.meta.sourceUrl из from-catalog
+
+- **YouGile:** BAC-25
+- **Итог:** `from-catalog` пишет `meta.sourceUrl` (TMDB page); create/update с клиента игнорируют, PATCH сохраняет; read-only «Источник» на S07 и ShareItemView; OpenAPI обновлён.
+- **Репо:** `feat/BAC-25` / [PR #73](https://github.com/NejaTive/Topic/pull/73) → `develop`
+- **Заметки:** manual-close; не externalId / дедуп; UI фронта в том же коммите.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 16.10.2026 — S09: read-only деталка элемента по клику
 
 - **YouGile:** FRO-40
