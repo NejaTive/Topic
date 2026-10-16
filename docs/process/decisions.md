@@ -693,6 +693,13 @@
 
 ## 16.10.2026
 
+### S09 — read-only деталка элемента
+
+- Клик по RankRow на публичном share → **`/t/:shareId/items/:itemId`** (`ShareItemView`), без `requiresAuth`.
+- Данные из уже существующего `GET /api/t/:shareId` (`ShareItemDto` + `category`); отдельный item-эндпоинт не делаем.
+- Только просмотр: обложка + title; для `movies` — meta (description / genre / director / country), если есть. Без edit CTA; владелец с S09 **не** уходит в S07.
+- Неверный `itemId` при валидном share → `NotFound`; 403/404 share — как на S09.
+
 ### Item.meta — поля фильма (director / genre / country)
 
 - **Хранение:** на `Item` опциональный **`meta Json?`** (не плоские колонки) — один контейнер под category-specific поля.

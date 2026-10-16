@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 16.10.2026 — S09: read-only деталка элемента по клику
+
+- **YouGile:** FRO-40
+- **Итог:** Клик по RankRow на публичном share → `/t/:shareId/items/:itemId`; read-only страница (обложка, title, meta для movies); desktop — постер справа; данные из Share payload без нового API.
+- **Репо:** `feat/FRO-40` / [PR #72](https://github.com/NejaTive/Topic/pull/72) → `develop`
+- **Заметки:** manual-close; без edit CTA / redirect на S07.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 16.10.2026 — Item.meta Json + movies fields
 
 - **YouGile:** BAC-24
