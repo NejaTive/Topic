@@ -1,8 +1,14 @@
 import { randomUUID } from 'node:crypto';
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import {
   BadRequestException,
   Injectable,
+  Logger,
   OnModuleInit,
   PayloadTooLargeException,
 } from '@nestjs/common';
@@ -14,6 +20,7 @@ export const COVER_MAX_BYTES = 5 * 1024 * 1024;
 
 @Injectable()
 export class StorageService implements OnModuleInit {
+  private readonly logger = new Logger(StorageService.name);
   private client!: S3Client;
   private bucket!: string;
   private publicBaseUrl!: string;
@@ -94,6 +101,34 @@ export class StorageService implements OnModuleInit {
     return key;
   }
 
+  /**
+   * Копия объекта обложки под новый ключ `covers/{uuid}.webp`.
+   * Не шарить один coverKey между Item — delete/replace удаляет объект.
+   */
+  async copyCover(sourceKey: string): Promise<string> {
+    const out = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: sourceKey }),
+    );
+    const bytes = await out.Body?.transformToByteArray();
+    if (!bytes?.length) {
+      throw new BadRequestException({
+        message: 'Не удалось скопировать обложку',
+        statusCode: 400,
+      });
+    }
+
+    const key = `covers/${randomUUID()}.webp`;
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: Buffer.from(bytes),
+        ContentType: out.ContentType ?? 'image/webp',
+      }),
+    );
+    return key;
+  }
+
   /** Best-effort удаление; ошибки логируем и глотаем (после Cascade в БД). */
   async deleteObjects(keys: string[]): Promise<void> {
     const unique = [...new Set(keys.filter(Boolean))];
@@ -101,7 +136,7 @@ export class StorageService implements OnModuleInit {
       try {
         await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
       } catch (error) {
-        console.warn(`storage: не удалось удалить ${key}`, error);
+        this.logger.warn(`storage: не удалось удалить ${key}`, error);
       }
     }
   }
