@@ -18,6 +18,7 @@ import {
   useCreateItemMutation,
   useUploadItemCoverMutation,
 } from '@/composables/useItemMutations';
+import { useTopicItemsQuery } from '@/composables/useTopicItemsQuery';
 import { useTopicQuery } from '@/composables/useTopicQuery';
 import { queryKeys } from '@/query/keys';
 import { RouteName } from '@/router/route-names';
@@ -39,6 +40,7 @@ const router = useRouter();
 const topicId = computed(() => String(route.params.id ?? ''));
 
 const topicQuery = useTopicQuery(topicId);
+const itemsQuery = useTopicItemsQuery(topicId);
 const createItem = useCreateItemMutation(() => topicId.value);
 const createFromCatalog = useCreateItemFromCatalogMutation(() => topicId.value);
 
@@ -112,10 +114,36 @@ const showEmptyResults = computed(
     searchResults.value.length === 0,
 );
 
+const existingSourceUrls = computed(() => {
+  const list = itemsQuery.data.value;
+  const urls = new Set<string>();
+  if (!list) return urls;
+  for (const item of [...list.inbox, ...list.ranked]) {
+    const url = item.meta?.sourceUrl;
+    if (url) urls.add(url);
+  }
+  return urls;
+});
+
+const duplicateFormMessage = computed(() =>
+  isSeriesTopic.value ? 'Этот сериал уже есть в списке' : 'Этот фильм уже есть в списке',
+);
+
 const isSubmitting = computed(
   () =>
     createItem.isPending.value || uploadCover.isPending.value || createFromCatalog.isPending.value,
 );
+
+function catalogSourceUrl(providerId: string): string {
+  const id = providerId.trim();
+  return isSeriesTopic.value
+    ? `https://www.themoviedb.org/tv/${id}`
+    : `https://www.themoviedb.org/movie/${id}`;
+}
+
+function isAlreadyInList(providerId: string): boolean {
+  return existingSourceUrls.value.has(catalogSourceUrl(providerId));
+}
 
 watch(
   () => catalogSearch.error.value,
@@ -192,7 +220,7 @@ function applyError(err: unknown, preferCover = false) {
 }
 
 async function onSelectCatalogItem(entry: CatalogMovie) {
-  if (isSubmitting.value) return;
+  if (isSubmitting.value || isAlreadyInList(entry.providerId)) return;
   clearErrors();
   selectingProviderId.value = entry.providerId;
 
@@ -209,6 +237,10 @@ async function onSelectCatalogItem(entry: CatalogMovie) {
     if (err instanceof ItemsApiError || err instanceof TopicsApiError) {
       if (err.status === 401) {
         void router.replace({ name: RouteName.Login, query: { returnUrl: route.fullPath } });
+        return;
+      }
+      if (err.status === 409) {
+        formError.value = err.message || duplicateFormMessage.value;
         return;
       }
       formError.value = err.message || 'Не удалось добавить элемент';
@@ -319,7 +351,8 @@ async function onSubmit() {
               type="button"
               class="flex w-full items-center gap-3 py-2.5 text-left transition-colors outline-none hover:enabled:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-60"
               role="option"
-              :disabled="isSubmitting"
+              :disabled="isSubmitting || isAlreadyInList(entry.providerId)"
+              :aria-disabled="isAlreadyInList(entry.providerId) || undefined"
               :aria-busy="selectingProviderId === entry.providerId || undefined"
               @click="onSelectCatalogItem(entry)"
             >
@@ -336,7 +369,13 @@ async function onSubmit() {
               />
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-body text-ink">{{ entry.title }}</span>
-                <span v-if="entry.year" class="block text-caption text-muted">{{
+                <span
+                  v-if="isAlreadyInList(entry.providerId)"
+                  class="block text-caption text-muted"
+                >
+                  Уже в списке
+                </span>
+                <span v-else-if="entry.year" class="block text-caption text-muted">{{
                   entry.year
                 }}</span>
               </span>

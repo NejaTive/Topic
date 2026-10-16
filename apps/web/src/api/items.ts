@@ -97,6 +97,9 @@ export async function createItemFromCatalog(
   if (response.status === 404) {
     throw new ItemsApiError('Топик не найден', 404);
   }
+  if (response.status === 409) {
+    throw new ItemsApiError(errorMessage(error, 'Уже есть в списке'), 409);
+  }
   if (response.status === 400 || response.status === 422) {
     throw new ItemsApiError(
       errorMessage(error, 'Не удалось импортировать из каталога'),

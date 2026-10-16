@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -105,6 +106,31 @@ export class ItemsService {
       });
     }
 
+    const sourceUrl =
+      topic.category === TopicCategory.series
+        ? tmdbTvSourceUrl(dto.providerId)
+        : tmdbMovieSourceUrl(dto.providerId);
+
+    const duplicate = await this.prisma.item.findFirst({
+      where: {
+        topicId,
+        meta: {
+          path: ['sourceUrl'],
+          equals: sourceUrl,
+        },
+      },
+      select: { id: true },
+    });
+    if (duplicate) {
+      throw new ConflictException({
+        message:
+          topic.category === TopicCategory.series
+            ? 'Этот сериал уже есть в списке'
+            : 'Этот фильм уже есть в списке',
+        statusCode: 409,
+      });
+    }
+
     if (!this.tmdb.isConfigured()) {
       throw new ServiceUnavailableException({
         message: 'Каталог временно недоступен',
@@ -137,10 +163,7 @@ export class ItemsService {
       director: hit.director,
       genre: hit.genre,
       country: hit.country,
-      sourceUrl:
-        topic.category === TopicCategory.series
-          ? tmdbTvSourceUrl(dto.providerId)
-          : tmdbMovieSourceUrl(dto.providerId),
+      sourceUrl,
     });
 
     const item = await this.prisma.$transaction(async (tx) => {

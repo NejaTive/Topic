@@ -19,6 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConflictResponse,
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -42,6 +43,7 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { FromCatalogItemDto } from './dto/from-catalog-item.dto';
 import {
   ItemBadRequestResponseDto,
+  ItemConflictResponseDto,
   ItemDto,
   ItemListDto,
   ItemNotFoundResponseDto,
@@ -106,6 +108,10 @@ export class ItemsController {
   @ApiCreatedResponse({ type: ItemDto })
   @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
   @ApiBadRequestResponse({ type: ItemBadRequestResponseDto })
+  @ApiConflictResponse({
+    description: 'Фильм / сериал уже есть в топике',
+    type: ItemConflictResponseDto,
+  })
   @ApiNotFoundResponse({
     description: 'Топик не найден / фильм не найден в каталоге',
     type: NotFoundResponseDto,

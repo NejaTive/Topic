@@ -574,6 +574,12 @@ export interface components {
             /** @example 400 */
             statusCode: number;
         };
+        ItemConflictResponseDto: {
+            /** @example Этот фильм уже есть в списке */
+            message: string;
+            /** @example 409 */
+            statusCode: number;
+        };
         ItemNotFoundResponseDto: {
             /** @example Элемент не найден */
             message: string;
@@ -1223,6 +1229,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+            /** @description Фильм / сериал уже есть в топике */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemConflictResponseDto"];
                 };
             };
             /** @description TMDB не сконфигурирован */
