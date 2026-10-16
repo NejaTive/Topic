@@ -1,11 +1,27 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ItemPlacement, TopicPrivacy } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import type { MutualFollowsDto } from './dto/mutual-follows-response.dto';
 import type { UserProfileDto } from './dto/user-profile-response.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getMutualFollows(userId: string): Promise<MutualFollowsDto> {
+    const items = await this.prisma.user.findMany({
+      where: {
+        AND: [
+          { following: { some: { followingId: userId } } },
+          { followers: { some: { followerId: userId } } },
+        ],
+      },
+      select: { id: true, nick: true },
+      orderBy: { nick: 'asc' },
+    });
+
+    return { items };
+  }
 
   async getProfile(nickParam: string, viewerId: string | undefined): Promise<UserProfileDto> {
     const nick = nickParam.trim().toLowerCase();
