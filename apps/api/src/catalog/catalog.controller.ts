@@ -44,4 +44,17 @@ export class CatalogController {
   searchSeries(@Query('q') q?: string): Promise<CatalogMovieDto[]> {
     return this.catalog.searchSeries(q);
   }
+
+  @Get('games/search')
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    type: String,
+    description: 'Строка поиска; пустая / без ключа RAWG → []',
+  })
+  @ApiOkResponse({ type: CatalogMovieDto, isArray: true })
+  @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
+  searchGames(@Query('q') q?: string): Promise<CatalogMovieDto[]> {
+    return this.catalog.searchGames(q);
+  }
 }

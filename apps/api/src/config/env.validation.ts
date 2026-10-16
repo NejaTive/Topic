@@ -67,6 +67,11 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   TMDB_ACCESS_TOKEN?: string;
+
+  /** RAWG API key; optional — без ключа поиск игр деградирует в []. */
+  @IsOptional()
+  @IsString()
+  RAWG_API_KEY?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

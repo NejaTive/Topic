@@ -17,6 +17,7 @@ enum TopicPrivacy {
 enum TopicCategory {
   movies
   series
+  games
   custom
 }
 

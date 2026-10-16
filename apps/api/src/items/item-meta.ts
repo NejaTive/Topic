@@ -125,3 +125,7 @@ export function tmdbMovieSourceUrl(providerId: string): string {
 export function tmdbTvSourceUrl(providerId: string): string {
   return `https://www.themoviedb.org/tv/${providerId.trim()}`.slice(0, META_SOURCE_URL_MAX);
 }
+
+export function rawgGameSourceUrl(slugOrId: string): string {
+  return `https://rawg.io/games/${slugOrId.trim()}`.slice(0, META_SOURCE_URL_MAX);
+}
