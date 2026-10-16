@@ -42,6 +42,15 @@
 - **Доработка после ревью:** нет
 - **Длительность:** реализация ~4 мин · ревью ~9 мин · всего ~13 мин
 
+### 17.10.2026 — Блок «Мои рекомендации» на Ленте + accept/dismiss
+
+- **YouGile:** FRO-46
+- **Итог:** Секция «Мои рекомендации» сверху FeedPage (скрыта при пустом pending); RecommendationCard (cover/title/category/@fromNick + Принять/Отклонить); Accept → AcceptRecommendationModal (паттерн CopyItemToTopicModal) → accept API → invalidate; Dismiss → dismiss API.
+- **Репо:** `feat/FRO-46` / [PR #88](https://github.com/NejaTive/Topic/pull/88) → `develop`
+- **Заметки:** smoke: pending сверху ленты; Accept → picker category → copy в inbox; Dismiss убирает карточку и скрывает секцию; без pending блок скрыт; лента public-топиков без регрессии. Модалка S07 (FRO-47) и badge AppNav — out of scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~6 мин · всего ~9 мин
+
 ### 17.10.2026 — API-клиент recommendations + mutual-follows
 
 - **YouGile:** FRO-48
