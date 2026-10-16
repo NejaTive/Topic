@@ -37,6 +37,7 @@ export class UsersService {
           id: true,
           shareId: true,
           title: true,
+          category: true,
           updatedAt: true,
           items: {
             where: { placement: ItemPlacement.ranked },
@@ -74,6 +75,7 @@ export class UsersService {
         id: topic.id,
         shareId: topic.shareId,
         title: topic.title,
+        category: topic.category,
         updatedAt: topic.updatedAt.toISOString(),
         previewCovers: topic.items.map((item) => item.coverKey),
       })),

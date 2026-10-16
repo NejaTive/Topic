@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import type { TopicCategory } from '@/api/topics';
 import {
   TApproveModal,
   TButton,
@@ -37,12 +38,14 @@ const sampleCover =
 const sampleRows: {
   title: string;
   meta: string;
+  category: TopicCategory;
   privacy: PrivacyValue;
   covers?: Array<string | null>;
 }[] = [
   {
     title: 'Фильмы 2026',
     meta: 'обновлён вчера',
+    category: 'movies',
     privacy: 'public',
     covers: [
       'data:image/svg+xml,' +
@@ -62,11 +65,13 @@ const sampleRows: {
   {
     title: 'Книги по ссылке',
     meta: 'обновлён 1 окт',
+    category: 'custom',
     privacy: 'unlisted',
   },
   {
     title: 'Личное',
     meta: 'обновлён сегодня',
+    category: 'games',
     privacy: 'private',
   },
 ];
@@ -196,6 +201,7 @@ function showCoverErrorDemo() {
         :key="row.title"
         :title="row.title"
         :meta="row.meta"
+        :category="row.category"
         :privacy="row.privacy"
         :covers="row.covers"
       />
@@ -208,6 +214,7 @@ function showCoverErrorDemo() {
         :key="`m-${row.title}`"
         :title="row.title"
         :meta="row.meta"
+        :category="row.category"
         :privacy="row.privacy"
         :covers="row.covers"
         compact-privacy

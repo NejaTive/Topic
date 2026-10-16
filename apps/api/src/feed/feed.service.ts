@@ -27,6 +27,7 @@ export class FeedService {
           id: true,
           shareId: true,
           title: true,
+          category: true,
           updatedAt: true,
           owner: { select: { nick: true } },
           items: {
@@ -45,6 +46,7 @@ export class FeedService {
         id: topic.id,
         shareId: topic.shareId,
         title: topic.title,
+        category: topic.category,
         updatedAt: topic.updatedAt.toISOString(),
         previewCovers: topic.items.map((item) => item.coverKey),
         ownerNick: topic.owner.nick,

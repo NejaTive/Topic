@@ -52,6 +52,7 @@ function onRetry() {
         <TTopicRow
           :title="topic.title"
           :meta="formatTopicUpdatedAt(topic.updatedAt)"
+          :category="topic.category"
           :privacy="topic.privacy"
           :covers="previewCoverUrls(topic.previewCovers)"
           :compact-privacy="isMobileView"

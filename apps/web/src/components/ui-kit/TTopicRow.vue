@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { TopicCategory } from '@/api/topics';
+import TCategoryChip from './TCategoryChip.vue';
 import TPrivacyChip from './TPrivacyChip.vue';
 import type { PrivacyValue } from './TPrivacyChip.vue';
 
 interface TTopicRowProps {
   title: string;
   meta: string;
+  category?: TopicCategory;
   privacy?: PrivacyValue;
   compactPrivacy?: boolean;
   covers?: Array<string | null | undefined>;
@@ -19,6 +22,7 @@ interface TTopicRowEmits {
 }
 
 const props = withDefaults(defineProps<TTopicRowProps>(), {
+  category: undefined,
   privacy: undefined,
   compactPrivacy: false,
   covers: () => [],
@@ -61,12 +65,17 @@ function onActivate(event: MouseEvent | KeyboardEvent) {
     @click="onActivate"
     @keydown="rootTag === 'div' ? onActivate($event) : undefined"
   >
-    <div class="flex shrink-0 gap-1" aria-hidden="true">
+    <div class="relative flex shrink-0 max-md:h-10 max-md:w-12 md:gap-1" aria-hidden="true">
       <div
         v-for="(src, index) in coverSlots"
         :key="index"
-        class="h-10 w-8 overflow-hidden rounded-sm"
-        :class="src ? 'bg-surface-sunken' : placeholderTone[index]"
+        class="h-10 w-8 overflow-hidden rounded-sm max-md:absolute max-md:top-0 max-md:shadow-sm max-md:ring-1 max-md:ring-line"
+        :class="[
+          src ? 'bg-surface-sunken' : placeholderTone[index],
+          index === 0 ? 'max-md:left-0 max-md:z-30' : '',
+          index === 1 ? 'max-md:left-2 max-md:z-20' : '',
+          index === 2 ? 'max-md:left-4 max-md:z-10' : '',
+        ]"
       >
         <img v-if="src" :src="src" alt="" class="size-full object-cover" draggable="false" />
       </div>
@@ -89,6 +98,7 @@ function onActivate(event: MouseEvent | KeyboardEvent) {
       </p>
     </div>
 
+    <TCategoryChip v-if="category" :category="category" />
     <TPrivacyChip v-if="privacy" class="shrink-0" :privacy="privacy" :compact="compactPrivacy" />
   </component>
 </template>

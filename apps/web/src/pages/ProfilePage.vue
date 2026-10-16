@@ -246,6 +246,7 @@ async function onApproveLogout() {
         <TTopicRow
           :title="topic.title"
           :meta="formatTopicUpdatedAt(topic.updatedAt)"
+          :category="topic.category"
           :covers="previewCoverUrls(topic.previewCovers)"
           @click="goShare(topic.shareId)"
         />

@@ -6,6 +6,7 @@ import FieldHint from '@/components/FieldHint.vue';
 import { TButton, TInput, TMainChip, TPrivacyChip, type PrivacyValue } from '@/components/ui-kit';
 import { ContentPageWrapper } from '@/components/layout';
 import { useCreateTopicMutation } from '@/composables/useCreateTopicMutation';
+import { TOPIC_CATEGORY_LABELS } from '@/lib/topic-category';
 import { RouteName } from '@/router/route-names';
 
 interface FieldErrors {
@@ -19,27 +20,24 @@ interface CategoryOption {
 
 const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
 
-const CATEGORY_OPTIONS: CategoryOption[] = [
-  { value: 'movies', label: 'Фильмы' },
-  { value: 'series', label: 'Сериалы' },
-  { value: 'games', label: 'Игры' },
-  { value: 'custom', label: 'Своё' },
-];
+const CATEGORY_OPTIONS: CategoryOption[] = (
+  Object.entries(TOPIC_CATEGORY_LABELS) as [TopicCategory, string][]
+).map(([value, label]) => ({ value, label }));
 
 const TITLE_PREFILL: Partial<Record<TopicCategory, string>> = {
-  movies: 'Фильмы',
-  series: 'Сериалы',
-  games: 'Игры',
+  movies: TOPIC_CATEGORY_LABELS.movies,
+  series: TOPIC_CATEGORY_LABELS.series,
+  games: TOPIC_CATEGORY_LABELS.games,
 };
 
 const CATEGORY_HINT =
-  '«Категория» — при добавлении элементов можно искать название и обложку в каталоге. «Своё» — всё вводите вручную.';
+  '«Категория» — при добавлении элементов можно искать название и обложку в каталоге.';
 
 const router = useRouter();
 const createTopic = useCreateTopicMutation();
 
-const title = ref('');
-const category = ref<TopicCategory>('custom');
+const title = ref(TITLE_PREFILL.movies ?? '');
+const category = ref<TopicCategory>('movies');
 const privacy = ref<PrivacyValue>('unlisted');
 const privacyTouched = ref(false);
 const fieldErrors = ref<FieldErrors>({});
@@ -53,6 +51,7 @@ function clearErrors() {
 }
 
 function onCategorySelect(value: TopicCategory) {
+  if (value === 'custom') return;
   category.value = value;
   const prefill = TITLE_PREFILL[value];
   if (prefill) {
@@ -146,7 +145,7 @@ async function onSubmit() {
             :key="option.value"
             :label="option.label"
             :selected="category === option.value"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting || option.value === 'custom'"
             @select="onCategoryChipSelect"
           />
         </div>

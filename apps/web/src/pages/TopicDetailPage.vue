@@ -321,12 +321,7 @@ function onRetry() {
         />
         <div class="flex flex-wrap gap-2">
           <TButton size="sm" :loading="busyTitle" @click="saveTitle">Сохранить</TButton>
-          <TButton
-            variant="danger-ghost"
-            size="sm"
-            :disabled="busyTitle"
-            @click="cancelTitleEdit"
-          >
+          <TButton variant="danger-ghost" size="sm" :disabled="busyTitle" @click="cancelTitleEdit">
             Отмена
           </TButton>
         </div>
