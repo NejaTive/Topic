@@ -11,6 +11,7 @@ import {
   TApproveModal,
   TButton,
   TError,
+  TInput,
   TLoader,
   TPrivacyChip,
   type PrivacyValue,
@@ -22,6 +23,7 @@ import {
   useRankItemMutation,
   useReorderItemsMutation,
   useUpdateTopicPrivacyMutation,
+  useUpdateTopicTitleMutation,
 } from '@/composables/useTopicMutations';
 import { useRankedLiveGap } from '@/composables/useRankedLiveGap';
 import { useTopicItemsQuery } from '@/composables/useTopicItemsQuery';
@@ -45,6 +47,7 @@ const queryClient = useQueryClient();
 const topicQuery = useTopicQuery(topicId);
 const itemsQuery = useTopicItemsQuery(topicId);
 const updatePrivacy = useUpdateTopicPrivacyMutation(() => topicId.value);
+const updateTitle = useUpdateTopicTitleMutation(() => topicId.value);
 const deleteTopicMut = useDeleteTopicMutation();
 const rankItemMut = useRankItemMutation(() => topicId.value);
 const reorderMut = useReorderItemsMutation(() => topicId.value);
@@ -53,6 +56,11 @@ const privacyOpen = ref(false);
 const actionError = ref('');
 const copyFeedback = ref('');
 const approveOpen = ref(false);
+const titleEditing = ref(false);
+const draftTitle = ref('');
+const titleError = ref('');
+
+const TITLE_INPUT_ID = 'topic-detail-title';
 
 const breakpoints = useTailwindBreakpoints();
 const isMdUp = breakpoints.greaterOrEqual('md');
@@ -75,12 +83,67 @@ const shareUrl = computed(() => {
 
 const isUnlisted = computed(() => topic.value?.privacy === 'unlisted');
 const busyPrivacy = computed(() => updatePrivacy.isPending.value);
+const busyTitle = computed(() => updateTitle.isPending.value);
 const busyDelete = computed(() => deleteTopicMut.isPending.value);
 const isPending = computed(() => topicQuery.isPending.value || itemsQuery.isPending.value);
 const isError = computed(() => topicQuery.isError.value || itemsQuery.isError.value);
 
 function clearActionError() {
   actionError.value = '';
+}
+
+function clearTitleError() {
+  titleError.value = '';
+}
+
+async function startTitleEdit() {
+  if (!topic.value || busyTitle.value) return;
+  clearActionError();
+  clearTitleError();
+  privacyOpen.value = false;
+  draftTitle.value = topic.value.title;
+  titleEditing.value = true;
+  await nextTick();
+  document.getElementById(TITLE_INPUT_ID)?.focus();
+}
+
+function cancelTitleEdit() {
+  if (busyTitle.value) return;
+  titleEditing.value = false;
+  draftTitle.value = '';
+  clearTitleError();
+}
+
+async function saveTitle() {
+  if (!topic.value || busyTitle.value) return;
+  clearTitleError();
+  clearActionError();
+
+  const trimmed = draftTitle.value.trim();
+  if (!trimmed) {
+    titleError.value = 'Укажите название';
+    return;
+  }
+  if (trimmed === topic.value.title) {
+    cancelTitleEdit();
+    return;
+  }
+
+  try {
+    await updateTitle.mutateAsync(trimmed);
+    titleEditing.value = false;
+    draftTitle.value = '';
+  } catch (err) {
+    if (err instanceof TopicsApiError) {
+      if (err.status === 401) {
+        void router.replace({ name: RouteName.Login, query: { returnUrl: route.fullPath } });
+        return;
+      }
+      titleError.value = err.fields?.title || err.message || 'Не удалось сохранить название';
+      return;
+    }
+    titleError.value = 'Не удалось сохранить название';
+  }
 }
 
 function applyApiError(err: unknown, fallback: string) {
@@ -245,6 +308,42 @@ function onRetry() {
     text-to="Мои топики"
     :title="topic.title"
   >
+    <template #title>
+      <div v-if="titleEditing" class="mt-4 flex flex-col gap-3">
+        <TInput
+          :id="TITLE_INPUT_ID"
+          v-model="draftTitle"
+          label="Название"
+          type="text"
+          autocomplete="off"
+          :error="titleError"
+          :disabled="busyTitle"
+        />
+        <div class="flex flex-wrap gap-2">
+          <TButton size="sm" :loading="busyTitle" @click="saveTitle">Сохранить</TButton>
+          <TButton variant="ghost" size="sm" :disabled="busyTitle" @click="cancelTitleEdit">
+            Отмена
+          </TButton>
+        </div>
+      </div>
+      <div v-else class="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <button
+          type="button"
+          class="min-w-0 cursor-pointer text-left text-h1 text-ink transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+          aria-label="Изменить название топика"
+          @click="startTitleEdit"
+        >
+          {{ topic.title }}
+        </button>
+        <button
+          type="button"
+          class="cursor-pointer text-label font-semibold text-accent transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+          @click="startTitleEdit"
+        >
+          Изменить
+        </button>
+      </div>
+    </template>
     <template #chrome>
       <div class="mt-3 flex items-center justify-between gap-3 md:mt-4">
         <div class="flex min-w-0 items-center gap-2">
