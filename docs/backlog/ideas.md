@@ -107,6 +107,12 @@
 - **Канон:** [`../feature/recommendations.md`](../feature/recommendations.md), [`../process/decisions.md`](../process/decisions.md) (17.10.2026).
 - **Источник:** обсуждение owner 17.10.2026.
 
+### Toast / notify (глобальный)
+- **Статус:** отложено (17.10.2026); вернуться явно
+- **Суть:** общий `notify(message)` + тост в layout (успех после «Добавить к себе» из рекомендации и т.п.).
+- **Сейчас:** локальные inline-feedback на отдельных экранах (copy link / recommend sent); глобального toast нет.
+- **Источник:** обсуждение после accept рекомендации 17.10.2026.
+
 ---
 
 ## Быстрые заметки

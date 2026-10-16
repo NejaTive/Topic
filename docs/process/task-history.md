@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — Рекомендации: share-item + копирайт Добавить/Скрыть
+
+- **YouGile:** FRO-49
+- **Итог:** «Рекомендовать» на share-деталках item для владельца; CTA на ленте «Добавить к себе» / «Скрыть»; `predev` → `prisma generate` (чтобы не ловить 500 без клиента); docs recommendations + toast в backlog.
+- **Репо:** `feat/FRO-49` / [PR #90](https://github.com/NejaTive/Topic/pull/90) → `develop`
+- **Заметки:** manual-close; toast/notify отложен (ideas).
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 17.10.2026 — Модалка «Кому рекомендовать» на S07
 
 - **YouGile:** FRO-47

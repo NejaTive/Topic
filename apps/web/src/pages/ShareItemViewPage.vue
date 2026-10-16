@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ShareApiError } from '@/api/share';
 import type { TopicCategory } from '@/api/topics';
 import { ContentPageWrapper, PageShell } from '@/components/layout';
+import RecommendItemModal from '@/components/recommendations/RecommendItemModal.vue';
 import CopyItemToTopicModal from '@/components/share/CopyItemToTopicModal.vue';
 import { TButton, TError, TLoader } from '@/components/ui-kit';
 import { useShareQuery } from '@/composables/useShareQuery';
@@ -32,17 +33,26 @@ const directorLabel = computed(() => {
 const isGamesTopic = computed(() => category.value === 'games');
 const meta = computed(() => item.value?.meta ?? null);
 
+const isOwner = computed(
+  () =>
+    session.status === 'authed' && !!share.value && session.user?.nick === share.value.ownerNick,
+);
+
 const canCopy = computed(() => {
   if (!share.value) return false;
-  if (session.status === 'authed' && session.user?.nick === share.value.ownerNick) {
-    return false;
-  }
+  if (isOwner.value) return false;
   return true;
 });
+
+const canRecommend = computed(() => isOwner.value);
 
 const pickerOpen = ref(false);
 const copyFeedback = ref('');
 let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
+
+const recommendOpen = ref(false);
+const recommendFeedback = ref('');
+let recommendFeedbackTimer: ReturnType<typeof setTimeout> | undefined;
 
 watch(
   () => shareQuery.error.value,
@@ -90,6 +100,19 @@ function onCopied() {
   if (feedbackTimer) clearTimeout(feedbackTimer);
   feedbackTimer = setTimeout(() => {
     copyFeedback.value = '';
+  }, 2500);
+}
+
+function openRecommend() {
+  recommendFeedback.value = '';
+  recommendOpen.value = true;
+}
+
+function onRecommendSent() {
+  recommendFeedback.value = 'Рекомендация отправлена';
+  if (recommendFeedbackTimer) clearTimeout(recommendFeedbackTimer);
+  recommendFeedbackTimer = setTimeout(() => {
+    recommendFeedback.value = '';
   }, 2500);
 }
 </script>
@@ -150,14 +173,29 @@ function onCopied() {
     <p v-if="copyFeedback" class="mt-5 text-caption text-muted" role="status">
       {{ copyFeedback }}
     </p>
+    <p v-if="recommendFeedback" class="mt-5 text-caption text-muted" role="status">
+      {{ recommendFeedback }}
+    </p>
 
     <div
-      v-if="canCopy"
+      v-if="canCopy || canRecommend"
       class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:mt-8 md:block"
     >
       <div class="flex w-full max-w-91.5 px-3 md:w-auto md:max-w-none md:px-0">
-        <TButton class="w-full shadow-float md:w-auto md:shadow-none" @click="onAddClick">
+        <TButton
+          v-if="canCopy"
+          class="w-full shadow-float md:w-auto md:shadow-none"
+          @click="onAddClick"
+        >
           Добавить к себе
+        </TButton>
+        <TButton
+          v-else-if="canRecommend"
+          variant="secondary"
+          class="w-full shadow-float md:w-auto md:shadow-none"
+          @click="openRecommend"
+        >
+          Рекомендовать
         </TButton>
       </div>
     </div>
@@ -169,6 +207,12 @@ function onCopied() {
       :item-id="itemId"
       :category="category as TopicCategory"
       @copied="onCopied"
+    />
+    <RecommendItemModal
+      v-if="canRecommend"
+      v-model:open="recommendOpen"
+      :item-id="itemId"
+      @sent="onRecommendSent"
     />
   </ContentPageWrapper>
 </template>

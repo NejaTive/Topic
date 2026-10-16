@@ -78,7 +78,7 @@ async function onPickTopic(topicId: string) {
       errorMessage.value = err.message;
       return;
     }
-    errorMessage.value = 'Не удалось принять рекомендацию';
+    errorMessage.value = 'Не удалось добавить в топик';
   } finally {
     pendingTopicId.value = null;
   }
