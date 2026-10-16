@@ -67,3 +67,11 @@ export class ItemBadRequestResponseDto {
   @ApiProperty({ example: 400 })
   statusCode!: number;
 }
+
+export class ItemConflictResponseDto {
+  @ApiProperty({ example: 'Этот фильм уже есть в списке' })
+  message!: string;
+
+  @ApiProperty({ example: 409 })
+  statusCode!: number;
+}
