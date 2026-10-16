@@ -181,6 +181,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/topics/{topicId}/items/copy-from-share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ItemsController_copyFromShare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics/{topicId}/items/{itemId}": {
         parameters: {
             query?: never;
@@ -595,6 +611,18 @@ export interface components {
             message: string;
             /** @example 409 */
             statusCode: number;
+        };
+        CopyFromShareDto: {
+            /**
+             * @description Opaque shareId исходного топика
+             * @example ILcBO4JTj9X9n53F-rgizA
+             */
+            shareId: string;
+            /**
+             * Format: uuid
+             * @description Id элемента в исходном топике
+             */
+            itemId: string;
         };
         ItemNotFoundResponseDto: {
             /** @example Элемент не найден */
@@ -1271,6 +1299,73 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    ItemsController_copyFromShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CopyFromShareDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForbiddenShareResponseDto"];
+                };
+            };
+            /** @description Целевой топик / share / элемент не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+            /** @description Элемент с тем же sourceUrl уже есть в целевом топике */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemConflictResponseDto"];
+                };
             };
         };
     };

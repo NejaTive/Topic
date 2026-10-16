@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -10,9 +11,10 @@ import {
 import { RawgClient } from '../catalog/rawg.client';
 import { TmdbClient } from '../catalog/tmdb.client';
 import { Prisma, type Item } from '../generated/prisma/client';
-import { ItemPlacement, TopicCategory } from '../generated/prisma/enums';
+import { ItemPlacement, TopicCategory, TopicPrivacy } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import type { CopyFromShareDto } from './dto/copy-from-share.dto';
 import type { CreateItemDto } from './dto/create-item.dto';
 import type { FromCatalogItemDto } from './dto/from-catalog-item.dto';
 import type { ItemMetaDto } from './dto/item-meta.dto';
@@ -228,6 +230,130 @@ export class ItemsService {
       });
       await tx.topic.update({
         where: { id: topicId },
+        data: { updatedAt: new Date() },
+      });
+      return created;
+    });
+
+    return this.toDto(item);
+  }
+
+  /**
+   * Копия ranked-элемента из доступного share в inbox своего топика той же категории.
+   * Обложку копируем новым ключом; meta (вкл. sourceUrl) — как в источнике.
+   */
+  async copyFromShareForOwner(
+    ownerId: string,
+    targetTopicId: string,
+    dto: CopyFromShareDto,
+  ): Promise<ItemDto> {
+    const target = await this.findOwnedTopicOrThrow(ownerId, targetTopicId);
+
+    const sourceTopic = await this.prisma.topic.findUnique({
+      where: { shareId: dto.shareId },
+      select: {
+        id: true,
+        category: true,
+        privacy: true,
+        items: {
+          where: { id: dto.itemId, placement: ItemPlacement.ranked },
+          take: 1,
+          select: {
+            id: true,
+            title: true,
+            coverKey: true,
+            meta: true,
+          },
+        },
+      },
+    });
+
+    if (!sourceTopic) {
+      throw new NotFoundException({
+        message: 'Топик не найден',
+        statusCode: 404,
+      });
+    }
+
+    if (sourceTopic.privacy === TopicPrivacy.private) {
+      throw new ForbiddenException({
+        message: 'Топик недоступен',
+        statusCode: 403,
+      });
+    }
+
+    const sourceItem = sourceTopic.items[0];
+    if (!sourceItem) {
+      throw new NotFoundException({
+        message: 'Элемент не найден',
+        statusCode: 404,
+      });
+    }
+
+    if (sourceTopic.category !== target.category) {
+      throw new BadRequestException({
+        message: 'Категория целевого топика должна совпадать с исходным',
+        statusCode: 400,
+      });
+    }
+
+    const sourceMeta = parseMoviesMeta(sourceItem.meta);
+    if (sourceMeta.sourceUrl) {
+      const duplicate = await this.prisma.item.findFirst({
+        where: {
+          topicId: targetTopicId,
+          meta: {
+            path: ['sourceUrl'],
+            equals: sourceMeta.sourceUrl,
+          },
+        },
+        select: { id: true },
+      });
+      if (duplicate) {
+        throw new ConflictException({
+          message:
+            target.category === TopicCategory.games
+              ? 'Эта игра уже есть в списке'
+              : target.category === TopicCategory.series
+                ? 'Этот сериал уже есть в списке'
+                : target.category === TopicCategory.movies
+                  ? 'Этот фильм уже есть в списке'
+                  : 'Уже есть в списке',
+          statusCode: 409,
+        });
+      }
+    }
+
+    let coverKey: string | null = null;
+    if (sourceItem.coverKey) {
+      try {
+        coverKey = await this.storage.copyCover(sourceItem.coverKey);
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : 'unknown';
+        this.logger.warn(`copy cover skipped: ${reason}`);
+      }
+    }
+
+    const meta =
+      CATALOG_CATEGORIES.has(target.category) && Object.keys(sourceMeta).length > 0
+        ? moviesMetaToJson(sourceMeta)
+        : Prisma.DbNull;
+
+    const title = sourceItem.title.slice(0, ITEM_TITLE_MAX);
+
+    const item = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.item.create({
+        data: {
+          topicId: targetTopicId,
+          title,
+          coverKey,
+          meta,
+          placement: ItemPlacement.unranked,
+          rankPosition: null,
+        },
+      });
+      await tx.topic.update({
+        where: { id: targetTopicId },
         data: { updatedAt: new Date() },
       });
       return created;

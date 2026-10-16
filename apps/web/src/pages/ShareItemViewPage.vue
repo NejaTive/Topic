@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ShareApiError } from '@/api/share';
+import type { TopicCategory } from '@/api/topics';
 import { ContentPageWrapper, PageShell } from '@/components/layout';
-import { TError, TLoader } from '@/components/ui-kit';
+import CopyItemToTopicModal from '@/components/share/CopyItemToTopicModal.vue';
+import { TButton, TError, TLoader } from '@/components/ui-kit';
 import { useShareQuery } from '@/composables/useShareQuery';
 import { RouteName } from '@/router/route-names';
+import { useSessionStore } from '@/stores/session';
 
 const route = useRoute();
 const router = useRouter();
+const session = useSessionStore();
 
 const shareId = computed(() => String(route.params.shareId ?? ''));
 const itemId = computed(() => String(route.params.itemId ?? ''));
@@ -27,6 +31,18 @@ const directorLabel = computed(() => {
 });
 const isGamesTopic = computed(() => category.value === 'games');
 const meta = computed(() => item.value?.meta ?? null);
+
+const canCopy = computed(() => {
+  if (!share.value) return false;
+  if (session.status === 'authed' && session.user?.nick === share.value.ownerNick) {
+    return false;
+  }
+  return true;
+});
+
+const pickerOpen = ref(false);
+const copyFeedback = ref('');
+let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
 
 watch(
   () => shareQuery.error.value,
@@ -59,6 +75,22 @@ watch(
 
 function onRetry() {
   shareQuery.refetch();
+}
+
+function onAddClick() {
+  if (session.status !== 'authed') {
+    void router.push({ name: RouteName.Login, query: { returnUrl: route.fullPath } });
+    return;
+  }
+  pickerOpen.value = true;
+}
+
+function onCopied() {
+  copyFeedback.value = 'Добавлено в inbox выбранного топика';
+  if (feedbackTimer) clearTimeout(feedbackTimer);
+  feedbackTimer = setTimeout(() => {
+    copyFeedback.value = '';
+  }, 2500);
 }
 </script>
 
@@ -105,7 +137,7 @@ function onRetry() {
           <h2 class="text-label text-muted">Источник</h2>
           <a
             :href="meta.sourceUrl"
-            class="text-body text-accent break-all"
+            class="break-all text-body text-accent"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -114,5 +146,29 @@ function onRetry() {
         </section>
       </div>
     </div>
+
+    <p v-if="copyFeedback" class="mt-5 text-caption text-muted" role="status">
+      {{ copyFeedback }}
+    </p>
+
+    <div
+      v-if="canCopy"
+      class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:mt-8 md:block"
+    >
+      <div class="flex w-full max-w-91.5 px-3 md:w-auto md:max-w-none md:px-0">
+        <TButton class="w-full shadow-float md:w-auto md:shadow-none" @click="onAddClick">
+          Добавить к себе
+        </TButton>
+      </div>
+    </div>
+
+    <CopyItemToTopicModal
+      v-if="canCopy && session.status === 'authed' && category"
+      v-model:open="pickerOpen"
+      :share-id="shareId"
+      :item-id="itemId"
+      :category="category as TopicCategory"
+      @copied="onCopied"
+    />
   </ContentPageWrapper>
 </template>

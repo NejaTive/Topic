@@ -23,6 +23,7 @@ import {
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -38,7 +39,9 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UnauthorizedResponseDto } from '../auth/dto/user-response.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { COVER_MAX_BYTES } from '../storage/storage.service';
+import { ForbiddenShareResponseDto } from '../topics/dto/share-topic-response.dto';
 import { NotFoundResponseDto } from '../topics/dto/topic-response.dto';
+import { CopyFromShareDto } from './dto/copy-from-share.dto';
 import { CreateItemDto } from './dto/create-item.dto';
 import { FromCatalogItemDto } from './dto/from-catalog-item.dto';
 import {
@@ -125,6 +128,28 @@ export class ItemsController {
     @Body() dto: FromCatalogItemDto,
   ): Promise<ItemDto> {
     return this.items.createFromCatalogForOwner(user.id, topicId, dto);
+  }
+
+  @Post('copy-from-share')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: ItemDto })
+  @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
+  @ApiBadRequestResponse({ type: ItemBadRequestResponseDto })
+  @ApiForbiddenResponse({ type: ForbiddenShareResponseDto })
+  @ApiConflictResponse({
+    description: 'Элемент с тем же sourceUrl уже есть в целевом топике',
+    type: ItemConflictResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Целевой топик / share / элемент не найден',
+    type: NotFoundResponseDto,
+  })
+  copyFromShare(
+    @CurrentUser() user: AuthUser,
+    @Param('topicId', ParseUUIDPipe) topicId: string,
+    @Body() dto: CopyFromShareDto,
+  ): Promise<ItemDto> {
+    return this.items.copyFromShareForOwner(user.id, topicId, dto);
   }
 
   @Get(':itemId')

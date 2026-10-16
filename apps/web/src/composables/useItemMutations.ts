@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import {
+  copyItemFromShare,
   createItem,
   createItemFromCatalog,
   deleteItem,
@@ -8,6 +9,7 @@ import {
   unrankItem,
   updateItem,
   uploadItemCover,
+  type CopyFromShareBody,
   type CreateItemBody,
   type FromCatalogItemBody,
   type ItemDto,
@@ -42,6 +44,19 @@ export function useCreateItemFromCatalogMutation(topicId: () => string) {
       const id = topicId();
       queryClient.setQueryData(queryKeys.topics.item(id, item.id), item);
       invalidateTopicLists(queryClient, id);
+    },
+  });
+}
+
+export function useCopyItemFromShareMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ targetTopicId, body }: { targetTopicId: string; body: CopyFromShareBody }) =>
+      copyItemFromShare(targetTopicId, body),
+    onSuccess: (item: ItemDto) => {
+      queryClient.setQueryData(queryKeys.topics.item(item.topicId, item.id), item);
+      invalidateTopicLists(queryClient, item.topicId);
     },
   });
 }
