@@ -326,23 +326,15 @@ function onRetry() {
           </TButton>
         </div>
       </div>
-      <div v-else class="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <button
-          type="button"
-          class="min-w-0 cursor-pointer text-left text-h1 text-ink transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-          aria-label="Изменить название топика"
-          @click="startTitleEdit"
-        >
-          {{ topic.title }}
-        </button>
-        <button
-          type="button"
-          class="cursor-pointer text-label font-semibold text-accent transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-          @click="startTitleEdit"
-        >
-          Изменить
-        </button>
-      </div>
+      <button
+        v-else
+        type="button"
+        class="mt-4 min-w-0 cursor-pointer text-left text-h1 text-ink transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+        aria-label="Изменить название топика"
+        @click="startTitleEdit"
+      >
+        {{ topic.title }}
+      </button>
     </template>
     <template #chrome>
       <div class="mt-3 flex items-center justify-between gap-3 md:mt-4">
