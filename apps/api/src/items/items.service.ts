@@ -27,6 +27,7 @@ import type { ItemMetaDto } from './dto/item-meta.dto';
 import type { ItemDto, ItemListDto } from './dto/item-response.dto';
 import type { RecommendItemDto } from './dto/recommend-item.dto';
 import type { RecommendCreatedDto } from './dto/recommend-response.dto';
+import type { RecommendationDto, RecommendationListDto } from './dto/recommendation-response.dto';
 import type { ReorderItemsDto } from './dto/reorder-items.dto';
 import type { UpdateItemDto } from './dto/update-item.dto';
 import {
@@ -39,6 +40,13 @@ import {
   tmdbMovieSourceUrl,
   tmdbTvSourceUrl,
 } from './item-meta';
+
+type InboxSnapshot = {
+  title: string;
+  coverKey: string | null;
+  meta: Prisma.JsonValue | null;
+  category: TopicCategory;
+};
 
 const POSTER_FETCH_TIMEOUT_MS = 10_000;
 const ITEM_TITLE_MAX = 200;
@@ -148,6 +156,72 @@ export class ItemsService {
     );
 
     return { ids: created.map((row) => row.id) };
+  }
+
+  async listPendingRecommendations(userId: string): Promise<RecommendationListDto> {
+    const rows = await this.prisma.recommendation.findMany({
+      where: { toUserId: userId, status: RecommendationStatus.pending },
+      orderBy: { createdAt: 'desc' },
+      include: { fromUser: { select: { nick: true } } },
+    });
+
+    return {
+      items: rows.map((row) => this.toRecommendationDto(row)),
+    };
+  }
+
+  async acceptRecommendation(
+    userId: string,
+    recommendationId: string,
+    topicId: string,
+  ): Promise<ItemDto> {
+    const recommendation = await this.prisma.recommendation.findFirst({
+      where: {
+        id: recommendationId,
+        toUserId: userId,
+        status: RecommendationStatus.pending,
+      },
+    });
+    if (!recommendation) {
+      throw new NotFoundException({
+        message: 'Рекомендация не найдена',
+        statusCode: 404,
+      });
+    }
+
+    return this.copySnapshotToInbox(
+      userId,
+      topicId,
+      {
+        title: recommendation.title,
+        coverKey: recommendation.coverKey,
+        meta: recommendation.meta,
+        category: recommendation.category,
+      },
+      { markRecommendationAcceptedId: recommendationId },
+    );
+  }
+
+  async dismissRecommendation(userId: string, recommendationId: string): Promise<void> {
+    const recommendation = await this.prisma.recommendation.findFirst({
+      where: {
+        id: recommendationId,
+        toUserId: userId,
+        status: RecommendationStatus.pending,
+      },
+      select: { id: true },
+    });
+    if (!recommendation) {
+      throw new NotFoundException({
+        message: 'Рекомендация не найдена',
+        statusCode: 404,
+      });
+    }
+
+    await this.prisma.recommendation.update({
+      where: { id: recommendationId },
+      data: { status: RecommendationStatus.dismissed },
+    });
   }
 
   async listForOwner(ownerId: string, topicId: string): Promise<ItemListDto> {
@@ -345,8 +419,6 @@ export class ItemsService {
     targetTopicId: string,
     dto: CopyFromShareDto,
   ): Promise<ItemDto> {
-    const target = await this.findOwnedTopicOrThrow(ownerId, targetTopicId);
-
     const sourceTopic = await this.prisma.topic.findUnique({
       where: { shareId: dto.shareId },
       select: {
@@ -388,14 +460,30 @@ export class ItemsService {
       });
     }
 
-    if (sourceTopic.category !== target.category) {
+    return this.copySnapshotToInbox(ownerId, targetTopicId, {
+      title: sourceItem.title,
+      coverKey: sourceItem.coverKey,
+      meta: sourceItem.meta,
+      category: sourceTopic.category,
+    });
+  }
+
+  private async copySnapshotToInbox(
+    ownerId: string,
+    targetTopicId: string,
+    snapshot: InboxSnapshot,
+    options?: { markRecommendationAcceptedId?: string },
+  ): Promise<ItemDto> {
+    const target = await this.findOwnedTopicOrThrow(ownerId, targetTopicId);
+
+    if (snapshot.category !== target.category) {
       throw new BadRequestException({
         message: 'Категория целевого топика должна совпадать с исходным',
         statusCode: 400,
       });
     }
 
-    const sourceMeta = parseMoviesMeta(sourceItem.meta);
+    const sourceMeta = parseMoviesMeta(snapshot.meta);
     if (sourceMeta.sourceUrl) {
       const duplicate = await this.prisma.item.findFirst({
         where: {
@@ -423,9 +511,9 @@ export class ItemsService {
     }
 
     let coverKey: string | null = null;
-    if (sourceItem.coverKey) {
+    if (snapshot.coverKey) {
       try {
-        coverKey = await this.storage.copyCover(sourceItem.coverKey);
+        coverKey = await this.storage.copyCover(snapshot.coverKey);
       } catch (err) {
         const reason = err instanceof Error ? err.message : 'unknown';
         this.logger.warn(`copy cover skipped: ${reason}`);
@@ -437,7 +525,7 @@ export class ItemsService {
         ? moviesMetaToJson(sourceMeta)
         : Prisma.DbNull;
 
-    const title = sourceItem.title.slice(0, ITEM_TITLE_MAX);
+    const title = snapshot.title.slice(0, ITEM_TITLE_MAX);
 
     const item = await this.prisma.$transaction(async (tx) => {
       const created = await tx.item.create({
@@ -454,6 +542,12 @@ export class ItemsService {
         where: { id: targetTopicId },
         data: { updatedAt: new Date() },
       });
+      if (options?.markRecommendationAcceptedId) {
+        await tx.recommendation.update({
+          where: { id: options.markRecommendationAcceptedId },
+          data: { status: RecommendationStatus.accepted },
+        });
+      }
       return created;
     });
 
@@ -814,6 +908,26 @@ export class ItemsService {
       placement: item.placement,
       rankPosition: item.rankPosition,
       createdAt: item.createdAt.toISOString(),
+    };
+  }
+
+  private toRecommendationDto(row: {
+    id: string;
+    title: string;
+    coverKey: string | null;
+    category: TopicCategory;
+    meta: Prisma.JsonValue | null;
+    createdAt: Date;
+    fromUser: { nick: string };
+  }): RecommendationDto {
+    return {
+      id: row.id,
+      title: row.title,
+      coverUrl: this.storage.coverUrl(row.coverKey),
+      category: row.category,
+      meta: metaToDto(row.meta),
+      fromNick: row.fromUser.nick,
+      createdAt: row.createdAt.toISOString(),
     };
   }
 }

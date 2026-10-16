@@ -5,10 +5,11 @@ import { UsersModule } from '../users/users.module';
 import { ItemRecommendController } from './item-recommend.controller';
 import { ItemsController } from './items.controller';
 import { ItemsService } from './items.service';
+import { RecommendationsController } from './recommendations.controller';
 
 @Module({
   imports: [AuthModule, CatalogModule, UsersModule],
-  controllers: [ItemsController, ItemRecommendController],
+  controllers: [ItemsController, ItemRecommendController, RecommendationsController],
   providers: [ItemsService],
 })
 export class ItemsModule {}
