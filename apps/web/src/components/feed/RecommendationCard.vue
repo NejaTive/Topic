@@ -88,7 +88,7 @@ async function onDismiss() {
 
     <div class="flex gap-2">
       <TButton class="min-w-0 flex-1" size="sm" :disabled="isDismissing" @click="onAccept">
-        Принять
+        Добавить к себе
       </TButton>
       <TButton
         class="min-w-0 flex-1"
@@ -98,7 +98,7 @@ async function onDismiss() {
         :disabled="isDismissing"
         @click="onDismiss"
       >
-        Отклонить
+        Скрыть
       </TButton>
     </div>
 

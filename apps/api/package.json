@@ -4,6 +4,7 @@
   "version": "0.3.1",
   "scripts": {
     "dev": "nest start --watch",
+    "predev": "pnpm run db:generate",
     "prebuild": "pnpm run db:generate",
     "build": "nest build",
     "start": "node dist/main.js",
