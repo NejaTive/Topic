@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — Copy from share: элемент из чужого топика к себе
+
+- **YouGile:** вне карточки (команда владельца)
+- **Итог:** `POST …/items/copy-from-share` копирует ranked-элемент в inbox своего топика той же категории (title/meta + новый coverKey); UI — «+» в списке share и CTA на карточке + picker топиков.
+- **Репо:** `feat/copy-from-share` / [PR #82](https://github.com/NejaTive/Topic/pull/82) → `develop`
+- **Заметки:** флаг «уже есть у меня» отложен (`decisions.md` 17.10.2026); без YouGile-ревью.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~ретро · ревью n/a · всего ~ретро
+
 ### 16.10.2026 — Категория в списках + mobile cover stack; Своё disabled
 
 - **YouGile:** FRO-45
