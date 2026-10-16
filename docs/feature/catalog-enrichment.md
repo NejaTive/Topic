@@ -43,8 +43,12 @@
 
 ### Item
 
-- Без новых обязательных полей в v1.
-- Create по-прежнему: `title` + опциональный cover upload (или cover, скачанный сервером при импорте из поиска).
+- Общие поля: `title` + опциональный cover (upload или скачивание при импорте из поиска).
+- Опциональный **`meta Json?`** — category-specific поля на том же `Item` (не отдельные колонки / таблицы).
+  - **`movies`:** опциональные строки `description`, `director`, `genre`, `country` (singular; пустая строка → ключ отсутствует / `meta` null).
+  - **`custom`:** `meta` всегда `null`; передача `meta` в create/update → `400`.
+  - Каталожный и ручной элемент в топике «Фильмы» — один контракт полей.
+  - Будущие категории (`series`, `books`, …): другие ключи в том же `meta`, валидация по `topic.category`.
 
 ## API (Nest)
 
@@ -60,7 +64,8 @@
    - **A2:** фронт после выбора шлёт обычный create + отдельный «cover by url» на Nest.  
    Предпочтение плана: **A1** (меньше дыр, один транзакционный UX).
 
-3. Ручной путь без изменений контракта: `POST .../items` + optional cover multipart.
+3. Ручной путь: `POST .../items` + optional cover multipart; для `movies` — опциональный `meta: { director?, genre?, country? }`.
+4. `from-catalog` дополняет `meta` из TMDB details (`overview` → description; `append_to_response=credits`: первый Director, первый genre, первая production country).
 
 Ошибки поиска: fail-soft (пустой список / сообщение), ручное создание не блокировать. Rate-limit / таймаут к TMDB — на Nest.
 
@@ -74,8 +79,9 @@
 
 ### S06 Добавить элемент
 
-- Если `topic.category === 'movies'`: поле поиска → debounce → список из API → выбор заполняет превью (title + cover) → CTA «Добавить»; ссылка/кнопка «Указать вручную» → текущая форма (title + CoverUpload).
-- Если `custom`: только текущая форма (без поиска).
+- Если `topic.category === 'movies'`: поле поиска → debounce → список из API → выбор → from-catalog (title + cover + meta); ссылка/кнопка «Указать вручную» → форма обложка → название → описание → жанр → режиссёр → страна.
+- Если `custom`: только title + CoverUpload (без поиска и без meta-полей).
+- S07 (редактирование): те же meta-поля при `movies`. Список ранга / RankRow / S09 UI — без meta в первом slice (поля уже в API / ShareItemDto).
 
 ### Атрибуция
 
@@ -106,9 +112,9 @@
 
 1. **Контракт и docs** — этот файл + decisions (✅).
 2. **Нарезка YouGile** — ✅ 15.10.2026 (см. ниже); hi-fi не блокирует.
-3. **Backend:** BAC-21 → BAC-22 → BAC-23.
-4. **Frontend:** FRO-36 → FRO-37 → FRO-38.
-5. **Проверка:** топик «Фильмы» → поиск → элемент с обложкой в MinIO; `custom` → как сейчас; без ключа TMDB — деградация без падения create.
+3. **Backend:** BAC-21 → BAC-22 → BAC-23 → BAC-24.
+4. **Frontend:** FRO-36 → FRO-37 → FRO-38 → FRO-39.
+5. **Проверка:** топик «Фильмы» → поиск → элемент с обложкой и meta в MinIO/API; ручной create с полями; `custom` → как сейчас без meta; без ключа TMDB — деградация без падения create.
 
 ## Нарезка YouGile ✅
 
@@ -119,11 +125,13 @@
 | **BAC-21** | `Topic.category` (`movies` \| `custom`): Prisma + миграция + CreateTopicDto / TopicDto / OpenAPI | — |
 | **BAC-22** | TMDB env + клиент + `GET /api/catalog/movies/search` | — |
 | **BAC-23** | `POST .../items/from-catalog` (TMDB → Item + cover MinIO) | BAC-21, BAC-22 |
+| **BAC-24** | `Item.meta` Json + movies fields (director/genre/country) в create/update/from-catalog/OpenAPI | BAC-23 |
 | **FRO-36** | Catalog API-клиент (category + search + from-catalog) | BAC-21, BAC-22, BAC-23 |
 | **FRO-37** | S04: чипы Фильмы / Своё | FRO-36 |
 | **FRO-38** | S06: поиск TMDB + from-catalog + ручной fallback | FRO-36, FRO-37 |
+| **FRO-39** | S06/S07: поля Режиссёр / Жанр / Страна для `movies` | BAC-24, FRO-38 |
 
-Порядок исполнения: BAC-21 → BAC-22 → BAC-23 → FRO-36 → FRO-37 → FRO-38 (executor’ов не параллелить по умолчанию).
+Порядок исполнения: BAC-21 → … → BAC-23 → FRO-36…38 → BAC-24 → FRO-39 (executor’ов не параллелить по умолчанию).
 
 ### Зафиксировано при нарезке
 
@@ -134,8 +142,9 @@
 
 ## Не делаем в v1
 
-- Сериалы / игры / книги и прочие адаптеры.
-- Поля жанра, рейтинга TMDB, трейлеров на Item.
+- Сериалы / игры / книги и прочие адаптеры (другие ключи `meta` — позже).
+- Рейтинг TMDB, трейлеры, множественные жанры/страны/режиссёры.
+- Meta в RankRow / S09 UI (поля уже в API).
 - Хранение `externalSource` / `externalId` на Item.
 - Смена `category` у топика после создания.
 - OG-превью share-страницы `/t/:shareId` (другая фича).

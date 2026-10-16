@@ -444,6 +444,16 @@ export interface components {
             /** @enum {string} */
             privacy?: "private" | "unlisted" | "public";
         };
+        ItemMetaDto: {
+            /** @example Команда исследователей путешествует через червоточину… */
+            description?: string | null;
+            /** @example Кристофер Нолан */
+            director?: string | null;
+            /** @example Фантастика */
+            genre?: string | null;
+            /** @example США */
+            country?: string | null;
+        };
         ShareItemDto: {
             /** Format: uuid */
             id: string;
@@ -459,6 +469,8 @@ export interface components {
              * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
              */
             coverUrl?: string | null;
+            /** @description Category-specific поля; null если пусто */
+            meta?: components["schemas"]["ItemMetaDto"] | null;
         };
         ShareTopicDto: {
             /** @example Фильмы 2026 */
@@ -493,6 +505,8 @@ export interface components {
              * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
              */
             coverUrl?: string | null;
+            /** @description Category-specific поля; null для custom / пустого meta */
+            meta?: components["schemas"]["ItemMetaDto"] | null;
             /** @enum {string} */
             placement: "unranked" | "ranked";
             /** @description Плотный 1…N только для ranked; иначе null */
@@ -507,6 +521,8 @@ export interface components {
         CreateItemDto: {
             /** @example Dune 2 */
             title: string;
+            /** @description Только для топиков category=movies; иначе 400 */
+            meta?: components["schemas"]["ItemMetaDto"];
         };
         ReorderItemsDto: {
             /**
@@ -546,6 +562,8 @@ export interface components {
         UpdateItemDto: {
             /** @example Dune 2 */
             title?: string;
+            /** @description Частичный merge; только для category=movies; иначе 400 */
+            meta?: components["schemas"]["ItemMetaDto"];
         };
         CatalogMovieDto: {
             /**

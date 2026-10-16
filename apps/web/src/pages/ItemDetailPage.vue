@@ -3,7 +3,15 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import { TApproveModal, TButton, TError, TInput, TLoader, TCoverUpload } from '@/components/ui-kit';
+import {
+  TApproveModal,
+  TButton,
+  TCoverUpload,
+  TError,
+  TInput,
+  TLoader,
+  TTextarea,
+} from '@/components/ui-kit';
 import {
   useDeleteItemCoverMutation,
   useDeleteItemMutation,
@@ -53,6 +61,10 @@ const unrankMut = useUnrankItemMutation(
 );
 
 const title = ref('');
+const description = ref('');
+const director = ref('');
+const genre = ref('');
+const country = ref('');
 const coverFile = ref<File | null>(null);
 const coverPreviewUrl = ref<string | null>(null);
 const coverRemoved = ref(false);
@@ -63,6 +75,7 @@ const actionError = ref('');
 const approveOpen = ref(false);
 
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
+const isMoviesTopic = computed(() => topicQuery.data.value?.category === 'movies');
 const item = computed(() => itemQuery.data.value);
 
 const remoteCoverUrl = computed(() => item.value?.coverUrl ?? null);
@@ -83,9 +96,14 @@ const isBusy = computed(
 );
 
 watch(
-  () => item.value?.title,
+  () => item.value,
   (next) => {
-    if (next != null) title.value = next;
+    if (!next) return;
+    title.value = next.title;
+    description.value = next.meta?.description ?? '';
+    director.value = next.meta?.director ?? '';
+    genre.value = next.meta?.genre ?? '';
+    country.value = next.meta?.country ?? '';
   },
   { immediate: true },
 );
@@ -169,8 +187,27 @@ async function onSave() {
   }
 
   try {
-    if (!item.value || trimmed !== item.value.title) {
-      await updateItem.mutateAsync({ title: trimmed });
+    const nextMeta = isMoviesTopic.value
+      ? {
+          description: description.value.trim(),
+          director: director.value.trim(),
+          genre: genre.value.trim(),
+          country: country.value.trim(),
+        }
+      : undefined;
+    const prevMeta = item.value?.meta;
+    const metaChanged =
+      isMoviesTopic.value &&
+      (nextMeta!.description !== (prevMeta?.description ?? '') ||
+        nextMeta!.director !== (prevMeta?.director ?? '') ||
+        nextMeta!.genre !== (prevMeta?.genre ?? '') ||
+        nextMeta!.country !== (prevMeta?.country ?? ''));
+
+    if (!item.value || trimmed !== item.value.title || metaChanged) {
+      await updateItem.mutateAsync({
+        title: trimmed,
+        ...(metaChanged ? { meta: nextMeta } : {}),
+      });
     }
 
     if (coverFile.value) {
@@ -228,6 +265,14 @@ function onRetry() {
 
     <template v-else-if="item">
       <form class="flex flex-col gap-5" @submit.prevent="onSave">
+        <TCoverUpload
+          :preview-url="displayCoverUrl"
+          :error="coverError"
+          :disabled="isBusy"
+          @file="onCoverFile"
+          @clear="onCoverClear"
+        />
+
         <TInput
           v-model="title"
           label="Название"
@@ -237,13 +282,24 @@ function onRetry() {
           :disabled="isBusy"
         />
 
-        <TCoverUpload
-          :preview-url="displayCoverUrl"
-          :error="coverError"
-          :disabled="isBusy"
-          @file="onCoverFile"
-          @clear="onCoverClear"
-        />
+        <template v-if="isMoviesTopic">
+          <TTextarea v-model="description" label="Описание" :disabled="isBusy" />
+          <TInput v-model="genre" label="Жанр" type="text" autocomplete="off" :disabled="isBusy" />
+          <TInput
+            v-model="director"
+            label="Режиссёр"
+            type="text"
+            autocomplete="off"
+            :disabled="isBusy"
+          />
+          <TInput
+            v-model="country"
+            label="Страна"
+            type="text"
+            autocomplete="off"
+            :disabled="isBusy"
+          />
+        </template>
 
         <p v-if="formError" class="text-caption text-danger">
           {{ formError }}

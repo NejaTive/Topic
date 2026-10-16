@@ -33,6 +33,24 @@
 
 ## Записи
 
+### 16.10.2026 — Item.meta Json + movies fields
+
+- **YouGile:** BAC-24
+- **Итог:** На `Item` — `meta Json?`; для `movies` поля `description` / `director` / `genre` / `country` в create/update/from-catalog и Share; TMDB details (`overview` + credits); `custom` + meta → 400; OpenAPI-клиент обновлён.
+- **Репо:** `feat/BAC-24` / [PR #70](https://github.com/NejaTive/Topic/pull/70) → `feat/catalog-enrichment`
+- **Заметки:** manual-close; вместе с FRO-39 в одном коммите/PR; RankRow/S09 UI не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 16.10.2026 — S06/S07: meta-поля фильма + TTextarea
+
+- **YouGile:** FRO-39
+- **Итог:** На S06/S07 для `movies` — обложка → название → описание (`TTextarea`) → жанр → режиссёр → страна; from-catalog подтягивает meta; плюс мелкий UX Catalog (FieldHint, TLoader, chips).
+- **Репо:** `feat/BAC-24` / [PR #70](https://github.com/NejaTive/Topic/pull/70) → `feat/catalog-enrichment` (тот же PR, что BAC-24)
+- **Заметки:** manual-close; custom без meta-полей.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 15.10.2026 — S06: поиск TMDB + from-catalog + ручной fallback
 
 - **YouGile:** FRO-38

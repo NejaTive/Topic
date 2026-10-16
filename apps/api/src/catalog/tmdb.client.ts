@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 const TMDB_API_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_TIMEOUT_MS = 5_000;
+const META_FIELD_MAX = 100;
+const META_DESCRIPTION_MAX = 2000;
 
 type TmdbSearchMovie = {
   id: number;
@@ -17,11 +19,26 @@ type TmdbSearchResponse = {
   results?: TmdbSearchMovie[];
 };
 
+type TmdbGenre = { name?: string | null };
+type TmdbCountry = { name?: string | null };
+type TmdbCrew = { job?: string | null; name?: string | null };
+
+type TmdbMovieDetails = TmdbSearchMovie & {
+  overview?: string | null;
+  genres?: TmdbGenre[];
+  production_countries?: TmdbCountry[];
+  credits?: { crew?: TmdbCrew[] };
+};
+
 export type TmdbMovieHit = {
   providerId: string;
   title: string;
   year?: number;
   imageUrl?: string | null;
+  description?: string;
+  director?: string;
+  genre?: string;
+  country?: string;
 };
 
 @Injectable()
@@ -73,13 +90,14 @@ export class TmdbClient {
 
     const url = new URL(`${TMDB_API_BASE}/movie/${encodeURIComponent(id)}`);
     url.searchParams.set('language', 'ru');
+    url.searchParams.set('append_to_response', 'credits');
 
     try {
-      const body = await this.tmdbGetJson<TmdbSearchMovie>(url);
+      const body = await this.tmdbGetJson<TmdbMovieDetails>(url);
       if (!body) {
         return null;
       }
-      return this.mapHit(body);
+      return this.mapDetails(body);
     } catch (err) {
       const reason = err instanceof Error ? err.name : 'unknown';
       this.logger.warn(`TMDB movie ${id} failed: ${reason}`);
@@ -143,6 +161,28 @@ export class TmdbClient {
       imageUrl,
     };
   }
+
+  private mapDetails(item: TmdbMovieDetails): TmdbMovieHit | null {
+    const base = this.mapHit(item);
+    if (!base) {
+      return null;
+    }
+
+    const description = firstMetaString(item.overview, META_DESCRIPTION_MAX);
+    const director = firstMetaString(
+      item.credits?.crew?.find((member) => member.job === 'Director')?.name,
+    );
+    const genre = firstMetaString(item.genres?.[0]?.name);
+    const country = firstMetaString(item.production_countries?.[0]?.name);
+
+    return {
+      ...base,
+      ...(description ? { description } : {}),
+      ...(director ? { director } : {}),
+      ...(genre ? { genre } : {}),
+      ...(country ? { country } : {}),
+    };
+  }
 }
 
 function nonEmpty(value: string | undefined): string | undefined {
@@ -156,4 +196,15 @@ function parseYear(releaseDate: string | null | undefined): number | undefined {
   }
   const year = Number.parseInt(releaseDate.slice(0, 4), 10);
   return Number.isFinite(year) ? year : undefined;
+}
+
+function firstMetaString(
+  value: string | null | undefined,
+  maxLength = META_FIELD_MAX,
+): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return trimmed.slice(0, maxLength);
 }

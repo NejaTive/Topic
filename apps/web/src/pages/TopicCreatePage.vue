@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { TopicsApiError, type TopicCategory } from '@/api/topics';
+import FieldHint from '@/components/FieldHint.vue';
 import { TButton, TInput, TMainChip, TPrivacyChip, type PrivacyValue } from '@/components/ui-kit';
 import { ContentPageWrapper } from '@/components/layout';
 import { useCreateTopicMutation } from '@/composables/useCreateTopicMutation';
@@ -24,6 +25,9 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
 ];
 
 const MOVIES_TITLE_PREFILL = 'Фильмы';
+
+const CATEGORY_HINT =
+  '«Категория» — при добавлении элементов можно искать название и обложку в каталоге. «Своё» — всё вводите вручную.';
 
 const router = useRouter();
 const createTopic = useCreateTopicMutation();
@@ -125,7 +129,10 @@ async function onSubmit() {
   <ContentPageWrapper :route-to="RouteName.AppTopics" text-to="Мои топики" title="Новый топик">
     <form class="flex flex-col gap-5" @submit.prevent="onSubmit">
       <fieldset>
-        <legend class="mb-2 text-label">Категория</legend>
+        <legend class="mb-2 flex w-full items-center gap-1.5 text-label">
+          <span>Категория</span>
+          <FieldHint :text="CATEGORY_HINT" label="Зачем выбирать категорию" />
+        </legend>
         <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="Категория топика">
           <TMainChip
             v-for="option in CATEGORY_OPTIONS"
@@ -143,7 +150,7 @@ async function onSubmit() {
         label="Название"
         type="text"
         autocomplete="off"
-        placeholder="Например, Фильмы"
+        placeholder="Например, Зарубежные фильмы"
         :error="fieldErrors.title"
         :disabled="isSubmitting"
       />

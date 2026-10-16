@@ -25,9 +25,11 @@ const linkTo = computed<RouteLocationRaw | undefined>(() => {
 <template>
   <PageShell>
     <template #header>
-      <RouterLink v-if="linkTo" :to="linkTo" class="text-label font-semibold text-accent">
-        ← {{ props.textTo }}
-      </RouterLink>
+      <slot name="back">
+        <RouterLink v-if="linkTo" :to="linkTo" class="text-label font-semibold text-accent">
+          ← {{ props.textTo }}
+        </RouterLink>
+      </slot>
       <h1 class="mt-4 text-h1 text-ink">{{ props.title }}</h1>
       <slot name="chrome" />
     </template>

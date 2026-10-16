@@ -7,6 +7,7 @@ import {
   type TopicCategory as TopicCategoryType,
   type TopicPrivacy as TopicPrivacyType,
 } from '../generated/prisma/enums';
+import { metaToDto } from '../items/item-meta';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import type { CreateTopicDto } from './dto/create-topic.dto';
@@ -126,6 +127,7 @@ export class TopicsService {
             title: true,
             rankPosition: true,
             coverKey: true,
+            meta: true,
           },
         },
       },
@@ -155,6 +157,7 @@ export class TopicsService {
         title: item.title,
         rankPosition: item.rankPosition as number,
         coverUrl: this.storage.coverUrl(item.coverKey),
+        meta: metaToDto(item.meta),
       })),
     };
   }

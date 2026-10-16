@@ -691,6 +691,18 @@
 - Закреплено в `develop` без bump версии (вариант B); на VPS уже применено вручную; в prod через CI — со следующим promote в `main`.
 - Канон: `docs/process/deploy.md`.
 
+## 16.10.2026
+
+### Item.meta — поля фильма (director / genre / country)
+
+- **Хранение:** на `Item` опциональный **`meta Json?`** (не плоские колонки) — один контейнер под category-specific поля.
+- **movies:** опциональные строки `description` (из TMDB `overview`), `director`, `genre`, `country` (singular); каталожный и ручной элемент — один контракт.
+- **custom:** `meta` всегда `null`; передача meta → `400`.
+- **TMDB from-catalog:** details + `credits` → первый Director / genre / production country.
+- **UI v1:** S06 (ручная форма) + S07; RankRow / S09 UI — позже (meta уже в `ItemDto` / `ShareItemDto`).
+- **YouGile:** BAC-24, FRO-39 (эпик Catalog); ветка `feat/catalog-enrichment`.
+- План/контракт: [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+
 ## 15.10.2026
 
 ### Каталог при добавлении элементов (вариант A)
