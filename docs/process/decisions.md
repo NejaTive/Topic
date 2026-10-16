@@ -693,6 +693,19 @@
 
 ## 16.10.2026
 
+### Категория games (игры) — RAWG, meta вариант A
+
+- **Пересматриваем** «вне v1» для игр из Catalog (15.10.2026): добавляем категорию **`games`**.
+- Провайдер: **RAWG** (`GET /api/games?search=`, `GET /api/games/{id}`); секрет `RAWG_API_KEY` только на Nest.
+- **Meta вариант A:** тот же контракт строк, что у `movies`/`series` — `description` / `director` / `genre` / `country` / `sourceUrl`.
+- RAWG: `name`→title, `released`→year в поиске, `background_image`→cover, `description_raw`→description, первый developer→`director`, первый genre→`genre`, первая platform→`country`; `sourceUrl` = `https://rawg.io/games/{slug}`.
+- UI: лейбл `director` для games — **«Разработчик»**; `country` — **«Платформа»** (ключи API не меняем).
+- `from-catalog`: `provider: 'tmdb' | 'rawg'` (movies/series → tmdb; games → rawg).
+- Attribution в UI поиска (ссылка на RAWG).
+- Смена `category` после create, IGDB, books, externalId — вне slice.
+- **YouGile:** по одной карточке BAC + FRO (эпик Catalog); PR → `develop`.
+- План: [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+
 ### Категория series (сериалы) — TMDB TV, meta вариант A
 
 - **Пересматриваем** «вне v1» для сериалов из Catalog (15.10.2026): добавляем категорию **`series`**.

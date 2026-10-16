@@ -12,7 +12,7 @@ export class CreateItemDto {
 
   @ApiPropertyOptional({
     type: ItemMetaDto,
-    description: 'Только для топиков category=movies|series; иначе 400',
+    description: 'Только для топиков category=movies|series|games; иначе 400',
   })
   @IsOptional()
   @ValidateNested()

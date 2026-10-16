@@ -60,7 +60,8 @@ export class ItemNotFoundResponseDto {
 
 export class ItemBadRequestResponseDto {
   @ApiProperty({
-    example: 'Импорт из каталога доступен только для топиков категорий «Фильмы» и «Сериалы»',
+    example:
+      'Импорт из каталога доступен только для топиков категорий «Фильмы», «Сериалы» и «Игры»',
   })
   message!: string;
 

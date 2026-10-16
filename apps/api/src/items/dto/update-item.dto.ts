@@ -13,7 +13,7 @@ export class UpdateItemDto {
 
   @ApiPropertyOptional({
     type: ItemMetaDto,
-    description: 'Частичный merge; только для category=movies|series; иначе 400',
+    description: 'Частичный merge; только для category=movies|series|games; иначе 400',
   })
   @IsOptional()
   @ValidateNested()

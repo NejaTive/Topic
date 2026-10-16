@@ -12,16 +12,16 @@
 
 **Одна модель `Item`:** title + cover (как сейчас). Каталог только **заполняет** поля, не добавляет «карточку фильма» (жанры, рейтинг провайдера и т.п.).
 
-## Scope v1 (+ series 16.10.2026)
+## Scope v1 (+ series 16.10.2026, + games/RAWG 16.10.2026)
 
 | В scope | Вне scope (позже) |
 |---------|-------------------|
-| Категории: `movies` \| `series` \| `custom` | `games`, `books`, … |
-| Провайдер: **TMDB** (movie + TV search/poster) | Unfurl произвольных URL |
+| Категории: `movies` \| `series` \| `games` \| `custom` | `books`, … |
+| Провайдеры: **TMDB** (movie + TV); **RAWG** (games) | Unfurl произвольных URL |
 | S04: выбор категории при создании | Смена категории у существующего топика (отдельное решение) |
 | S06: поиск → выбор → create; или ручной create | Share Target / PWA «поделиться» |
 | Обложку с CDN провайдера **копируем** в MinIO | Горячие ссылки на чужой CDN |
-| Ключ TMDB только на Nest | Прямые вызовы TMDB из браузера |
+| Ключи TMDB / RAWG только на Nest | Прямые вызовы провайдеров из браузера |
 
 ## Что значит «не храним external id» (п.3)
 
@@ -36,7 +36,7 @@
 
 ### Topic
 
-- Поле: `category` — enum `movies` | `series` | `custom`.
+- Поле: `category` — enum `movies` | `series` | `games` | `custom`.
 - Дефолт при создании: **`custom`** (если чип не выбран).
 - Существующие топики при миграции → `custom`.
 - Смена `category` после create в v1 не поддерживается.
@@ -45,47 +45,52 @@
 
 - Общие поля: `title` + опциональный cover (upload или скачивание при импорте из поиска).
 - Опциональный **`meta Json?`** — category-specific поля на том же `Item` (не отдельные колонки / таблицы).
-  - **`movies` / `series` (вариант A):** одни и те же опциональные строки `description`, `director`, `genre`, `country` (singular; пустая строка → ключ отсутствует / `meta` null); `sourceUrl` — только server-set при from-catalog (TMDB page), в create/update с клиента игнорируется. Для series UI-лейбл `director` → «Создатель»; в TMDB → `created_by[0]`.
+  - **`movies` / `series` / `games` (вариант A):** одни и те же опциональные строки `description`, `director`, `genre`, `country` (singular; пустая строка → ключ отсутствует / `meta` null); `sourceUrl` — только server-set при from-catalog, в create/update с клиента игнорируется.
+    - series: UI-лейбл `director` → «Создатель»; TMDB → `created_by[0]`.
+    - games: UI-лейблы `director` → «Разработчик», `country` → «Платформа»; RAWG → первый developer / genre / platform.
   - **`custom`:** `meta` всегда `null`; передача `meta` в create/update → `400`.
-  - Каталожный и ручной элемент в топике movies/series — один контракт редактируемых полей; `sourceUrl` только у импортированных.
+  - Каталожный и ручной элемент в топике movies/series/games — один контракт редактируемых полей; `sourceUrl` только у импортированных.
   - Будущие категории (`books`, …): другие ключи в том же `meta`, валидация по `topic.category`.
 
 ## API (Nest)
 
-Все вызовы провайдера — с бэкенда. Ключ: `TMDB_API_KEY` (или read access token) в `apps/api/.env`; в `.env.example` — пустой плейсхолдер.
+Все вызовы провайдера — с бэкенда. Ключи: `TMDB_API_KEY` / `TMDB_ACCESS_TOKEN` и `RAWG_API_KEY` в `apps/api/.env`; в `.env.example` — пустые плейсхолдеры.
 
 Предлагаемый контур (имена можно уточнить при нарезке карточек):
 
-1. **`GET /api/catalog/movies/search?q=`** и **`GET /api/catalog/series/search?q=`** (auth: владелец сессии)  
+1. **`GET /api/catalog/movies/search?q=`**, **`GET /api/catalog/series/search?q=`**, **`GET /api/catalog/games/search?q=`** (auth: владелец сессии)  
    → нормализованный список `{ providerId, title, year?, imageUrl? }` (для UI строки поиска; `providerId` **не** обязан попадать в БД Item).
 
 2. **Импорт в элемент** — один из вариантов при реализации:  
-   - **A1:** `POST /api/topics/:topicId/items/from-catalog` body `{ provider: 'tmdb', providerId }` → Nest тянет детали/постер по `topic.category` (movie vs tv) → create Item + cover в MinIO;  
+   - **A1:** `POST /api/topics/:topicId/items/from-catalog` body `{ provider: 'tmdb' | 'rawg', providerId }` → Nest тянет детали/постер по `topic.category` → create Item + cover в MinIO;  
    - **A2:** фронт после выбора шлёт обычный create + отдельный «cover by url» на Nest.  
-   Предпочтение плана: **A1** (меньше дыр, один транзакционный UX).
+   Предпочтение плана: **A1** (меньше дыр, один транзакционный UX).  
+   movies/series → только `tmdb`; games → только `rawg`.
 
-3. Ручной путь: `POST .../items` + optional cover multipart; для `movies` | `series` — опциональный `meta: { description?, director?, genre?, country? }`.
-4. `from-catalog` дополняет `meta` из TMDB details (`overview` → description; movie: первый Director из credits; series: первый `created_by`; первый genre / production country; `sourceUrl` → `/movie/{id}` или `/tv/{id}`).
+3. Ручной путь: `POST .../items` + optional cover multipart; для `movies` | `series` | `games` — опциональный `meta: { description?, director?, genre?, country? }`.
+4. `from-catalog` дополняет `meta`:
+   - TMDB: `overview` → description; movie: первый Director; series: первый `created_by`; первый genre / production country; `sourceUrl` → `/movie/{id}` или `/tv/{id}`.
+   - RAWG: `description_raw` → description; первый developer / genre / platform; `sourceUrl` → `https://rawg.io/games/{slug}`.
 
-Ошибки поиска: fail-soft (пустой список / сообщение), ручное создание не блокировать. Rate-limit / таймаут к TMDB — на Nest.
+Ошибки поиска: fail-soft (пустой список / сообщение), ручное создание не блокировать. Rate-limit / таймаут к провайдеру — на Nest.
 
 ## UX
 
 ### S04 Создание топика
 
-- Чипы категории: **Фильмы** | **Сериалы** | **Своё**.
-- Для `movies` / `series` название можно префиллить «Фильмы» / «Сериалы»; пользователь может переименовать.
+- Чипы категории: **Фильмы** | **Сериалы** | **Игры** | **Своё**.
+- Для `movies` / `series` / `games` название можно префиллить «Фильмы» / «Сериалы» / «Игры»; пользователь может переименовать.
 - Privacy — без изменений.
 
 ### S06 Добавить элемент
 
-- Если `topic.category === 'movies' | 'series'`: поле поиска → debounce → список из API (movies или series) → выбор → from-catalog (title + cover + meta); ссылка/кнопка «Указать вручную» → форма обложка → название → описание → жанр → режиссёр/создатель → страна.
+- Если `topic.category === 'movies' | 'series' | 'games'`: поле поиска → debounce → список из API → выбор → from-catalog (title + cover + meta); ссылка/кнопка «Указать вручную» → форма обложка → название → описание → жанр → режиссёр/создатель/разработчик → страна/платформа.
 - Если `custom`: только title + CoverUpload (без поиска и без meta-полей).
-- S07 (редактирование): те же meta-поля при `movies` | `series` (лейбл director: «Режиссёр» / «Создатель»); `sourceUrl` — read-only ссылка «Источник», если есть. Список ранга / RankRow — без meta в первом slice (поля уже в API / ShareItemDto).
+- S07 (редактирование): те же meta-поля при `movies` | `series` | `games` (лейбл director: «Режиссёр» / «Создатель» / «Разработчик»; country: «Страна» / «Платформа» для games); `sourceUrl` — read-only ссылка «Источник», если есть. Список ранга / RankRow — без meta в первом slice (поля уже в API / ShareItemDto).
 
 ### Атрибуция
 
-- Мелко у результатов поиска: источник данных TMDB (требование ToS non-commercial).
+- Мелко у результатов поиска: TMDB (movies/series) или RAWG (games) — требование ToS.
 
 ## Провайдер: TMDB (выбрано 15.10.2026)
 
@@ -149,13 +154,46 @@
 
 Порядок: BAC → FRO. PR base: **`develop`**.
 
+## Провайдер: RAWG (games, выбрано 16.10.2026)
+
+**Решение владельца:** для категории `games` используем **[RAWG API](https://rawg.io/apidocs)**.
+
+Почему не альтернативы (исследование 16.10.2026):
+
+| Кандидат | Почему не взяли |
+|----------|-----------------|
+| IGDB | Free non-commercial ок, но Twitch OAuth + 4 rps; тяжелее онбординг |
+| Steam Store API | Неофициальный; только Steam-каталог |
+| FreeToGame | Только F2P (~400 игр) |
+| Giant Bomb | API недоступен |
+| MobyGames | Платный API |
+
+Контракт использования:
+
+- Endpoints: `GET /api/games?search=` (список), `GET /api/games/{id}` (details).
+- Язык: `lang=ru`.
+- Cover: `background_image` → скачать на Nest → sharp webp → MinIO.
+- Секрет: `RAWG_API_KEY` только в `apps/api/.env`; в `.env.example` — пустой плейсхолдер; во фронт не отдаём.
+- ToS: free personal/hobby + attribution + активная ссылка на RAWG на страницах с данными; no redistribution.
+- `from-catalog` body: `{ provider: 'rawg', providerId }`; `sourceUrl` = `https://rawg.io/games/{slug}`.
+
+## Нарезка YouGile — games / RAWG (16.10.2026)
+
+| ID | Задача | Зависит от |
+|----|--------|------------|
+| **BAC-27** | `games`: Prisma + RAWG search/from-catalog + meta (зеркало movies) | BAC-26 |
+| **FRO-43** | S04/S06/S07: чип Игры + поиск RAWG + meta («Разработчик» / «Платформа») | BAC-27 |
+
+Порядок: BAC → FRO. PR base: **`develop`**.
+
 ## Не делаем в этом slice
 
-- Игры / книги и прочие адаптеры (другие ключи `meta` — позже).
-- Отдельный ключ `creator` (для series используем `director` + UI-лейбл).
-- Рейтинг TMDB, трейлеры, множественные жанры/страны/режиссёры, сезоны/network.
+- Книги и прочие адаптеры (другие ключи `meta` — позже).
+- Отдельный ключ `creator` / `developer` / `platform` (для series/games используем `director`/`country` + UI-лейбл).
+- Рейтинг TMDB/RAWG, трейлеры, множественные жанры/страны/режиссёры, сезоны/network.
 - Meta в RankRow / S09 UI (поля уже в API).
 - Хранение `externalSource` / `externalId` на Item.
 - Смена `category` у топика после создания.
 - OG-превью share-страницы `/t/:shareId` (другая фича).
 - Отдельная Design/hi-fi карточка YouGile.
+- IGDB как альтернатива RAWG.

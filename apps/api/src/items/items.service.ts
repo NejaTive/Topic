@@ -7,6 +7,7 @@ import {
   ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { RawgClient } from '../catalog/rawg.client';
 import { TmdbClient } from '../catalog/tmdb.client';
 import { Prisma, type Item } from '../generated/prisma/client';
 import { ItemPlacement, TopicCategory } from '../generated/prisma/enums';
@@ -24,12 +25,19 @@ import {
   moviesMetaToJson,
   normalizeMoviesMetaPatch,
   parseMoviesMeta,
+  rawgGameSourceUrl,
   tmdbMovieSourceUrl,
   tmdbTvSourceUrl,
 } from './item-meta';
 
 const POSTER_FETCH_TIMEOUT_MS = 10_000;
 const ITEM_TITLE_MAX = 200;
+
+const CATALOG_CATEGORIES = new Set<TopicCategory>([
+  TopicCategory.movies,
+  TopicCategory.series,
+  TopicCategory.games,
+]);
 
 @Injectable()
 export class ItemsService {
@@ -39,6 +47,7 @@ export class ItemsService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly tmdb: TmdbClient,
+    private readonly rawg: RawgClient,
   ) {}
 
   async listForOwner(ownerId: string, topicId: string): Promise<ItemListDto> {
@@ -99,17 +108,76 @@ export class ItemsService {
         statusCode: 404,
       });
     }
-    if (topic.category !== TopicCategory.movies && topic.category !== TopicCategory.series) {
+    if (!CATALOG_CATEGORIES.has(topic.category)) {
       throw new BadRequestException({
-        message: 'Импорт из каталога доступен только для топиков категорий «Фильмы» и «Сериалы»',
+        message:
+          'Импорт из каталога доступен только для топиков категорий «Фильмы», «Сериалы» и «Игры»',
         statusCode: 400,
       });
     }
 
-    const sourceUrl =
-      topic.category === TopicCategory.series
-        ? tmdbTvSourceUrl(dto.providerId)
-        : tmdbMovieSourceUrl(dto.providerId);
+    const expectedProvider = topic.category === TopicCategory.games ? 'rawg' : 'tmdb';
+    if (dto.provider !== expectedProvider) {
+      throw new BadRequestException({
+        message:
+          topic.category === TopicCategory.games
+            ? 'Для категории «Игры» используйте provider=rawg'
+            : 'Для категорий «Фильмы» и «Сериалы» используйте provider=tmdb',
+        statusCode: 400,
+      });
+    }
+
+    let hit: {
+      title: string;
+      imageUrl?: string | null;
+      description?: string;
+      director?: string;
+      genre?: string;
+      country?: string;
+      slug?: string;
+    } | null = null;
+    let sourceUrl: string;
+
+    if (topic.category === TopicCategory.games) {
+      if (!this.rawg.isConfigured()) {
+        throw new ServiceUnavailableException({
+          message: 'Каталог временно недоступен',
+          statusCode: 503,
+        });
+      }
+      hit = await this.rawg.getGame(dto.providerId);
+      if (!hit) {
+        throw new NotFoundException({
+          message: 'Игра не найдена в каталоге',
+          statusCode: 404,
+        });
+      }
+      sourceUrl = rawgGameSourceUrl(hit.slug || dto.providerId);
+    } else {
+      if (!this.tmdb.isConfigured()) {
+        throw new ServiceUnavailableException({
+          message: 'Каталог временно недоступен',
+          statusCode: 503,
+        });
+      }
+      hit =
+        topic.category === TopicCategory.series
+          ? await this.tmdb.getTv(dto.providerId)
+          : await this.tmdb.getMovie(dto.providerId);
+      if (!hit) {
+        throw new NotFoundException({
+          message:
+            topic.category === TopicCategory.series
+              ? 'Сериал не найден в каталоге'
+              : 'Фильм не найден в каталоге',
+          statusCode: 404,
+        });
+      }
+      sourceUrl =
+        topic.category === TopicCategory.series
+          ? tmdbTvSourceUrl(dto.providerId)
+          : tmdbMovieSourceUrl(dto.providerId);
+    }
 
     const duplicate = await this.prisma.item.findFirst({
       where: {
@@ -124,31 +192,12 @@ export class ItemsService {
     if (duplicate) {
       throw new ConflictException({
         message:
-          topic.category === TopicCategory.series
-            ? 'Этот сериал уже есть в списке'
-            : 'Этот фильм уже есть в списке',
+          topic.category === TopicCategory.games
+            ? 'Эта игра уже есть в списке'
+            : topic.category === TopicCategory.series
+              ? 'Этот сериал уже есть в списке'
+              : 'Этот фильм уже есть в списке',
         statusCode: 409,
-      });
-    }
-
-    if (!this.tmdb.isConfigured()) {
-      throw new ServiceUnavailableException({
-        message: 'Каталог временно недоступен',
-        statusCode: 503,
-      });
-    }
-
-    const hit =
-      topic.category === TopicCategory.series
-        ? await this.tmdb.getTv(dto.providerId)
-        : await this.tmdb.getMovie(dto.providerId);
-    if (!hit) {
-      throw new NotFoundException({
-        message:
-          topic.category === TopicCategory.series
-            ? 'Сериал не найден в каталоге'
-            : 'Фильм не найден в каталоге',
-        statusCode: 404,
       });
     }
 
@@ -441,9 +490,9 @@ export class ItemsService {
     if (meta === undefined) {
       return Prisma.DbNull;
     }
-    if (category !== TopicCategory.movies && category !== TopicCategory.series) {
+    if (!CATALOG_CATEGORIES.has(category)) {
       throw new BadRequestException({
-        message: 'Поля meta доступны только для топиков категорий «Фильмы» и «Сериалы»',
+        message: 'Поля meta доступны только для топиков категорий «Фильмы», «Сериалы» и «Игры»',
         statusCode: 400,
       });
     }
@@ -455,9 +504,9 @@ export class ItemsService {
     existing: Prisma.JsonValue,
     patch: ItemMetaDto,
   ): Prisma.InputJsonValue | typeof Prisma.DbNull {
-    if (category !== TopicCategory.movies && category !== TopicCategory.series) {
+    if (!CATALOG_CATEGORIES.has(category)) {
       throw new BadRequestException({
-        message: 'Поля meta доступны только для топиков категорий «Фильмы» и «Сериалы»',
+        message: 'Поля meta доступны только для топиков категорий «Фильмы», «Сериалы» и «Игры»',
         statusCode: 400,
       });
     }
