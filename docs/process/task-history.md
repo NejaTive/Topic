@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 16.10.2026 — S04/S06/S07: чип Игры + поиск RAWG + meta
+
+- **YouGile:** FRO-43
+- **Итог:** Чип «Игры» и prefill на S04; `searchCatalogGames` / gamesSearch; S06 → from-catalog `provider: rawg`, дедуп по sourceUrl (slug), attribution RAWG, ручная meta; S07 и ShareItemView — лейблы «Разработчик» / «Платформа».
+- **Репо:** `feat/FRO-43` / [PR #78](https://github.com/NejaTive/Topic/pull/78) → `develop`
+- **Заметки:** UI-прогон: топик Игры → поиск Cyberpunk → meta/Источник; дедуп «Уже в списке»; manual Разработчик/Платформа; movies Режиссёр/Страна; series Создатель/Страна; custom без catalog; share item после rank.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~20 мин · ревью ~5 мин · всего ~25 мин
+
 ### 16.10.2026 — Категория games: Prisma + RAWG
 
 - **YouGile:** BAC-27
