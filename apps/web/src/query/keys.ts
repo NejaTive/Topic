@@ -19,4 +19,7 @@ export const queryKeys = {
   feed: {
     list: () => ['feed', 'list'] as const,
   },
+  catalog: {
+    moviesSearch: (q: string) => ['catalog', 'movies', 'search', q] as const,
+  },
 };

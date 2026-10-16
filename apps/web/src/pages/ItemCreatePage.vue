@@ -1,17 +1,32 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useQuery } from '@tanstack/vue-query';
+import { refDebounced } from '@vueuse/core';
+import { computed, onUnmounted, ref, watch } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { CatalogApiError, searchCatalogMovies, type CatalogMovie } from '@/api/catalog';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import { TButton, TError, TInput, TCoverUpload } from '@/components/ui-kit';
-import { useCreateItemMutation, useUploadItemCoverMutation } from '@/composables/useItemMutations';
-import { useTopicQuery } from '@/composables/useTopicQuery';
-import { RouteName } from '@/router/route-names';
 import { ContentPageWrapper } from '@/components/layout';
+import { TButton, TCoverUpload, TError, TInput, TLoader, TTextarea } from '@/components/ui-kit';
+import {
+  useCreateItemFromCatalogMutation,
+  useCreateItemMutation,
+  useUploadItemCoverMutation,
+} from '@/composables/useItemMutations';
+import { useTopicQuery } from '@/composables/useTopicQuery';
+import { queryKeys } from '@/query/keys';
+import { RouteName } from '@/router/route-names';
+
+const BACK_LINK_CLASS =
+  'cursor-pointer text-label font-semibold text-accent transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50';
 
 interface FieldErrors {
   title?: string;
 }
+
+type EntryMode = 'search' | 'manual';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const route = useRoute();
 const router = useRouter();
@@ -20,6 +35,7 @@ const topicId = computed(() => String(route.params.id ?? ''));
 
 const topicQuery = useTopicQuery(topicId);
 const createItem = useCreateItemMutation(() => topicId.value);
+const createFromCatalog = useCreateItemFromCatalogMutation(() => topicId.value);
 
 const pendingItemId = ref('');
 const uploadCover = useUploadItemCoverMutation(
@@ -27,15 +43,66 @@ const uploadCover = useUploadItemCoverMutation(
   () => pendingItemId.value,
 );
 
+const entryMode = ref<EntryMode>('search');
+const searchInput = ref('');
+const debouncedSearch = refDebounced(searchInput, SEARCH_DEBOUNCE_MS);
+const selectingProviderId = ref<string | null>(null);
+
 const title = ref('');
+const description = ref('');
+const director = ref('');
+const genre = ref('');
+const country = ref('');
 const coverFile = ref<File | null>(null);
 const coverPreviewUrl = ref<string | null>(null);
 const coverError = ref<string | null>(null);
 const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 
-const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
-const isSubmitting = computed(() => createItem.isPending.value || uploadCover.isPending.value);
+const isMoviesTopic = computed(() => topicQuery.data.value?.category === 'movies');
+const showCatalogSearch = computed(() => isMoviesTopic.value && entryMode.value === 'search');
+const showManualForm = computed(() => !isMoviesTopic.value || entryMode.value === 'manual');
+const backToSearch = computed(() => showManualForm.value && isMoviesTopic.value);
+
+const trimmedSearch = computed(() => debouncedSearch.value.trim());
+
+const catalogSearch = useQuery({
+  queryKey: computed(() => queryKeys.catalog.moviesSearch(trimmedSearch.value)),
+  queryFn: () => searchCatalogMovies(trimmedSearch.value),
+  enabled: computed(() => showCatalogSearch.value && trimmedSearch.value.length > 0),
+  retry: false,
+  staleTime: 30_000,
+});
+
+const searchResults = computed(() => catalogSearch.data.value ?? []);
+const searchBusy = computed(() => catalogSearch.isFetching.value && trimmedSearch.value.length > 0);
+const searchSoftError = computed(() => {
+  if (!catalogSearch.isError.value) return '';
+  const err = catalogSearch.error.value;
+  if (err instanceof CatalogApiError && err.status === 401) return '';
+  return 'Не удалось выполнить поиск. Можно указать вручную.';
+});
+const showEmptyResults = computed(
+  () =>
+    trimmedSearch.value.length > 0 &&
+    !searchBusy.value &&
+    !catalogSearch.isError.value &&
+    searchResults.value.length === 0,
+);
+
+const isSubmitting = computed(
+  () =>
+    createItem.isPending.value || uploadCover.isPending.value || createFromCatalog.isPending.value,
+);
+
+watch(
+  () => catalogSearch.error.value,
+  (err) => {
+    if (err instanceof CatalogApiError && err.status === 401) {
+      void router.replace({ name: RouteName.Login, query: { returnUrl: route.fullPath } });
+    }
+  },
+);
 
 function revokePreview() {
   if (coverPreviewUrl.value?.startsWith('blob:')) {
@@ -55,6 +122,16 @@ function clearErrors() {
   coverError.value = null;
 }
 
+function switchToManual() {
+  clearErrors();
+  entryMode.value = 'manual';
+}
+
+function switchToSearch() {
+  clearErrors();
+  entryMode.value = 'search';
+}
+
 function onCoverFile(file: File) {
   coverError.value = null;
   revokePreview();
@@ -71,7 +148,7 @@ function onCoverClear() {
 function applyError(err: unknown, preferCover = false) {
   if (err instanceof TopicsApiError || err instanceof ItemsApiError) {
     if (err.status === 401) {
-      router.replace({ name: RouteName.Login, query: { returnUrl: route.fullPath } });
+      void router.replace({ name: RouteName.Login, query: { returnUrl: route.fullPath } });
       return;
     }
     if (err.status === 404) {
@@ -92,6 +169,35 @@ function applyError(err: unknown, preferCover = false) {
   formError.value = 'Не удалось добавить элемент';
 }
 
+async function onSelectMovie(movie: CatalogMovie) {
+  if (isSubmitting.value) return;
+  clearErrors();
+  selectingProviderId.value = movie.providerId;
+
+  try {
+    await createFromCatalog.mutateAsync({
+      provider: 'tmdb',
+      providerId: movie.providerId,
+    });
+    await router.replace({
+      name: RouteName.AppTopicDetail,
+      params: { id: topicId.value },
+    });
+  } catch (err) {
+    if (err instanceof ItemsApiError || err instanceof TopicsApiError) {
+      if (err.status === 401) {
+        void router.replace({ name: RouteName.Login, query: { returnUrl: route.fullPath } });
+        return;
+      }
+      formError.value = err.message || 'Не удалось добавить элемент';
+      return;
+    }
+    formError.value = 'Не удалось добавить элемент';
+  } finally {
+    selectingProviderId.value = null;
+  }
+}
+
 async function onSubmit() {
   clearErrors();
 
@@ -102,7 +208,18 @@ async function onSubmit() {
   }
 
   try {
-    const item = await createItem.mutateAsync({ title: trimmed });
+    const meta = isMoviesTopic.value
+      ? {
+          ...(description.value.trim() ? { description: description.value.trim() } : {}),
+          ...(director.value.trim() ? { director: director.value.trim() } : {}),
+          ...(genre.value.trim() ? { genre: genre.value.trim() } : {}),
+          ...(country.value.trim() ? { country: country.value.trim() } : {}),
+        }
+      : undefined;
+    const item = await createItem.mutateAsync({
+      title: trimmed,
+      ...(meta && Object.keys(meta).length > 0 ? { meta } : {}),
+    });
     pendingItemId.value = item.id;
 
     if (coverFile.value) {
@@ -129,48 +246,173 @@ async function onSubmit() {
 </script>
 
 <template>
-  <ContentPageWrapper
-    title="Добавить элемент"
-    :route-to="{ name: RouteName.AppTopicDetail, params: { id: topicId } }"
-    :text-to="topicTitle"
-  >
+  <ContentPageWrapper title="Добавить элемент">
+    <template #back>
+      <button
+        v-if="backToSearch"
+        type="button"
+        :class="BACK_LINK_CLASS"
+        :disabled="isSubmitting"
+        @click="switchToSearch"
+      >
+        ← Назад
+      </button>
+      <RouterLink
+        v-else
+        :to="{ name: RouteName.AppTopicDetail, params: { id: topicId } }"
+        class="text-label font-semibold text-accent"
+      >
+        ← Назад
+      </RouterLink>
+    </template>
     <TError v-if="topicQuery.isError.value" />
-    <form v-else class="flex flex-col gap-5" @submit.prevent="onSubmit">
-      <TInput
-        v-model="title"
-        label="Название *"
-        type="text"
-        autocomplete="off"
-        placeholder="Например, Интерстеллар"
-        :error="fieldErrors.title"
-        :disabled="isSubmitting"
-      />
+    <TLoader v-else-if="topicQuery.isPending.value" />
+    <div v-else class="flex flex-col gap-5">
+      <template v-if="showCatalogSearch">
+        <TInput
+          v-model="searchInput"
+          label="Поиск фильма"
+          type="text"
+          autocomplete="off"
+          placeholder="Например, Интерстеллар"
+          :disabled="isSubmitting"
+        />
 
-      <TCoverUpload
-        :preview-url="coverPreviewUrl"
-        :error="coverError"
-        :disabled="isSubmitting"
-        @file="onCoverFile"
-        @clear="onCoverClear"
-      />
+        <p v-if="searchSoftError" class="text-caption text-danger" role="status">
+          {{ searchSoftError }}
+        </p>
+        <p v-else-if="showEmptyResults" class="text-caption text-muted" role="status">
+          Ничего не найдено
+        </p>
+        <TLoader v-else-if="searchBusy" />
 
-      <p v-if="formError" class="text-caption text-danger">
-        {{ formError }}
-      </p>
-
-      <div class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block">
-        <div
-          class="flex w-full max-w-91.5 flex-col gap-3 px-3 md:w-auto md:max-w-none md:flex-row md:items-center md:px-0"
+        <ul
+          v-if="searchResults.length > 0"
+          class="flex flex-col divide-y divide-line"
+          role="listbox"
+          aria-label="Результаты поиска"
         >
-          <TButton
-            type="submit"
-            class="w-full shadow-float md:w-auto md:shadow-none"
-            :loading="isSubmitting"
+          <li v-for="movie in searchResults" :key="movie.providerId">
+            <button
+              type="button"
+              class="flex w-full items-center gap-3 py-2.5 text-left transition-colors outline-none hover:enabled:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-60"
+              role="option"
+              :disabled="isSubmitting"
+              :aria-busy="selectingProviderId === movie.providerId || undefined"
+              @click="onSelectMovie(movie)"
+            >
+              <img
+                v-if="movie.imageUrl"
+                :src="movie.imageUrl"
+                alt=""
+                class="h-15 w-10 shrink-0 rounded-sm bg-surface-sunken object-cover"
+              />
+              <div
+                v-else
+                class="h-15 w-10 shrink-0 rounded-sm bg-surface-sunken"
+                aria-hidden="true"
+              />
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-body text-ink">{{ movie.title }}</span>
+                <span v-if="movie.year" class="block text-caption text-muted">{{
+                  movie.year
+                }}</span>
+              </span>
+            </button>
+          </li>
+        </ul>
+
+        <p v-if="formError" class="text-caption text-danger">
+          {{ formError }}
+        </p>
+
+        <p v-if="trimmedSearch.length > 0" class="text-caption text-muted">
+          Источник данных: TMDB. This product uses the TMDB API but is not endorsed or certified by
+          TMDB.
+        </p>
+
+        <button
+          type="button"
+          class="self-start text-label font-semibold text-accent transition-opacity hover:enabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          :disabled="isSubmitting"
+          @click="switchToManual"
+        >
+          Указать вручную
+        </button>
+      </template>
+
+      <form v-if="showManualForm" class="flex flex-col gap-5" @submit.prevent="onSubmit">
+        <TCoverUpload
+          :preview-url="coverPreviewUrl"
+          :error="coverError"
+          :disabled="isSubmitting"
+          @file="onCoverFile"
+          @clear="onCoverClear"
+        />
+
+        <TInput
+          v-model="title"
+          label="Название *"
+          type="text"
+          autocomplete="off"
+          placeholder="Например, Интерстеллар"
+          :error="fieldErrors.title"
+          :disabled="isSubmitting"
+        />
+
+        <template v-if="isMoviesTopic">
+          <TTextarea
+            v-model="description"
+            label="Описание"
+            placeholder="Кратко о фильме"
+            :disabled="isSubmitting"
+          />
+          <TInput
+            v-model="genre"
+            label="Жанр"
+            type="text"
+            autocomplete="off"
+            placeholder="Например, Фантастика"
+            :disabled="isSubmitting"
+          />
+          <TInput
+            v-model="director"
+            label="Режиссёр"
+            type="text"
+            autocomplete="off"
+            placeholder="Например, Кристофер Нолан"
+            :disabled="isSubmitting"
+          />
+          <TInput
+            v-model="country"
+            label="Страна"
+            type="text"
+            autocomplete="off"
+            placeholder="Например, США"
+            :disabled="isSubmitting"
+          />
+        </template>
+
+        <p v-if="formError" class="text-caption text-danger">
+          {{ formError }}
+        </p>
+
+        <div
+          class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block"
+        >
+          <div
+            class="flex w-full max-w-91.5 flex-col gap-3 px-3 md:w-auto md:max-w-none md:flex-row md:items-center md:px-0"
           >
-            Добавить
-          </TButton>
+            <TButton
+              type="submit"
+              class="w-full shadow-float md:w-auto md:shadow-none"
+              :loading="isSubmitting"
+            >
+              Добавить
+            </TButton>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </ContentPageWrapper>
 </template>

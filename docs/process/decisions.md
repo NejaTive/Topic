@@ -690,3 +690,44 @@
 - Доступ владельца: SSH-туннель / TablePlus Over SSH → `127.0.0.1:5432`, SSL off; креды из `/opt/topic/.env`.
 - Закреплено в `develop` без bump версии (вариант B); на VPS уже применено вручную; в prod через CI — со следующим promote в `main`.
 - Канон: `docs/process/deploy.md`.
+
+## 16.10.2026
+
+### Item.meta — поля фильма (director / genre / country)
+
+- **Хранение:** на `Item` опциональный **`meta Json?`** (не плоские колонки) — один контейнер под category-specific поля.
+- **movies:** опциональные строки `description` (из TMDB `overview`), `director`, `genre`, `country` (singular); каталожный и ручной элемент — один контракт.
+- **custom:** `meta` всегда `null`; передача meta → `400`.
+- **TMDB from-catalog:** details + `credits` → первый Director / genre / production country.
+- **UI v1:** S06 (ручная форма) + S07; RankRow / S09 UI — позже (meta уже в `ItemDto` / `ShareItemDto`).
+- **YouGile:** BAC-24, FRO-39 (эпик Catalog); ветка `feat/catalog-enrichment`.
+- План/контракт: [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+
+## 15.10.2026
+
+### Каталог при добавлении элементов (вариант A)
+
+- **Проблема:** на S06 название и обложка вводятся вручную — friction на длинном топе.
+- **Решение:** категория топика (enum) + поиск во внешнем API для известных категорий; своя категория — без автодополнения; в каталожном топике всегда путь «создать свой элемент» вручную.
+- **Модель Item без расширения схемы карточки:** каталог только префиллит title + cover (одна модель для всех топиков).
+- **Scope v1:** категории `movies` | `custom`; провайдер **TMDB** (фильмы); обложку копируем в MinIO; ключ только на Nest.
+- **Вне v1:** сериалы/игры/книги, unfurl URL, хранение `externalSource`/`externalId` на Item (связь с id в TMDB не нужна для первого slice — копируем данные один раз).
+- **План:** [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+- **Backlog:** идея «Категории топиков» переведена в эту фичу (больше не «только post-MVP идея без плана»).
+
+### Провайдер каталога фильмов — TMDB
+
+- После сравнения бесплатных API (OMDb, kino.is, Kinopoisk Unofficial, ПоискКино, no-key скрейперы) владелец выбрал **TMDB**.
+- Критерии: title + poster в search, `language=ru`, стабильность, свой image CDN, free non-commercial + attribution.
+- Детали и отвергнутые альтернативы — в [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) §«Провайдер: TMDB».
+
+### Нарезка YouGile — Catalog
+
+- Эпик **Catalog**: **BAC-21…23**, **FRO-36…38** в Бэклог; таблица и AC — [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) §«Нарезка YouGile».
+- При нарезке: дефолт category `custom`; year только в поиске; без смены category после create; from-catalog (A1); hi-fi не блокирует.
+
+### Catalog — интеграционная ветка и UX без Figma (15.10.2026)
+
+- Интеграция эпика: **`feat/catalog-enrichment`** (не сразу в `develop`).
+- Карточки по-прежнему **одна ветка = одна задача** (`feat/BAC-21` …), но **PR base / merge → `feat/catalog-enrichment`**, не `develop`.
+- Hi-fi в Figma для Catalog **не делаем**: UI сразу в коде по [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) и UI-kit.

@@ -33,6 +33,78 @@
 
 ## Записи
 
+### 16.10.2026 — Item.meta Json + movies fields
+
+- **YouGile:** BAC-24
+- **Итог:** На `Item` — `meta Json?`; для `movies` поля `description` / `director` / `genre` / `country` в create/update/from-catalog и Share; TMDB details (`overview` + credits); `custom` + meta → 400; OpenAPI-клиент обновлён.
+- **Репо:** `feat/BAC-24` / [PR #70](https://github.com/NejaTive/Topic/pull/70) → `feat/catalog-enrichment`
+- **Заметки:** manual-close; вместе с FRO-39 в одном коммите/PR; RankRow/S09 UI не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 16.10.2026 — S06/S07: meta-поля фильма + TTextarea
+
+- **YouGile:** FRO-39
+- **Итог:** На S06/S07 для `movies` — обложка → название → описание (`TTextarea`) → жанр → режиссёр → страна; from-catalog подтягивает meta; плюс мелкий UX Catalog (FieldHint, TLoader, chips).
+- **Репо:** `feat/BAC-24` / [PR #70](https://github.com/NejaTive/Topic/pull/70) → `feat/catalog-enrichment` (тот же PR, что BAC-24)
+- **Заметки:** manual-close; custom без meta-полей.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 15.10.2026 — S06: поиск TMDB + from-catalog + ручной fallback
+
+- **YouGile:** FRO-38
+- **Итог:** На `ItemCreatePage` для `movies` — debounce-поиск TMDB, список (title/year/poster), выбор → `from-catalog` и редирект на топик; attribution TMDB; «Указать вручную» / «К поиску»; для `custom` — прежняя форма без поиска.
+- **Репо:** `feat/FRO-38` / [PR #69](https://github.com/NejaTive/Topic/pull/69) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI в коде/браузере без Figma; series/externalId не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~7 мин · всего ~10 мин
+
+### 15.10.2026 — S04: чипы категории Фильмы / Своё
+
+- **YouGile:** FRO-37
+- **Итог:** На создании топика чипы **Фильмы** | **Своё** (`movies`|`custom`) вместо name-hints; дефолт `custom`; выбор Фильмы префиллит название; `createTopic` всегда шлёт `category`.
+- **Репо:** `feat/FRO-37` / [PR #68](https://github.com/NejaTive/Topic/pull/68) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI по docs §UX S04 без Figma; S06/смена category на S05 не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~10 мин · ревью ~6 мин · всего ~16 мин
+
+### 15.10.2026 — Catalog API-клиент: category + search + from-catalog
+
+- **YouGile:** FRO-36
+- **Итог:** Обёртки web API: `createTopic` с optional `category`, `searchCatalogMovies` + `CatalogApiError`, `createItemFromCatalog`; `CreateTopicInput` прокидывает category. Без UI S04/S06.
+- **Репо:** `feat/FRO-36` / [PR #67](https://github.com/NejaTive/Topic/pull/67) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); schema уже содержал контракт после BAC; UI не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
+### 15.10.2026 — POST items/from-catalog (TMDB → Item + cover MinIO)
+
+- **YouGile:** BAC-23
+- **Итог:** `POST /api/topics/:topicId/items/from-catalog` body `{ provider: 'tmdb', providerId }`; только owner и `category===movies` (иначе 400/404); title (+ poster → sharp webp → MinIO) в inbox unranked без externalId; без постера — Item с `coverUrl: null`; OpenAPI + `schema.d.ts`.
+- **Репо:** `feat/BAC-23` / [PR #66](https://github.com/NejaTive/Topic/pull/66) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI S06 / дедуп по TMDB id не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
+### 15.10.2026 — TMDB client + GET /api/catalog/movies/search
+
+- **YouGile:** BAC-22
+- **Итог:** Optional `TMDB_API_KEY`/`TMDB_ACCESS_TOKEN`; Nest `CatalogModule` + `TmdbClient` (Bearer или api_key, timeout 5s); `GET /api/catalog/movies/search` под AuthGuard, `language=ru`, fail-soft `[]`; OpenAPI + `gen:api`.
+- **Репо:** `feat/BAC-22` / [PR #65](https://github.com/NejaTive/Topic/pull/65) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); from-catalog/Item/MinIO/UI/series не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~4 мин · всего ~7 мин
+
+### 15.10.2026 — Topic.category: Prisma enum + DTO/OpenAPI
+
+- **YouGile:** BAC-21
+- **Итог:** Prisma enum `TopicCategory` (`movies`|`custom`), поле `Topic.category` с дефолтом `custom` и миграцией existing→custom; create принимает optional category, update — нет; list/detail/share DTO + OpenAPI/`schema.d.ts` отдают category.
+- **Репо:** `feat/BAC-21` / [PR #64](https://github.com/NejaTive/Topic/pull/64) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); TMDB/UI/смена category после create не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
 ### 12.10.2026 — Dark green палитра, liquid-glass, nav slide и approve-modal
 
 - **YouGile:** FRO-35

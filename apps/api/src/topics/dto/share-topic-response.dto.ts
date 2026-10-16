@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TopicPrivacy } from '../../generated/prisma/enums';
+import { TopicCategory, TopicPrivacy } from '../../generated/prisma/enums';
+import { ItemMetaDto } from '../../items/dto/item-meta.dto';
 
 /** Ranked-элемент в публичном Share-ответе (без inbox / placement). */
 export class ShareItemDto {
@@ -22,12 +23,22 @@ export class ShareItemDto {
     example: 'http://127.0.0.1:9000/topic-covers/covers/abc.webp',
   })
   coverUrl!: string | null;
+
+  @ApiPropertyOptional({
+    type: ItemMetaDto,
+    nullable: true,
+    description: 'Category-specific поля; null если пусто',
+  })
+  meta!: ItemMetaDto | null;
 }
 
 /** Публичный read-only топик по shareId (S09). */
 export class ShareTopicDto {
   @ApiProperty({ example: 'Фильмы 2026' })
   title!: string;
+
+  @ApiProperty({ enum: TopicCategory })
+  category!: TopicCategory;
 
   @ApiProperty({
     enum: TopicPrivacy,

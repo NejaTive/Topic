@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { TopicsApiError } from '@/api/topics';
-import {
-  TButton,
-  TInput,
-  MAIN_CHIP_LABELS,
-  TMainChip,
-  TPrivacyChip,
-  type PrivacyValue,
-} from '@/components/ui-kit';
+import { TopicsApiError, type TopicCategory } from '@/api/topics';
+import FieldHint from '@/components/FieldHint.vue';
+import { TButton, TInput, TMainChip, TPrivacyChip, type PrivacyValue } from '@/components/ui-kit';
 import { ContentPageWrapper } from '@/components/layout';
 import { useCreateTopicMutation } from '@/composables/useCreateTopicMutation';
 import { RouteName } from '@/router/route-names';
@@ -18,12 +12,28 @@ interface FieldErrors {
   title?: string;
 }
 
+interface CategoryOption {
+  value: TopicCategory;
+  label: string;
+}
+
 const PRIVACY_OPTIONS: PrivacyValue[] = ['private', 'unlisted', 'public'];
+
+const CATEGORY_OPTIONS: CategoryOption[] = [
+  { value: 'movies', label: 'Фильмы' },
+  { value: 'custom', label: 'Своё' },
+];
+
+const MOVIES_TITLE_PREFILL = 'Фильмы';
+
+const CATEGORY_HINT =
+  '«Категория» — при добавлении элементов можно искать название и обложку в каталоге. «Своё» — всё вводите вручную.';
 
 const router = useRouter();
 const createTopic = useCreateTopicMutation();
 
 const title = ref('');
+const category = ref<TopicCategory>('custom');
 const privacy = ref<PrivacyValue>('unlisted');
 const privacyTouched = ref(false);
 const fieldErrors = ref<FieldErrors>({});
@@ -31,23 +41,24 @@ const formError = ref('');
 
 const isSubmitting = computed(() => createTopic.isPending.value);
 
-const visibleChips = computed(() => {
-  const q = title.value.trim().toLowerCase();
-  if (!q) return [];
-  if (MAIN_CHIP_LABELS.some((label) => label.toLowerCase() === q)) return [];
-  return MAIN_CHIP_LABELS.filter((label) => label.toLowerCase().startsWith(q));
-});
-
 function clearErrors() {
   fieldErrors.value = {};
   formError.value = '';
 }
 
-function onChipSelect(label: string) {
-  title.value = label;
-  if (fieldErrors.value.title) {
-    fieldErrors.value = { ...fieldErrors.value, title: undefined };
+function onCategorySelect(value: TopicCategory) {
+  category.value = value;
+  if (value === 'movies') {
+    title.value = MOVIES_TITLE_PREFILL;
+    if (fieldErrors.value.title) {
+      fieldErrors.value = { ...fieldErrors.value, title: undefined };
+    }
   }
+}
+
+function onCategoryChipSelect(label: string) {
+  const option = CATEGORY_OPTIONS.find((item) => item.label === label);
+  if (option) onCategorySelect(option.value);
 }
 
 function onPrivacySelect(value: PrivacyValue) {
@@ -103,6 +114,7 @@ async function onSubmit() {
     const privacyParam = privacyTouched.value ? { privacy: privacy.value } : {};
     const topic = await createTopic.mutateAsync({
       title: trimmed,
+      category: category.value,
       ...privacyParam,
     });
 
@@ -116,32 +128,32 @@ async function onSubmit() {
 <template>
   <ContentPageWrapper :route-to="RouteName.AppTopics" text-to="Мои топики" title="Новый топик">
     <form class="flex flex-col gap-5" @submit.prevent="onSubmit">
-      <div class="flex flex-col gap-2">
-        <TInput
-          v-model="title"
-          label="Название"
-          type="text"
-          autocomplete="off"
-          placeholder="Например, Фильмы"
-          :error="fieldErrors.title"
-          :disabled="isSubmitting"
-        />
-        <div
-          v-if="visibleChips.length > 0"
-          class="flex flex-wrap gap-2"
-          role="group"
-          aria-label="Подсказки названия"
-        >
+      <fieldset>
+        <legend class="mb-2 flex w-full items-center gap-1.5 text-label">
+          <span>Категория</span>
+          <FieldHint :text="CATEGORY_HINT" label="Зачем выбирать категорию" />
+        </legend>
+        <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="Категория топика">
           <TMainChip
-            v-for="label in visibleChips"
-            :key="label"
-            :label="label"
-            :selected="false"
+            v-for="option in CATEGORY_OPTIONS"
+            :key="option.value"
+            :label="option.label"
+            :selected="category === option.value"
             :disabled="isSubmitting"
-            @select="onChipSelect"
+            @select="onCategoryChipSelect"
           />
         </div>
-      </div>
+      </fieldset>
+
+      <TInput
+        v-model="title"
+        label="Название"
+        type="text"
+        autocomplete="off"
+        placeholder="Например, Зарубежные фильмы"
+        :error="fieldErrors.title"
+        :disabled="isSubmitting"
+      />
 
       <fieldset>
         <legend class="mb-2 text-label">Приватность</legend>

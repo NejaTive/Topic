@@ -1,23 +1,41 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { TmdbClient } from '../catalog/tmdb.client';
 import { Prisma, type Item } from '../generated/prisma/client';
-import { ItemPlacement } from '../generated/prisma/enums';
+import { ItemPlacement, TopicCategory } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import type { CreateItemDto } from './dto/create-item.dto';
+import type { FromCatalogItemDto } from './dto/from-catalog-item.dto';
+import type { ItemMetaDto } from './dto/item-meta.dto';
 import type { ItemDto, ItemListDto } from './dto/item-response.dto';
 import type { ReorderItemsDto } from './dto/reorder-items.dto';
 import type { UpdateItemDto } from './dto/update-item.dto';
+import {
+  applyMoviesMetaPatch,
+  metaToDto,
+  moviesMetaToJson,
+  normalizeMoviesMetaPatch,
+  parseMoviesMeta,
+} from './item-meta';
+
+const POSTER_FETCH_TIMEOUT_MS = 10_000;
+const ITEM_TITLE_MAX = 200;
 
 @Injectable()
 export class ItemsService {
+  private readonly logger = new Logger(ItemsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly tmdb: TmdbClient,
   ) {}
 
   async listForOwner(ownerId: string, topicId: string): Promise<ItemListDto> {
@@ -40,13 +58,86 @@ export class ItemsService {
   }
 
   async createForOwner(ownerId: string, topicId: string, dto: CreateItemDto): Promise<ItemDto> {
-    await this.findOwnedTopicOrThrow(ownerId, topicId);
+    const topic = await this.findOwnedTopicOrThrow(ownerId, topicId);
+    const meta = this.resolveCreateMeta(topic.category, dto.meta);
 
     const item = await this.prisma.$transaction(async (tx) => {
       const created = await tx.item.create({
         data: {
           topicId,
           title: dto.title.trim(),
+          meta,
+          placement: ItemPlacement.unranked,
+          rankPosition: null,
+        },
+      });
+      await tx.topic.update({
+        where: { id: topicId },
+        data: { updatedAt: new Date() },
+      });
+      return created;
+    });
+
+    return this.toDto(item);
+  }
+
+  async createFromCatalogForOwner(
+    ownerId: string,
+    topicId: string,
+    dto: FromCatalogItemDto,
+  ): Promise<ItemDto> {
+    const topic = await this.prisma.topic.findFirst({
+      where: { id: topicId, ownerId },
+      select: { id: true, category: true },
+    });
+    if (!topic) {
+      throw new NotFoundException({
+        message: 'Топик не найден',
+        statusCode: 404,
+      });
+    }
+    if (topic.category !== TopicCategory.movies) {
+      throw new BadRequestException({
+        message: 'Импорт из каталога доступен только для топиков категории «Фильмы»',
+        statusCode: 400,
+      });
+    }
+
+    if (!this.tmdb.isConfigured()) {
+      throw new ServiceUnavailableException({
+        message: 'Каталог фильмов временно недоступен',
+        statusCode: 503,
+      });
+    }
+
+    const movie = await this.tmdb.getMovie(dto.providerId);
+    if (!movie) {
+      throw new NotFoundException({
+        message: 'Фильм не найден в каталоге',
+        statusCode: 404,
+      });
+    }
+
+    const title = movie.title.slice(0, ITEM_TITLE_MAX);
+    let coverKey: string | null = null;
+    if (movie.imageUrl) {
+      coverKey = await this.tryUploadCoverFromUrl(movie.imageUrl);
+    }
+
+    const meta = moviesMetaToJson({
+      description: movie.description,
+      director: movie.director,
+      genre: movie.genre,
+      country: movie.country,
+    });
+
+    const item = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.item.create({
+        data: {
+          topicId,
+          title,
+          coverKey,
+          meta,
           placement: ItemPlacement.unranked,
           rankPosition: null,
         },
@@ -72,19 +163,28 @@ export class ItemsService {
     itemId: string,
     dto: UpdateItemDto,
   ): Promise<ItemDto> {
-    await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
-
-    if (dto.title === undefined) {
+    if (dto.title === undefined && dto.meta === undefined) {
       throw new BadRequestException({
         message: 'Нет полей для обновления',
         statusCode: 400,
       });
     }
 
+    const topic = await this.findOwnedTopicOrThrow(ownerId, topicId);
+    const existing = await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
+
+    const data: Prisma.ItemUpdateInput = {};
+    if (dto.title !== undefined) {
+      data.title = dto.title.trim();
+    }
+    if (dto.meta !== undefined) {
+      data.meta = this.resolveUpdateMeta(topic.category, existing.meta, dto.meta);
+    }
+
     const item = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.item.update({
         where: { id: itemId },
-        data: { title: dto.title!.trim() },
+        data,
       });
       await tx.topic.update({
         where: { id: topicId },
@@ -288,7 +388,7 @@ export class ItemsService {
   private async findOwnedTopicOrThrow(ownerId: string, topicId: string) {
     const topic = await this.prisma.topic.findFirst({
       where: { id: topicId, ownerId },
-      select: { id: true },
+      select: { id: true, category: true },
     });
     if (!topic) {
       throw new NotFoundException({
@@ -297,6 +397,36 @@ export class ItemsService {
       });
     }
     return topic;
+  }
+
+  private resolveCreateMeta(
+    category: TopicCategory,
+    meta: ItemMetaDto | undefined,
+  ): Prisma.InputJsonValue | typeof Prisma.DbNull {
+    if (meta === undefined) {
+      return Prisma.DbNull;
+    }
+    if (category !== TopicCategory.movies) {
+      throw new BadRequestException({
+        message: 'Поля meta доступны только для топиков категории «Фильмы»',
+        statusCode: 400,
+      });
+    }
+    return moviesMetaToJson(normalizeMoviesMetaPatch(meta));
+  }
+
+  private resolveUpdateMeta(
+    category: TopicCategory,
+    existing: Prisma.JsonValue,
+    patch: ItemMetaDto,
+  ): Prisma.InputJsonValue | typeof Prisma.DbNull {
+    if (category !== TopicCategory.movies) {
+      throw new BadRequestException({
+        message: 'Поля meta доступны только для топиков категории «Фильмы»',
+        statusCode: 400,
+      });
+    }
+    return moviesMetaToJson(applyMoviesMetaPatch(parseMoviesMeta(existing), patch));
   }
 
   private async findOwnedItemOrThrow(
@@ -337,12 +467,42 @@ export class ItemsService {
     }
   }
 
+  private async tryUploadCoverFromUrl(imageUrl: string): Promise<string | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), POSTER_FETCH_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(imageUrl, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        this.logger.warn(`poster fetch HTTP ${res.status}`);
+        return null;
+      }
+
+      const buffer = Buffer.from(await res.arrayBuffer());
+      if (!buffer.length) {
+        return null;
+      }
+
+      return await this.storage.uploadCover(buffer);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : 'unknown';
+      this.logger.warn(`poster → MinIO skipped: ${reason}`);
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   private toDto(item: Item): ItemDto {
     return {
       id: item.id,
       topicId: item.topicId,
       title: item.title,
       coverUrl: this.storage.coverUrl(item.coverKey),
+      meta: metaToDto(item.meta),
       placement: item.placement,
       rankPosition: item.rankPosition,
       createdAt: item.createdAt.toISOString(),

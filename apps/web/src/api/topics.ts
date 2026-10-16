@@ -4,8 +4,9 @@ import type { components } from './schema';
 export type TopicListItem = components['schemas']['TopicListItemDto'];
 export type TopicDetail = components['schemas']['TopicDetailDto'];
 export type CreateTopicBody = components['schemas']['CreateTopicDto'];
+export type TopicCategory = CreateTopicBody['category'];
 
-export type TopicsErrorField = 'title' | 'privacy';
+export type TopicsErrorField = 'title' | 'privacy' | 'category';
 
 export class TopicsApiError extends Error {
   constructor(
@@ -35,6 +36,7 @@ function mapCreateValidationFields(messages: string[]): Partial<Record<TopicsErr
     const lower = msg.toLowerCase();
     if (lower.includes('title') && !fields.title) fields.title = msg;
     else if (lower.includes('privacy') && !fields.privacy) fields.privacy = msg;
+    else if (lower.includes('category') && !fields.category) fields.category = msg;
   }
   return fields;
 }
@@ -53,10 +55,12 @@ export async function fetchTopics(): Promise<TopicListItem[]> {
 export async function createTopic(body: {
   title: string;
   privacy?: CreateTopicBody['privacy'];
+  category?: CreateTopicBody['category'];
 }): Promise<TopicDetail> {
   const payload = {
     title: body.title,
     ...(body.privacy !== undefined ? { privacy: body.privacy } : {}),
+    ...(body.category !== undefined ? { category: body.category } : {}),
   } as CreateTopicBody;
 
   const { data, error, response } = await apiClient.POST('/api/topics', {

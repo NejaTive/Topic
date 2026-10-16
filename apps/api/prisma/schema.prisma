@@ -14,6 +14,11 @@ enum TopicPrivacy {
   public
 }
 
+enum TopicCategory {
+  movies
+  custom
+}
+
 enum ItemPlacement {
   unranked
   ranked
@@ -66,21 +71,24 @@ model Topic {
   ownerId   String
   owner     User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   title     String
-  privacy   TopicPrivacy @default(unlisted)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  category  TopicCategory @default(custom)
+  privacy   TopicPrivacy  @default(unlisted)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
   items     Item[]
 
   @@index([ownerId])
 }
 
 /// Элемент топика. `coverKey` — ключ в S3/MinIO; `rankPosition` только при placement=ranked (плотный 1…N).
+/// `meta` — category-specific поля (для movies: director/genre/country); у custom всегда null.
 model Item {
   id           String        @id @default(uuid())
   topicId      String
   topic        Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
   title        String
   coverKey     String?
+  meta         Json?
   placement    ItemPlacement
   rankPosition Int?
   createdAt    DateTime      @default(now())

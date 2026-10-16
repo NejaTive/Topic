@@ -165,6 +165,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/topics/{topicId}/items/from-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ItemsController_createFromCatalog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics/{topicId}/items/{itemId}": {
         parameters: {
             query?: never;
@@ -224,6 +240,22 @@ export interface paths {
         put: operations["ItemsController_uploadCoverPut"];
         post: operations["ItemsController_uploadCoverPost"];
         delete: operations["ItemsController_deleteCover"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/movies/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CatalogController_searchMovies"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -351,6 +383,8 @@ export interface components {
             /** @example Фильмы 2026 */
             title: string;
             /** @enum {string} */
+            category: "movies" | "custom";
+            /** @enum {string} */
             privacy: "private" | "unlisted" | "public";
             /** Format: date-time */
             updatedAt: string;
@@ -366,6 +400,12 @@ export interface components {
         CreateTopicDto: {
             /** @example Фильмы 2026 */
             title: string;
+            /**
+             * @description По умолчанию custom; смена после create в v1 не поддерживается
+             * @default custom
+             * @enum {string}
+             */
+            category: "movies" | "custom";
             /**
              * @description По умолчанию unlisted
              * @default unlisted
@@ -383,6 +423,8 @@ export interface components {
             shareId: string;
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "custom";
             /** @enum {string} */
             privacy: "private" | "unlisted" | "public";
             /** Format: date-time */
@@ -402,6 +444,16 @@ export interface components {
             /** @enum {string} */
             privacy?: "private" | "unlisted" | "public";
         };
+        ItemMetaDto: {
+            /** @example Команда исследователей путешествует через червоточину… */
+            description?: string | null;
+            /** @example Кристофер Нолан */
+            director?: string | null;
+            /** @example Фантастика */
+            genre?: string | null;
+            /** @example США */
+            country?: string | null;
+        };
         ShareItemDto: {
             /** Format: uuid */
             id: string;
@@ -417,10 +469,14 @@ export interface components {
              * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
              */
             coverUrl?: string | null;
+            /** @description Category-specific поля; null если пусто */
+            meta?: components["schemas"]["ItemMetaDto"] | null;
         };
         ShareTopicDto: {
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "custom";
             /**
              * @description unlisted | public (private → 403, в тело не попадает)
              * @enum {string}
@@ -449,6 +505,8 @@ export interface components {
              * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
              */
             coverUrl?: string | null;
+            /** @description Category-specific поля; null для custom / пустого meta */
+            meta?: components["schemas"]["ItemMetaDto"] | null;
             /** @enum {string} */
             placement: "unranked" | "ranked";
             /** @description Плотный 1…N только для ranked; иначе null */
@@ -463,6 +521,8 @@ export interface components {
         CreateItemDto: {
             /** @example Dune 2 */
             title: string;
+            /** @description Только для топиков category=movies; иначе 400 */
+            meta?: components["schemas"]["ItemMetaDto"];
         };
         ReorderItemsDto: {
             /**
@@ -474,6 +534,25 @@ export interface components {
              */
             orderedItemIds: string[];
         };
+        FromCatalogItemDto: {
+            /**
+             * @description Провайдер каталога (v1 — только TMDB)
+             * @example tmdb
+             * @enum {string}
+             */
+            provider: "tmdb";
+            /**
+             * @description Id фильма у провайдера; в Item не сохраняется
+             * @example 157336
+             */
+            providerId: string;
+        };
+        ItemBadRequestResponseDto: {
+            /** @example Импорт из каталога доступен только для топиков категории «Фильмы» */
+            message: string;
+            /** @example 400 */
+            statusCode: number;
+        };
         ItemNotFoundResponseDto: {
             /** @example Элемент не найден */
             message: string;
@@ -483,6 +562,27 @@ export interface components {
         UpdateItemDto: {
             /** @example Dune 2 */
             title?: string;
+            /** @description Частичный merge; только для category=movies; иначе 400 */
+            meta?: components["schemas"]["ItemMetaDto"];
+        };
+        CatalogMovieDto: {
+            /**
+             * @description Id фильма у провайдера (TMDB); в Item v1 не сохраняется
+             * @example 157336
+             */
+            providerId: string;
+            /** @example Интерстеллар */
+            title: string;
+            /**
+             * @description Год из release_date; отсутствует, если даты нет
+             * @example 2014
+             */
+            year?: number;
+            /**
+             * @description Полный URL постера TMDB; null/omit если постера нет
+             * @example https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg
+             */
+            imageUrl?: string | null;
         };
         FeedItemDto: {
             /** Format: uuid */
@@ -1056,6 +1156,63 @@ export interface operations {
             };
         };
     };
+    ItemsController_createFromCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromCatalogItemDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            /** @description Топик не найден / фильм не найден в каталоге */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+            /** @description TMDB не сконфигурирован */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ItemsController_getOne: {
         parameters: {
             query?: never;
@@ -1378,6 +1535,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ItemNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    CatalogController_searchMovies: {
+        parameters: {
+            query?: {
+                /** @description Строка поиска; пустая / без ключа TMDB → [] */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogMovieDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
                 };
             };
         };

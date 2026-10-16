@@ -5,6 +5,7 @@ import {
   TApproveModal,
   TButton,
   TInput,
+  TTextarea,
   TCoverUpload,
   TEmptyState,
   TMainChip,
@@ -18,6 +19,7 @@ import {
 const email = ref('');
 const password = ref('secret');
 const errorEmail = ref('Некорректный email');
+const descriptionDemo = ref('');
 const loading = ref(false);
 const approveOpen = ref(false);
 const approveLoading = ref(false);
@@ -115,7 +117,7 @@ function showCoverErrorDemo() {
     </p>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">TMainChip · подсказки S04</h2>
+      <h2 class="text-title">TMainChip · категория / подписи</h2>
       <div class="flex flex-wrap gap-2">
         <TMainChip
           v-for="label in MAIN_CHIP_LABELS"
@@ -288,6 +290,11 @@ function showCoverErrorDemo() {
       <TInput v-model="password" label="Пароль" type="password" />
       <TInput v-model="errorEmail" label="С ошибкой" type="email" error="Некорректный email" />
       <TInput model-value="Disabled" label="Disabled" disabled />
+    </section>
+
+    <section class="mt-10 max-w-sm space-y-5">
+      <h2 class="text-title">TTextarea</h2>
+      <TTextarea v-model="descriptionDemo" label="Описание" placeholder="Многострочный текст" />
     </section>
   </main>
 </template>

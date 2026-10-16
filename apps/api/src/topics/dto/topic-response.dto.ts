@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TopicPrivacy } from '../../generated/prisma/enums';
+import { TopicCategory, TopicPrivacy } from '../../generated/prisma/enums';
 
 /** Элемент списка топиков владельца. */
 export class TopicListItemDto {
@@ -8,6 +8,9 @@ export class TopicListItemDto {
 
   @ApiProperty({ example: 'Фильмы 2026' })
   title!: string;
+
+  @ApiProperty({ enum: TopicCategory })
+  category!: TopicCategory;
 
   @ApiProperty({ enum: TopicPrivacy })
   privacy!: TopicPrivacy;
@@ -37,6 +40,9 @@ export class TopicDetailDto {
 
   @ApiProperty({ example: 'Фильмы 2026' })
   title!: string;
+
+  @ApiProperty({ enum: TopicCategory })
+  category!: TopicCategory;
 
   @ApiProperty({ enum: TopicPrivacy })
   privacy!: TopicPrivacy;
