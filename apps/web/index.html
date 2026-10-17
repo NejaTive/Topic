@@ -1,14 +1,39 @@
 <!doctype html>
-<html lang="ru" class="dark">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#2F8F63" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0C0C10" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <title>Topic</title>
+    <script>
+      (function () {
+        try {
+          var key = 'topic-theme';
+          var stored = localStorage.getItem(key);
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          var root = document.documentElement;
+          root.classList.add(theme);
+          root.style.colorScheme = theme;
+          var metaScheme = document.querySelector('meta[name="color-scheme"]');
+          if (metaScheme) metaScheme.setAttribute('content', theme);
+          var metaTheme = document.querySelector('meta[name="theme-color"]');
+          if (metaTheme) {
+            metaTheme.setAttribute('content', theme === 'light' ? '#F8F9FA' : '#0C0C10');
+          }
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

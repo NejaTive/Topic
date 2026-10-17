@@ -729,6 +729,14 @@
 - При возврате сначала выбрать семантику: (A) глобально «есть хоть где‑то» vs (B) дизейбл в picker по топикам; предпочтительнее B под текущий флоу. Реализация лёгкая (batch по `sourceUrl` при auth).
 - Идея в backlog: [`../backlog/ideas.md`](../backlog/ideas.md) («Copy from share — already owned»).
 
+### Светлая / тёмная тема
+
+- Дефолт: **system** (`prefers-color-scheme`); после клика по переключателю — явный `light` | `dark` в `localStorage` (`topic-theme`).
+- Переключатель: icon-кнопка sun/moon на **своём профиле** рядом с «Выйти» (M+D); также **GuestNav**. Не в AppNav.
+- Реализация: `html.light` / `html.dark` → CSS `--theme-*`; anti-FOUC inline script в `index.html`; composable `useTheme` (не Pinia).
+- Light-нейтрали с docs vue-dnd-kit (light); brand green Topic (`#2A6B4E`) общий для обоих режимов; soft — пастели.
+- SoT: `docs/design/tokens.json` (`color` / `colorLight`), таблица в `stage-2-brainstorm.md`. Figma Variables dual mode — отдельно.
+
 ## 16.10.2026
 
 ### Категория games (игры) — RAWG, meta вариант A

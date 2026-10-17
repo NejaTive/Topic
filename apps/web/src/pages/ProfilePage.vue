@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { SocialApiError } from '@/api/social';
-import { PageShell } from '@/components/layout';
+import { PageShell, ThemeToggle } from '@/components/layout';
 import {
   TApproveModal,
   TButton,
@@ -247,44 +247,47 @@ async function onApproveLogout() {
           </template>
 
           <template v-else-if="isSelf">
-            <button
-              v-if="isMobileView"
-              type="button"
-              class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-danger-soft text-danger transition-colors hover:opacity-80 disabled:pointer-events-none disabled:opacity-50"
-              aria-label="Выйти"
-              :disabled="logoutBusy"
-              :aria-busy="logoutBusy || undefined"
-              @click="openLogout"
-            >
-              <svg class="size-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <g transform="translate(2 0)">
-                  <path
-                    d="M8.5 4.5H5.5A1.5 1.5 0 0 0 4 6v8a1.5 1.5 0 0 0 1.5 1.5h3"
-                    fill="var(--color-danger-soft)"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                  />
-                  <path
-                    d="M11 13.5 14.5 10 11 6.5M14.5 10H8"
-                    fill="var(--color-danger-soft)"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </g>
-              </svg>
-            </button>
-            <TButton
-              v-else
-              variant="danger-ghost"
-              class="shrink-0"
-              :loading="logoutBusy"
-              @click="openLogout"
-            >
-              Выйти
-            </TButton>
+            <div class="flex shrink-0 items-center gap-2">
+              <ThemeToggle />
+              <button
+                v-if="isMobileView"
+                type="button"
+                class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-danger-soft text-danger transition-colors hover:opacity-80 disabled:pointer-events-none disabled:opacity-50"
+                aria-label="Выйти"
+                :disabled="logoutBusy"
+                :aria-busy="logoutBusy || undefined"
+                @click="openLogout"
+              >
+                <svg class="size-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <g transform="translate(2 0)">
+                    <path
+                      d="M8.5 4.5H5.5A1.5 1.5 0 0 0 4 6v8a1.5 1.5 0 0 0 1.5 1.5h3"
+                      fill="var(--color-danger-soft)"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M11 13.5 14.5 10 11 6.5M14.5 10H8"
+                      fill="var(--color-danger-soft)"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </g>
+                </svg>
+              </button>
+              <TButton
+                v-else
+                variant="danger-ghost"
+                class="shrink-0"
+                :loading="logoutBusy"
+                @click="openLogout"
+              >
+                Выйти
+              </TButton>
+            </div>
           </template>
         </div>
 
