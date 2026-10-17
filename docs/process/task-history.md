@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — Glass-карточки рейтинга + приглушённый accent
+
+- **YouGile:** FRO-56
+- **Итог:** `TRankRow` / share «+» / DnD-slot на `glass` (как лента); accent `#2F8F63` → `#2A6B4E` в tokens.
+- **Репо:** `style/FRO-56` / [PR #98](https://github.com/NejaTive/Topic/pull/98) → `develop`
+- **Заметки:** manual-close; эпик Topics.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 17.10.2026 — Металлические цифры топ-3
 
 - **YouGile:** FRO-55

@@ -116,7 +116,7 @@ function onCopied() {
         <button
           v-if="canCopy"
           type="button"
-          class="flex w-11 shrink-0 items-center justify-center rounded-md border border-row-line bg-row text-ink transition-colors hover:bg-row-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+          class="glass flex w-11 shrink-0 items-center justify-center rounded-md text-ink transition-colors hover:bg-surface-glass-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           aria-label="Добавить к себе"
           @click="onAddClick(item.id, $event)"
         >
