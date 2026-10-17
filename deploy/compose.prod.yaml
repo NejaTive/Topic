@@ -36,6 +36,9 @@ services:
       S3_BUCKET: ${S3_BUCKET:-topic-covers}
       # "." = same-origin path через Caddy (не зависеть от IP в URL обложек)
       S3_PUBLIC_URL: ${S3_PUBLIC_URL:-.}
+      TMDB_API_KEY: ${TMDB_API_KEY:-}
+      TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN:-}
+      RAWG_API_KEY: ${RAWG_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy
