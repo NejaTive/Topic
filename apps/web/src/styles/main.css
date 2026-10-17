@@ -10,6 +10,11 @@
     height: 100dvh;
   }
 
+  #app {
+    position: relative;
+    z-index: 1;
+  }
+
   html {
     color-scheme: dark;
   }
@@ -18,10 +23,102 @@
     @apply text-ink font-sans antialiased;
     background-color: var(--color-bg);
     background-image: radial-gradient(
-      color-mix(in srgb, #fff 5%, transparent) 1px,
+      color-mix(in srgb, #fff 8%, transparent) 1px,
       transparent 1px
     );
-    background-size: 16px 16px;
+    background-size: 28px 28px;
+    animation: bg-dots-drift 8s linear infinite;
+  }
+
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(color-mix(in srgb, #fff 12%, transparent) 1px, transparent 1px),
+      radial-gradient(color-mix(in srgb, #fff 12%, transparent) 1px, transparent 1px);
+    background-size:
+      56px 56px,
+      56px 56px;
+  }
+
+  body::before {
+    animation:
+      bg-dots-drift-a 8s linear infinite,
+      bg-dots-twinkle 5.5s ease-in-out infinite;
+  }
+
+  body::after {
+    animation:
+      bg-dots-drift-b 8s linear infinite,
+      bg-dots-twinkle 4.2s ease-in-out infinite reverse;
+  }
+
+  @keyframes bg-dots-drift {
+    to {
+      background-position: 28px 28px;
+    }
+  }
+
+  @keyframes bg-dots-drift-a {
+    from {
+      background-position:
+        0 0,
+        28px 28px;
+    }
+    to {
+      background-position:
+        28px 28px,
+        56px 56px;
+    }
+  }
+
+  @keyframes bg-dots-drift-b {
+    from {
+      background-position:
+        28px 0,
+        0 28px;
+    }
+    to {
+      background-position:
+        56px 28px,
+        28px 56px;
+    }
+  }
+
+  @keyframes bg-dots-twinkle {
+    0%,
+    100% {
+      opacity: 0.12;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body,
+    body::before,
+    body::after {
+      animation: none;
+    }
+
+    body::before,
+    body::after {
+      opacity: 0.22;
+      background-position:
+        0 0,
+        28px 28px;
+    }
+
+    body::after {
+      background-position:
+        28px 0,
+        0 28px;
+    }
   }
 }
 
