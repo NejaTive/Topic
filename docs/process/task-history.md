@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — Лёгкий repeating-паттерн фона (точки)
+
+- **YouGile:** FRO-53
+- **Итог:** На `body` — CSS repeating-паттерн точек поверх `--color-bg`; сравнили точки / диагонали / accent-сетку, оставили точки; остальные ветки удалены.
+- **Репо:** код: [PR #94](https://github.com/NejaTive/Topic/pull/94) → `develop`; история: `style/FRO-53` / [PR #95](https://github.com/NejaTive/Topic/pull/95) → `develop`
+- **Заметки:** manual-close; эпик Scaffold.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 17.10.2026 — Error chrome для authed + CTA на пустом своём профиле
 
 - **YouGile:** FRO-52
