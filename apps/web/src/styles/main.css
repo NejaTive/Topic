@@ -15,7 +15,13 @@
   }
 
   body {
-    @apply bg-bg text-ink font-sans antialiased;
+    @apply text-ink font-sans antialiased;
+    background-color: var(--color-bg);
+    background-image: radial-gradient(
+      color-mix(in srgb, #fff 5%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 16px 16px;
   }
 }
 
