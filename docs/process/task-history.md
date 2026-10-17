@@ -33,6 +33,15 @@
 
 ## Записи
 
+### 17.10.2026 — Светлая / тёмная тема
+
+- **YouGile:** FRO-57
+- **Итог:** Light/dark через `html.light`/`html.dark` + `useTheme` (system → localStorage); light-нейтрали; View Transition от кнопки; переключатель на своём профиле рядом с «Выйти» и в GuestNav.
+- **Репо:** `feat/FRO-57` / [PR #99](https://github.com/NejaTive/Topic/pull/99) → `develop`
+- **Заметки:** manual-close; эпик Scaffold; проверено вручную M/D.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
 ### 17.10.2026 — Glass-карточки рейтинга + приглушённый accent
 
 - **YouGile:** FRO-56
