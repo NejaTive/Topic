@@ -65,11 +65,11 @@ function onCardKeydown(event: KeyboardEvent) {
 
 <template>
   <div
-    class="group flex w-full max-w-89.5 items-center gap-3 rounded-md border border-row-line bg-row px-3 py-2 transition-colors outline-none select-none"
+    class="glass group flex w-full max-w-89.5 items-center gap-3 rounded-md px-3 py-2 transition-colors outline-none select-none"
     :class="[
       dragging
-        ? 'border-row-line bg-row-hover shadow-float'
-        : 'hover:bg-row-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
+        ? 'bg-surface-glass-hover shadow-float'
+        : 'hover:bg-surface-glass-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
       readonly ? 'cursor-default' : 'cursor-pointer',
     ]"
     :data-state="dragging ? 'dragging' : 'default'"
@@ -103,12 +103,12 @@ function onCardKeydown(event: KeyboardEvent) {
 
     <span
       v-if="showHandle"
-      class="-my-2 -mr-3 flex w-11 shrink-0 items-center justify-center self-stretch rounded-r-md border-l border-row-line bg-row-hover pl-2 pr-3 text-muted transition-colors touch-none"
+      class="-my-2 -mr-3 flex w-11 shrink-0 items-center justify-center self-stretch rounded-r-md border-l border-glass-line bg-surface-sunken pl-2 pr-3 text-muted transition-colors touch-none"
       :class="[
         dragEnabled
-          ? 'cursor-grab active:cursor-grabbing hover:bg-row-line hover:text-ink'
+          ? 'cursor-grab active:cursor-grabbing hover:bg-surface-glass-hover hover:text-ink'
           : 'cursor-default',
-        dragging ? 'bg-row-line text-ink' : null,
+        dragging ? 'bg-surface-glass-hover text-ink' : null,
       ]"
       aria-hidden="true"
       data-slot="drag-handle"

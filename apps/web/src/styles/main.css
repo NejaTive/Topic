@@ -170,8 +170,8 @@
     height: 74px;
     flex-shrink: 0;
     border-radius: var(--radius-md, 8px);
-    border: 1px dashed var(--color-row-line);
-    background: color-mix(in srgb, var(--color-row) 55%, var(--color-bg));
+    border: 1px dashed var(--color-glass-line);
+    background: color-mix(in srgb, var(--color-surface) 55%, var(--color-bg));
     pointer-events: none;
   }
 }
