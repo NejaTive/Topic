@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ItemPlacement } from '../../generated/prisma/enums';
+import { ItemMetaDto } from './item-meta.dto';
 
 export class ItemDto {
   @ApiProperty({ format: 'uuid' })
@@ -18,6 +19,13 @@ export class ItemDto {
     example: 'http://127.0.0.1:9000/topic-covers/covers/abc.webp',
   })
   coverUrl!: string | null;
+
+  @ApiPropertyOptional({
+    type: ItemMetaDto,
+    nullable: true,
+    description: 'Category-specific поля; null для custom / пустого meta',
+  })
+  meta!: ItemMetaDto | null;
 
   @ApiProperty({ enum: ItemPlacement })
   placement!: ItemPlacement;
@@ -47,5 +55,24 @@ export class ItemNotFoundResponseDto {
   message!: string;
 
   @ApiProperty({ example: 404 })
+  statusCode!: number;
+}
+
+export class ItemBadRequestResponseDto {
+  @ApiProperty({
+    example:
+      'Импорт из каталога доступен только для топиков категорий «Фильмы», «Сериалы» и «Игры»',
+  })
+  message!: string;
+
+  @ApiProperty({ example: 400 })
+  statusCode!: number;
+}
+
+export class ItemConflictResponseDto {
+  @ApiProperty({ example: 'Этот фильм уже есть в списке' })
+  message!: string;
+
+  @ApiProperty({ example: 409 })
   statusCode!: number;
 }

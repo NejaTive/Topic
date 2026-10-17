@@ -17,13 +17,17 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBadRequestResponse,
   ApiBody,
+  ApiConflictResponse,
   ApiConsumes,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiServiceUnavailableResponse,
   ApiTags,
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
@@ -35,9 +39,18 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UnauthorizedResponseDto } from '../auth/dto/user-response.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { COVER_MAX_BYTES } from '../storage/storage.service';
+import { ForbiddenShareResponseDto } from '../topics/dto/share-topic-response.dto';
 import { NotFoundResponseDto } from '../topics/dto/topic-response.dto';
+import { CopyFromShareDto } from './dto/copy-from-share.dto';
 import { CreateItemDto } from './dto/create-item.dto';
-import { ItemDto, ItemListDto, ItemNotFoundResponseDto } from './dto/item-response.dto';
+import { FromCatalogItemDto } from './dto/from-catalog-item.dto';
+import {
+  ItemBadRequestResponseDto,
+  ItemConflictResponseDto,
+  ItemDto,
+  ItemListDto,
+  ItemNotFoundResponseDto,
+} from './dto/item-response.dto';
 import { ReorderItemsDto } from './dto/reorder-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemsService } from './items.service';
@@ -91,6 +104,52 @@ export class ItemsController {
     @Body() dto: ReorderItemsDto,
   ): Promise<ItemListDto> {
     return this.items.reorderRankedOwned(user.id, topicId, dto);
+  }
+
+  @Post('from-catalog')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: ItemDto })
+  @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
+  @ApiBadRequestResponse({ type: ItemBadRequestResponseDto })
+  @ApiConflictResponse({
+    description: 'Фильм / сериал уже есть в топике',
+    type: ItemConflictResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Топик не найден / фильм не найден в каталоге',
+    type: NotFoundResponseDto,
+  })
+  @ApiServiceUnavailableResponse({
+    description: 'TMDB не сконфигурирован',
+  })
+  createFromCatalog(
+    @CurrentUser() user: AuthUser,
+    @Param('topicId', ParseUUIDPipe) topicId: string,
+    @Body() dto: FromCatalogItemDto,
+  ): Promise<ItemDto> {
+    return this.items.createFromCatalogForOwner(user.id, topicId, dto);
+  }
+
+  @Post('copy-from-share')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: ItemDto })
+  @ApiUnauthorizedResponse({ type: UnauthorizedResponseDto })
+  @ApiBadRequestResponse({ type: ItemBadRequestResponseDto })
+  @ApiForbiddenResponse({ type: ForbiddenShareResponseDto })
+  @ApiConflictResponse({
+    description: 'Элемент с тем же sourceUrl уже есть в целевом топике',
+    type: ItemConflictResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Целевой топик / share / элемент не найден',
+    type: NotFoundResponseDto,
+  })
+  copyFromShare(
+    @CurrentUser() user: AuthUser,
+    @Param('topicId', ParseUUIDPipe) topicId: string,
+    @Body() dto: CopyFromShareDto,
+  ): Promise<ItemDto> {
+    return this.items.copyFromShareForOwner(user.id, topicId, dto);
   }
 
   @Get(':itemId')

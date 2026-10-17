@@ -15,3 +15,14 @@ declare module '*.vue' {
   const component: DefineComponent<object, object, unknown>;
   export default component;
 }
+
+interface ViewTransition {
+  finished: Promise<void>;
+  ready: Promise<void>;
+  updateCallbackDone: Promise<void>;
+  skipTransition(): void;
+}
+
+interface Document {
+  startViewTransition?: (updateCallback: () => void | Promise<void>) => ViewTransition;
+}

@@ -683,3 +683,135 @@
 - **VPS:** обновить `/opt/topic/.env`; выкат образа `topic-web` с новым Caddyfile (том `caddy_data` сохранить).
 - **Отменяет отложенное** «купленный домен» из 08–09.10.2026; HTTPS по IP остаётся запасным доступом, канон — домен.
 - Канон: `docs/process/deploy.md`, `deploy/Caddyfile`, `deploy/.env.example`.
+
+### Prod Postgres — localhost для админ-доступа
+
+- В `deploy/compose.prod.yaml` у `postgres`: `ports: ['127.0.0.1:5432:5432']` — только loopback на VPS, не в интернет.
+- Доступ владельца: SSH-туннель / TablePlus Over SSH → `127.0.0.1:5432`, SSL off; креды из `/opt/topic/.env`.
+- Закреплено в `develop` без bump версии (вариант B); на VPS уже применено вручную; в prod через CI — со следующим promote в `main`.
+- Канон: `docs/process/deploy.md`.
+
+## 17.10.2026
+
+### UI polish — error chrome + empty profile (self)
+
+- **404 / no-access:** `ErrorStateView` показывает `AppNav` при `session === authed`, иначе `GuestNav` (не «Присоединиться» для залогиненного).
+- **Профиль:** счётчик и список — только **public** топики (так и задумано); для `isSelf` + empty — пояснение про «Мои топики» + CTA «Создать топик».
+- Не трогаем: empty-state typo, desktop full-width CTA, placeholder «Интерстеллар» на custom.
+
+### YouGile — параллельные executor’ы по умолчанию
+
+- **Пересматриваем** инвариант «executor’ы не параллелить по умолчанию».
+- Если у карточек в «К работе» / очереди **нет взаимных зависимостей** (все deps в Готово) — оркестратор запускает executor-subagent’ов **параллельно**.
+- Параллель только в **изолированных worktree** (или cloud), не в одном checkout.
+- Ревьюеров по разным PR тоже можно параллелить.
+- Зависимые карточки — по готовности предыдущих (как раньше).
+- Канон: `.cursor/rules/collaboration/yougile-agent-workflow.mdc`, skill `yougile-executor`.
+
+### Рекомендации — контракт v1 (mutual recommend)
+
+- Post-MVP фича: точечная рекомендация **элемента** (не топика) кругу взаимных подписок.
+- **Получатели:** только `followers ∩ following`. «Отправить всем» = всем из пересечения. Пикер: «Кому рекомендовать»; empty — «Пока нет взаимных подписок».
+- **Источник:** любой свой item (inbox/ranked), в т.ч. из **private**-топика.
+- **Получатель видит снимок** карточки (title/cover/category/meta + кто); чужой private/unlisted топик не открывается.
+- **UI:** блок «Мои рекомендации» **сверху Ленты** (`FeedPage`); ниже — текущая лента public-топиков.
+- **Accept:** как copy-from-share → picker своего топика той же `category` → copy в inbox. **Dismiss** — убрать из pending.
+- **Модель:** fan-out `Recommendation` (одна строка на получателя) + денормализованный снимок; `sourceItemId` nullable (`onDelete: SetNull`).
+- **API (черновик):** `GET /me/mutual-follows`, `POST /items/:itemId/recommend`, `GET /recommendations`, accept/dismiss.
+- **YouGile:** BAC-31 (Prisma) → BAC-30 (mutual) → BAC-29 (recommend) → BAC-28 (inbox/accept); FRO-48 (client) → FRO-47 / FRO-46 (UI); эпик-стикер **Recommendations**.
+- Канон: [`../feature/recommendations.md`](../feature/recommendations.md); идея в [`../backlog/ideas.md`](../backlog/ideas.md).
+
+### Copy from share — флаг «уже есть у меня» отложен
+
+- Копирование элемента из чужого `/t/:shareId` в inbox своего топика той же категории — **есть** (`POST …/items/copy-from-share`).
+- Дубликат сейчас: только при копировании в **конкретный** топик, по `meta.sourceUrl` → 409; без `sourceUrl` заранее не детектим.
+- **Не делаем сейчас** префлаг / дизейбл кнопки «уже есть в каком‑то моём топике».
+- При возврате сначала выбрать семантику: (A) глобально «есть хоть где‑то» vs (B) дизейбл в picker по топикам; предпочтительнее B под текущий флоу. Реализация лёгкая (batch по `sourceUrl` при auth).
+- Идея в backlog: [`../backlog/ideas.md`](../backlog/ideas.md) («Copy from share — already owned»).
+
+### Светлая / тёмная тема
+
+- Дефолт: **system** (`prefers-color-scheme`); после клика по переключателю — явный `light` | `dark` в `localStorage` (`topic-theme`).
+- Переключатель: icon-кнопка sun/moon на **своём профиле** рядом с «Выйти» (M+D); также **GuestNav**. Не в AppNav.
+- Реализация: `html.light` / `html.dark` → CSS `--theme-*`; anti-FOUC inline script в `index.html`; composable `useTheme` (не Pinia).
+- Light-нейтрали с docs vue-dnd-kit (light); brand green Topic (`#2A6B4E`) общий для обоих режимов; soft — пастели.
+- SoT: `docs/design/tokens.json` (`color` / `colorLight`), таблица в `stage-2-brainstorm.md`. Figma Variables dual mode — отдельно.
+
+## 16.10.2026
+
+### Категория games (игры) — RAWG, meta вариант A
+
+- **Пересматриваем** «вне v1» для игр из Catalog (15.10.2026): добавляем категорию **`games`**.
+- Провайдер: **RAWG** (`GET /api/games?search=`, `GET /api/games/{id}`); секрет `RAWG_API_KEY` только на Nest.
+- **Meta вариант A:** тот же контракт строк, что у `movies`/`series` — `description` / `director` / `genre` / `country` / `sourceUrl`.
+- RAWG: `name`→title, `released`→year в поиске, `background_image`→cover, `description_raw`→description, первый developer→`director`, первый genre→`genre`, первая platform→`country`; `sourceUrl` = `https://rawg.io/games/{slug}`.
+- UI: лейбл `director` для games — **«Разработчик»**; поле `country` / «Платформа» **не показываем** на фронте (может оставаться в meta с RAWG).
+- `from-catalog`: `provider: 'tmdb' | 'rawg'` (movies/series → tmdb; games → rawg).
+- Attribution в UI поиска (ссылка на RAWG).
+- Смена `category` после create, IGDB, books, externalId — вне slice.
+- **YouGile:** по одной карточке BAC + FRO (эпик Catalog); PR → `develop`.
+- План: [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+
+### Категория series (сериалы) — TMDB TV, meta вариант A
+
+- **Пересматриваем** «вне v1» для сериалов из Catalog (15.10.2026): добавляем категорию **`series`**.
+- Провайдер: тот же **TMDB**, эндпоинты `/search/tv` и `/tv/{id}` (+ credits); ключ/токен без изменений.
+- **Meta вариант A:** тот же контракт строк, что у `movies` — `description` / `director` / `genre` / `country` / `sourceUrl` (без отдельного ключа `creator`).
+- TMDB: `name`→title, `first_air_date`→year в поиске, `overview`→description, `created_by[0].name`→`director`, первый genre / production country; `sourceUrl` = `https://www.themoviedb.org/tv/{providerId}`.
+- UI: лейбл поля `director` для series — **«Создатель»** (ключ API не меняем).
+- Смена `category` после create, сезоны/network, externalId — по-прежнему вне slice.
+- **YouGile:** по одной карточке BAC + FRO (эпик Catalog); PR → `develop`.
+- План: [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+
+### S09 — read-only деталка элемента
+
+- Клик по RankRow на публичном share → **`/t/:shareId/items/:itemId`** (`ShareItemView`), без `requiresAuth`.
+- Данные из уже существующего `GET /api/t/:shareId` (`ShareItemDto` + `category`); отдельный item-эндпоинт не делаем.
+- Только просмотр: обложка + title; для `movies` — meta (description / genre / director / country / sourceUrl), если есть. Без edit CTA; владелец с S09 **не** уходит в S07.
+- Неверный `itemId` при валидном share → `NotFound`; 403/404 share — как на S09.
+
+### Item.meta.sourceUrl — ссылка на источник (from-catalog)
+
+- При `POST .../items/from-catalog` Nest пишет `meta.sourceUrl` = `https://www.themoviedb.org/movie/{providerId}`.
+- В create/update с клиента `sourceUrl` **игнорируется**; при PATCH остальных meta-полей текущий `sourceUrl` сохраняется.
+- Ручной create → без `sourceUrl`. UI: read-only ссылка «Источник» на S07 и ShareItemView.
+- Это не `externalId` для дедупа — только публичный URL.
+
+### Item.meta — поля фильма (director / genre / country)
+
+- **Хранение:** на `Item` опциональный **`meta Json?`** (не плоские колонки) — один контейнер под category-specific поля.
+- **movies:** опциональные строки `description` (из TMDB `overview`), `director`, `genre`, `country` (singular), `sourceUrl` (только from-catalog); каталожный и ручной элемент — один контракт редактируемых полей.
+- **custom:** `meta` всегда `null`; передача meta → `400`.
+- **TMDB from-catalog:** details + `credits` → первый Director / genre / production country + `sourceUrl`.
+- **UI v1:** S06 (ручная форма) + S07; RankRow / S09 UI — позже (meta уже в `ItemDto` / `ShareItemDto`).
+- **YouGile:** BAC-24, FRO-39 (эпик Catalog); ветка `feat/catalog-enrichment`.
+- План/контракт: [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+
+## 15.10.2026
+
+### Каталог при добавлении элементов (вариант A)
+
+- **Проблема:** на S06 название и обложка вводятся вручную — friction на длинном топе.
+- **Решение:** категория топика (enum) + поиск во внешнем API для известных категорий; своя категория — без автодополнения; в каталожном топике всегда путь «создать свой элемент» вручную.
+- **Модель Item без расширения схемы карточки:** каталог только префиллит title + cover (одна модель для всех топиков).
+- **Scope v1:** категории `movies` | `custom`; провайдер **TMDB** (фильмы); обложку копируем в MinIO; ключ только на Nest.
+- **Вне v1:** сериалы/игры/книги, unfurl URL, хранение `externalSource`/`externalId` на Item (связь с id в TMDB не нужна для первого slice — копируем данные один раз).
+- **План:** [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md).
+- **Backlog:** идея «Категории топиков» переведена в эту фичу (больше не «только post-MVP идея без плана»).
+
+### Провайдер каталога фильмов — TMDB
+
+- После сравнения бесплатных API (OMDb, kino.is, Kinopoisk Unofficial, ПоискКино, no-key скрейперы) владелец выбрал **TMDB**.
+- Критерии: title + poster в search, `language=ru`, стабильность, свой image CDN, free non-commercial + attribution.
+- Детали и отвергнутые альтернативы — в [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) §«Провайдер: TMDB».
+
+### Нарезка YouGile — Catalog
+
+- Эпик **Catalog**: **BAC-21…23**, **FRO-36…38** в Бэклог; таблица и AC — [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) §«Нарезка YouGile».
+- При нарезке: дефолт category `custom`; year только в поиске; без смены category после create; from-catalog (A1); hi-fi не блокирует.
+
+### Catalog — интеграционная ветка и UX без Figma (15.10.2026)
+
+- Интеграция эпика: **`feat/catalog-enrichment`** (не сразу в `develop`).
+- Карточки по-прежнему **одна ветка = одна задача** (`feat/BAC-21` …), но **PR base / merge → `feat/catalog-enrichment`**, не `develop`.
+- Hi-fi в Figma для Catalog **не делаем**: UI сразу в коде по [`../feature/catalog-enrichment.md`](../feature/catalog-enrichment.md) и UI-kit.

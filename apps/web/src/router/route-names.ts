@@ -4,6 +4,7 @@ export enum RouteName {
   Login = 'login',
   Register = 'register',
   ShareView = 'share-view',
+  ShareItemView = 'share-item-view',
   ShareForbidden = 'share-forbidden',
   ShareNotFound = 'share-not-found',
   AppFeed = 'app-feed',

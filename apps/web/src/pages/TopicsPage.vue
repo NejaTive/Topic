@@ -36,8 +36,27 @@ function onRetry() {
   <PageShell>
     <template #header>
       <header class="flex items-center justify-between gap-3">
-        <h1 class="text-h1 text-ink">Мои топики</h1>
-        <TButton v-if="!isMobileView" @click="goCreate">Создать топик</TButton>
+        <h1 class="min-w-0 truncate text-h1 text-ink">Мои топики</h1>
+        <button
+          v-if="isMobileView"
+          type="button"
+          class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-accent-soft text-accent transition-colors hover:opacity-80"
+          aria-label="Создать топик"
+          @click="goCreate"
+        >
+          <svg
+            class="size-5"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M10 4.5v11M4.5 10h11" />
+          </svg>
+        </button>
+        <TButton v-else class="shrink-0" @click="goCreate">Создать топик</TButton>
       </header>
     </template>
 
@@ -52,6 +71,7 @@ function onRetry() {
         <TTopicRow
           :title="topic.title"
           :meta="formatTopicUpdatedAt(topic.updatedAt)"
+          :category="topic.category"
           :privacy="topic.privacy"
           :covers="previewCoverUrls(topic.previewCovers)"
           :compact-privacy="isMobileView"
@@ -59,11 +79,5 @@ function onRetry() {
         />
       </li>
     </ul>
-
-    <template #overlay>
-      <div v-if="isMobileView" class="fixed inset-x-0 bottom-23 z-30 flex justify-center">
-        <TButton class="shadow-float" @click="goCreate">Создать топик</TButton>
-      </div>
-    </template>
   </PageShell>
 </template>

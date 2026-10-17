@@ -36,6 +36,9 @@ services:
       S3_BUCKET: ${S3_BUCKET:-topic-covers}
       # "." = same-origin path через Caddy (не зависеть от IP в URL обложек)
       S3_PUBLIC_URL: ${S3_PUBLIC_URL:-.}
+      TMDB_API_KEY: ${TMDB_API_KEY:-}
+      TMDB_ACCESS_TOKEN: ${TMDB_ACCESS_TOKEN:-}
+      RAWG_API_KEY: ${RAWG_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,6 +48,9 @@ services:
 
   postgres:
     image: postgres:17-alpine
+    # Только localhost на VPS — SSH/TablePlus-туннель; в интернет не публиковать
+    ports:
+      - '127.0.0.1:5432:5432'
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

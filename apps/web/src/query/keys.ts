@@ -19,4 +19,13 @@ export const queryKeys = {
   feed: {
     list: () => ['feed', 'list'] as const,
   },
+  recommendations: {
+    list: () => ['recommendations', 'list'] as const,
+    mutualFollows: () => ['recommendations', 'mutualFollows'] as const,
+  },
+  catalog: {
+    moviesSearch: (q: string) => ['catalog', 'movies', 'search', q] as const,
+    seriesSearch: (q: string) => ['catalog', 'series', 'search', q] as const,
+    gamesSearch: (q: string) => ['catalog', 'games', 'search', q] as const,
+  },
 };

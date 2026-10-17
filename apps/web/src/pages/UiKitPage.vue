@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import type { TopicCategory } from '@/api/topics';
 import {
   TApproveModal,
   TButton,
   TInput,
+  TTextarea,
   TCoverUpload,
   TEmptyState,
   TMainChip,
@@ -18,6 +20,7 @@ import {
 const email = ref('');
 const password = ref('secret');
 const errorEmail = ref('Некорректный email');
+const descriptionDemo = ref('');
 const loading = ref(false);
 const approveOpen = ref(false);
 const approveLoading = ref(false);
@@ -35,12 +38,14 @@ const sampleCover =
 const sampleRows: {
   title: string;
   meta: string;
+  category: TopicCategory;
   privacy: PrivacyValue;
   covers?: Array<string | null>;
 }[] = [
   {
     title: 'Фильмы 2026',
     meta: 'обновлён вчера',
+    category: 'movies',
     privacy: 'public',
     covers: [
       'data:image/svg+xml,' +
@@ -60,11 +65,13 @@ const sampleRows: {
   {
     title: 'Книги по ссылке',
     meta: 'обновлён 1 окт',
+    category: 'custom',
     privacy: 'unlisted',
   },
   {
     title: 'Личное',
     meta: 'обновлён сегодня',
+    category: 'games',
     privacy: 'private',
   },
 ];
@@ -115,7 +122,7 @@ function showCoverErrorDemo() {
     </p>
 
     <section class="mt-10 space-y-4">
-      <h2 class="text-title">TMainChip · подсказки S04</h2>
+      <h2 class="text-title">TMainChip · категория / подписи</h2>
       <div class="flex flex-wrap gap-2">
         <TMainChip
           v-for="label in MAIN_CHIP_LABELS"
@@ -194,6 +201,7 @@ function showCoverErrorDemo() {
         :key="row.title"
         :title="row.title"
         :meta="row.meta"
+        :category="row.category"
         :privacy="row.privacy"
         :covers="row.covers"
       />
@@ -206,6 +214,7 @@ function showCoverErrorDemo() {
         :key="`m-${row.title}`"
         :title="row.title"
         :meta="row.meta"
+        :category="row.category"
         :privacy="row.privacy"
         :covers="row.covers"
         compact-privacy
@@ -288,6 +297,11 @@ function showCoverErrorDemo() {
       <TInput v-model="password" label="Пароль" type="password" />
       <TInput v-model="errorEmail" label="С ошибкой" type="email" error="Некорректный email" />
       <TInput model-value="Disabled" label="Disabled" disabled />
+    </section>
+
+    <section class="mt-10 max-w-sm space-y-5">
+      <h2 class="text-title">TTextarea</h2>
+      <TTextarea v-model="descriptionDemo" label="Описание" placeholder="Многострочный текст" />
     </section>
   </main>
 </template>

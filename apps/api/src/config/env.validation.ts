@@ -57,6 +57,21 @@ class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   S3_PUBLIC_URL!: string;
+
+  /** TMDB API key (v3); optional — без ключа поиск каталога деградирует в []. */
+  @IsOptional()
+  @IsString()
+  TMDB_API_KEY?: string;
+
+  /** TMDB Read Access Token (Bearer); optional, альтернатива/дополнение к API key. */
+  @IsOptional()
+  @IsString()
+  TMDB_ACCESS_TOKEN?: string;
+
+  /** RAWG API key; optional — без ключа поиск игр деградирует в []. */
+  @IsOptional()
+  @IsString()
+  RAWG_API_KEY?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

@@ -94,6 +94,11 @@ export const router = createRouter({
           name: RouteName.ShareView,
           component: () => import('@/pages/ShareViewPage.vue'),
         },
+        {
+          path: 'items/:itemId',
+          name: RouteName.ShareItemView,
+          component: () => import('@/pages/ShareItemViewPage.vue'),
+        },
       ],
     },
     {

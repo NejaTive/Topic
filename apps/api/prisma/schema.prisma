@@ -14,22 +14,37 @@ enum TopicPrivacy {
   public
 }
 
+enum TopicCategory {
+  movies
+  series
+  games
+  custom
+}
+
 enum ItemPlacement {
   unranked
   ranked
 }
 
+enum RecommendationStatus {
+  pending
+  accepted
+  dismissed
+}
+
 /// Пользователь. `nick` хранится в lowercase — unique = case-insensitive.
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  nick         String    @unique
-  passwordHash String
-  createdAt    DateTime  @default(now())
-  sessions     Session[]
-  topics       Topic[]
-  following    Follow[]  @relation("UserFollowing")
-  followers    Follow[]  @relation("UserFollowers")
+  id                    String           @id @default(uuid())
+  email                 String           @unique
+  nick                  String           @unique
+  passwordHash          String
+  createdAt             DateTime         @default(now())
+  sessions              Session[]
+  topics                Topic[]
+  following             Follow[]         @relation("UserFollowing")
+  followers             Follow[]         @relation("UserFollowers")
+  recommendationsFrom   Recommendation[] @relation("RecommendationFrom")
+  recommendationsTo     Recommendation[] @relation("RecommendationTo")
 }
 
 /// Односторонняя подписка: follower → following.
@@ -66,24 +81,49 @@ model Topic {
   ownerId   String
   owner     User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   title     String
-  privacy   TopicPrivacy @default(unlisted)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  category  TopicCategory @default(custom)
+  privacy   TopicPrivacy  @default(unlisted)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
   items     Item[]
 
   @@index([ownerId])
 }
 
 /// Элемент топика. `coverKey` — ключ в S3/MinIO; `rankPosition` только при placement=ranked (плотный 1…N).
+/// `meta` — category-specific поля (для movies: director/genre/country); у custom всегда null.
 model Item {
-  id           String        @id @default(uuid())
-  topicId      String
-  topic        Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  title        String
-  coverKey     String?
-  placement    ItemPlacement
-  rankPosition Int?
-  createdAt    DateTime      @default(now())
+  id              String           @id @default(uuid())
+  topicId         String
+  topic           Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  title           String
+  coverKey        String?
+  meta            Json?
+  placement       ItemPlacement
+  rankPosition    Int?
+  createdAt       DateTime         @default(now())
+  recommendations Recommendation[]
 
   @@index([topicId, placement, rankPosition])
+}
+
+/// Персональная рекомендация элемента взаимной подписке. Fan-out: одна строка на получателя; снимок карточки.
+model Recommendation {
+  id           String               @id @default(uuid())
+  fromUserId   String
+  toUserId     String
+  sourceItemId String?
+  title        String
+  coverKey     String?
+  category     TopicCategory
+  meta         Json?
+  status       RecommendationStatus @default(pending)
+  createdAt    DateTime             @default(now())
+
+  fromUser   User  @relation("RecommendationFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser     User  @relation("RecommendationTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  sourceItem Item? @relation(fields: [sourceItemId], references: [id], onDelete: SetNull)
+
+  @@index([toUserId, status, createdAt])
+  @@index([fromUserId])
 }

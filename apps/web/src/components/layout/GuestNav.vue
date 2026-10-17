@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
+import ThemeToggle from '@/components/layout/ThemeToggle.vue';
 import TButton from '@/components/ui-kit/TButton.vue';
 import { useTailwindBreakpoints } from '@/composables/useTailwindBreakpoints';
 
@@ -19,9 +20,12 @@ const brandClass =
     >
       <RouterLink to="/" :class="brandClass">Topic</RouterLink>
 
-      <RouterLink v-slot="{ navigate }" to="/" custom>
-        <TButton :size="ctaSize" @click="navigate">Присоединиться</TButton>
-      </RouterLink>
+      <div class="flex items-center gap-2">
+        <ThemeToggle />
+        <RouterLink v-slot="{ navigate }" to="/" custom>
+          <TButton :size="ctaSize" @click="navigate">Присоединиться</TButton>
+        </RouterLink>
+      </div>
     </div>
   </nav>
 </template>

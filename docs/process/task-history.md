@@ -33,6 +33,312 @@
 
 ## Записи
 
+### 17.10.2026 — Светлая / тёмная тема
+
+- **YouGile:** FRO-57
+- **Итог:** Light/dark через `html.light`/`html.dark` + `useTheme` (system → localStorage); light-нейтрали; View Transition от кнопки; переключатель на своём профиле рядом с «Выйти» и в GuestNav.
+- **Репо:** `feat/FRO-57` / [PR #99](https://github.com/NejaTive/Topic/pull/99) → `develop`
+- **Заметки:** manual-close; эпик Scaffold; проверено вручную M/D.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Glass-карточки рейтинга + приглушённый accent
+
+- **YouGile:** FRO-56
+- **Итог:** `TRankRow` / share «+» / DnD-slot на `glass` (как лента); accent `#2F8F63` → `#2A6B4E` в tokens.
+- **Репо:** `style/FRO-56` / [PR #98](https://github.com/NejaTive/Topic/pull/98) → `develop`
+- **Заметки:** manual-close; эпик Topics.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Металлические цифры топ-3
+
+- **YouGile:** FRO-55
+- **Итог:** В `TRankRow` места 1/2/3 — золото / серебро / бронза (градиент + бегущий блик); строки рейтинга без смены фона.
+- **Репо:** `style/FRO-55` / [PR #97](https://github.com/NejaTive/Topic/pull/97) → `develop`
+- **Заметки:** manual-close; эпик Topics; проверено на share `/t/…`.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Анимация фона: drift + мерцание точек
+
+- **YouGile:** FRO-54
+- **Итог:** Drift сетки точек + мягкое мерцание двумя чередующимися группами; шаг 28px, чуть ярче; `prefers-reduced-motion` отключает анимацию.
+- **Репо:** `style/FRO-54` / [PR #96](https://github.com/NejaTive/Topic/pull/96) → `develop`
+- **Заметки:** manual-close; эпик Scaffold.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Лёгкий repeating-паттерн фона (точки)
+
+- **YouGile:** FRO-53
+- **Итог:** На `body` — CSS repeating-паттерн точек поверх `--color-bg`; сравнили точки / диагонали / accent-сетку, оставили точки; остальные ветки удалены.
+- **Репо:** код: [PR #94](https://github.com/NejaTive/Topic/pull/94) → `develop`; история: `style/FRO-53` / [PR #95](https://github.com/NejaTive/Topic/pull/95) → `develop`
+- **Заметки:** manual-close; эпик Scaffold.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Error chrome для authed + CTA на пустом своём профиле
+
+- **YouGile:** FRO-52
+- **Итог:** `ErrorStateView` показывает `AppNav` при authed (иначе `GuestNav`); на своём профиле без public-топиков — пояснение про «Мои топики» + CTA «Создать топик».
+- **Репо:** `fix/FRO-52` / [PR #93](https://github.com/NejaTive/Topic/pull/93) → `develop`
+- **Заметки:** manual-close; smoke: `/share/no-access` под сессией — AppNav; self profile empty — CTA.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Favicon и PWA-иконки: знак ранга
+
+- **YouGile:** FRO-51
+- **Итог:** Favicon SVG/PNG + apple-touch; PWA 192/512 на том же знаке (полоски ранга + точка); подключено в `index.html` и PWA `includeAssets`.
+- **Репо:** `style/FRO-51` / [PR #92](https://github.com/NejaTive/Topic/pull/92) → `develop`
+- **Заметки:** manual-close; вариант B.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Мобилка: убрать fixed CTA, иконки в шапке
+
+- **YouGile:** FRO-50
+- **Итог:** Убраны fixed-кнопки над навбаром (перекрывали контент): формы create/detail/share — CTA в потоке; профиль — follow в шапке (колокольчики на mobile); «Мои топики» — «+» в шапке; подправлен path иконки «Выйти».
+- **Репо:** `style/FRO-50` / [PR #91](https://github.com/NejaTive/Topic/pull/91) → `develop`
+- **Заметки:** manual-close; владелец прогнал mobile viewport.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Рекомендации: share-item + копирайт Добавить/Скрыть
+
+- **YouGile:** FRO-49
+- **Итог:** «Рекомендовать» на share-деталках item для владельца; CTA на ленте «Добавить к себе» / «Скрыть»; `predev` → `prisma generate` (чтобы не ловить 500 без клиента); docs recommendations + toast в backlog.
+- **Репо:** `feat/FRO-49` / [PR #90](https://github.com/NejaTive/Topic/pull/90) → `develop`
+- **Заметки:** manual-close; toast/notify отложен (ideas).
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 17.10.2026 — Модалка «Кому рекомендовать» на S07
+
+- **YouGile:** FRO-47
+- **Итог:** На ItemDetail кнопка «Рекомендовать»; `RecommendItemModal` — заголовок «Кому рекомендовать», чекбоксы mutual (`useMutualFollowsQuery`), «Отправить» / «Отправить всем», empty «Пока нет взаимных подписок»; submit через `useRecommendItemMutation`; success → закрытие + краткий feedback; 400/409 — текст в модалке.
+- **Репо:** `feat/FRO-47` / [PR #89](https://github.com/NejaTive/Topic/pull/89) → `develop`
+- **Заметки:** чеклист в YouGile; smoke UI: свой item → модалка; empty без mutual; send выбранным/всем; 409 «Уже рекомендовано»; Escape закрывает; feedback «Рекомендация отправлена». Блок ленты — FRO-46.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~4 мин · ревью ~9 мин · всего ~13 мин
+
+### 17.10.2026 — Блок «Мои рекомендации» на Ленте + accept/dismiss
+
+- **YouGile:** FRO-46
+- **Итог:** Секция «Мои рекомендации» сверху FeedPage (скрыта при пустом pending); RecommendationCard (cover/title/category/@fromNick + Принять/Отклонить); Accept → AcceptRecommendationModal (паттерн CopyItemToTopicModal) → accept API → invalidate; Dismiss → dismiss API.
+- **Репо:** `feat/FRO-46` / [PR #88](https://github.com/NejaTive/Topic/pull/88) → `develop`
+- **Заметки:** smoke: pending сверху ленты; Accept → picker category → copy в inbox; Dismiss убирает карточку и скрывает секцию; без pending блок скрыт; лента public-топиков без регрессии. Модалка S07 (FRO-47) и badge AppNav — out of scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~6 мин · всего ~9 мин
+
+### 17.10.2026 — API-клиент recommendations + mutual-follows
+
+- **YouGile:** FRO-48
+- **Итог:** `apps/web` API-модуль recommendations (mutual-follows, recommend, list, accept, dismiss) через общий `apiClient`; query keys; composables `useMutualFollowsQuery` / `useRecommendationsQuery` / recommend·accept·dismiss mutations (invalidate list + topics на accept).
+- **Репо:** `feat/FRO-48` / [PR #87](https://github.com/NejaTive/Topic/pull/87) → `develop`
+- **Заметки:** UI модалки/блок ленты — FRO-47/46; live HTTP smoke не гоняли (typecheck + сверка OpenAPI/паттерна social).
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~6 мин · всего ~8 мин
+
+### 17.10.2026 — GET /recommendations + accept/dismiss
+
+- **YouGile:** BAC-28
+- **Итог:** `GET /api/recommendations` (pending для me, `createdAt desc`, снимок + `fromNick` + `id`); `POST …/:id/accept` `{ topicId }` и `…/dismiss`; общий `copySnapshotToInbox` с copy-from-share (meta + clone cover best-effort); accept из снимка при `sourceItemId=null`; OpenAPI → `schema.d.ts`.
+- **Репо:** `feat/BAC-28` / [PR #86](https://github.com/NejaTive/Topic/pull/86) → `develop`
+- **Заметки:** smoke: 401; empty/pending GET + order; accept 201; category 400; чужой/повтор/после dismiss 404; sourceUrl 409; accept после удаления sourceItem; dismiss 204. UI/prefetch/уведомления — out of scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~3 мин · всего ~6 мин
+
+### 17.10.2026 — POST /items/:itemId/recommend
+
+- **YouGile:** BAC-29
+- **Итог:** `POST /api/items/:itemId/recommend` — body `{ recipientIds }` XOR `{ all: true }`; owner-only (любой placement; privacy не блокирует); mutual-follows; fan-out `Recommendation` pending со снимком; 201 `{ ids }`; OpenAPI → `schema.d.ts`.
+- **Репо:** `feat/BAC-29` / [PR #85](https://github.com/NejaTive/Topic/pull/85) → `develop`
+- **Заметки:** smoke: 401; XOR/пустой body 400; не-mutual / all@0 → 400; чужой/нет item → 404; private topic OK; повтор pending → 409. Unique index на pending-тройку — out of scope (гонка редкая). Параллельно починены conflict markers в этом файле (BAC-30∥BAC-31).
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~6 мин · всего ~8 мин
+
+### 17.10.2026 — GET /me/mutual-follows
+
+- **YouGile:** BAC-30
+- **Итог:** `GET /api/me/mutual-follows` под AuthGuard — пересечение followers ∩ following, `{ items: [{ id, nick }] }`, orderBy nick; OpenAPI → `schema.d.ts`.
+- **Репо:** `feat/BAC-30` / [PR #84](https://github.com/NejaTive/Topic/pull/84) → `develop`
+- **Заметки:** smoke: 401 без cookie; взаимные / односторонние / empty / sort / unfollow одной стороны.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~6 мин · всего ~8 мин
+
+### 17.10.2026 — Prisma Recommendation + status enum
+
+- **YouGile:** BAC-31
+- **Итог:** enum `RecommendationStatus` (pending|accepted|dismissed) и model `Recommendation` (снимок + fan-out) с relations User Cascade / Item SetNull и индексами `[toUserId, status, createdAt]`, `[fromUserId]`; миграция `20261016220403_add_recommendation`.
+- **Репо:** `feat/BAC-31` / [PR #83](https://github.com/NejaTive/Topic/pull/83) → `develop`
+- **Заметки:** HTTP API (BAC-30/29/28) и UI вне scope; CI на PR в репо нет (Deploy только на `main`).
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
+### 17.10.2026 — Copy from share: элемент из чужого топика к себе
+
+- **YouGile:** вне карточки (команда владельца)
+- **Итог:** `POST …/items/copy-from-share` копирует ranked-элемент в inbox своего топика той же категории (title/meta + новый coverKey); UI — «+» в списке share и CTA на карточке + picker топиков.
+- **Репо:** `feat/copy-from-share` / [PR #82](https://github.com/NejaTive/Topic/pull/82) → `develop`
+- **Заметки:** флаг «уже есть у меня» отложен (`decisions.md` 17.10.2026); без YouGile-ревью.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~ретро · ревью n/a · всего ~ретро
+
+### 16.10.2026 — Категория в списках + mobile cover stack; Своё disabled
+
+- **YouGile:** FRO-45
+- **Итог:** `category` в feed/profile API; `TCategoryChip` в `TTopicRow` (Topics/Feed/Profile); mobile album-stack обложек; на S04 чип «Своё» disabled, дефолт «Фильмы».
+- **Репо:** `feat/FRO-45` / [PR #81](https://github.com/NejaTive/Topic/pull/81) → `develop`
+- **Заметки:** manual-close; custom в API остаётся, UI создания временно без выбора.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 16.10.2026 — S05: inline переименование топика
+
+- **YouGile:** FRO-44
+- **Итог:** `ContentPageWrapper` слот `#title`; `useUpdateTopicTitleMutation` → `updateTopic({ title })` + invalidate detail/list; на S05 клик по названию → `TInput` + Сохранить / Отмена (`danger-ghost`); trim/пустое и `TopicsApiError`.
+- **Репо:** `feat/FRO-44` / [PR #79](https://github.com/NejaTive/Topic/pull/79) → `develop`
+- **Заметки:** клик по title в `h1`; Отмена как «Удалить топик»; пустое → «Укажите название». Ревьюер aborted — закрытие по запросу владельца.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~20 мин · ревью — · всего ~20 мин
+
+### 16.10.2026 — S04/S06/S07: чип Игры + поиск RAWG + meta
+
+- **YouGile:** FRO-43
+- **Итог:** Чип «Игры» и prefill на S04; `searchCatalogGames` / gamesSearch; S06 → from-catalog `provider: rawg`, дедуп по sourceUrl (slug), attribution RAWG, ручная meta; S07 и ShareItemView — лейблы «Разработчик» / «Платформа».
+- **Репо:** `feat/FRO-43` / [PR #78](https://github.com/NejaTive/Topic/pull/78) → `develop`
+- **Заметки:** UI-прогон: топик Игры → поиск Cyberpunk → meta/Источник; дедуп «Уже в списке»; manual Разработчик/Платформа; movies Режиссёр/Страна; series Создатель/Страна; custom без catalog; share item после rank.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~20 мин · ревью ~5 мин · всего ~25 мин
+
+### 16.10.2026 — Категория games: Prisma + RAWG
+
+- **YouGile:** BAC-27
+- **Итог:** `TopicCategory` += `games`; `RawgClient`; `GET /api/catalog/games/search`; `from-catalog` provider `tmdb|rawg` (games→rawg); meta + `sourceUrl` `https://rawg.io/games/{slug}`; OpenAPI/`schema.d.ts`; docs catalog-enrichment + decisions.
+- **Репо:** `feat/BAC-27` / [PR #77](https://github.com/NejaTive/Topic/pull/77) → `develop`
+- **Заметки:** UI — FRO-43; curl: search witcher → from-catalog meta/sourceUrl; provider mismatch 400; custom+meta 400; movies regression ок.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~25 мин · ревью ~7 мин · всего ~32 мин
+
+### 16.10.2026 — Поиск: блок дубликата уже в списке
+
+- **YouGile:** FRO-42
+- **Итог:** В результатах поиска каталога уже добавленные элементы (по `meta.sourceUrl`) приглушены, подпись «Уже в списке», клик `disabled`; API `from-catalog` → 409; UI мапит 409 в formError.
+- **Репо:** `feat/FRO-42` / [PR #76](https://github.com/NejaTive/Topic/pull/76) → `develop`
+- **Заметки:** manual-close; дедуп по названию для ручного ввода не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 16.10.2026 — S04/S06/S07: категория Сериалы (поиск TV + meta)
+
+- **YouGile:** FRO-41
+- **Итог:** Чип «Сериалы» на S04; `searchCatalogSeries` / seriesSearch; S06 TV search → from-catalog + ручной fallback с meta; S07/ShareItemView — meta как movies, лейбл «Создатель», «Источник» при sourceUrl; TMDB attribution.
+- **Репо:** `feat/FRO-41` / [PR #75](https://github.com/NejaTive/Topic/pull/75) → `develop`
+- **Заметки:** UI-прогон browser: create series → search «Во все тяжкие» → meta/Создатель/Источник; movies «Режиссёр»; custom без catalog/meta. Share item — после rank.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~9 мин · всего ~12 мин
+
+### 16.10.2026 — Категория series: Prisma + TMDB TV
+
+- **YouGile:** BAC-26
+- **Итог:** `TopicCategory` += `series`; TMDB `searchTv`/`getTv`; `GET /api/catalog/series/search`; `from-catalog` и Item meta для movies|series (`sourceUrl` на `/tv/{id}`); `custom` + meta → 400; OpenAPI/`schema.d.ts`.
+- **Репо:** `feat/BAC-26` / [PR #74](https://github.com/NejaTive/Topic/pull/74) → `develop`
+- **Заметки:** UI — FRO-41; docs catalog-enrichment (series) уже на develop.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~4 мин · ревью ~4 мин · всего ~8 мин
+
+### 16.10.2026 — Item.meta.sourceUrl из from-catalog
+
+- **YouGile:** BAC-25
+- **Итог:** `from-catalog` пишет `meta.sourceUrl` (TMDB page); create/update с клиента игнорируют, PATCH сохраняет; read-only «Источник» на S07 и ShareItemView; OpenAPI обновлён.
+- **Репо:** `feat/BAC-25` / [PR #73](https://github.com/NejaTive/Topic/pull/73) → `develop`
+- **Заметки:** manual-close; не externalId / дедуп; UI фронта в том же коммите.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 16.10.2026 — S09: read-only деталка элемента по клику
+
+- **YouGile:** FRO-40
+- **Итог:** Клик по RankRow на публичном share → `/t/:shareId/items/:itemId`; read-only страница (обложка, title, meta для movies); desktop — постер справа; данные из Share payload без нового API.
+- **Репо:** `feat/FRO-40` / [PR #72](https://github.com/NejaTive/Topic/pull/72) → `develop`
+- **Заметки:** manual-close; без edit CTA / redirect на S07.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 16.10.2026 — Item.meta Json + movies fields
+
+- **YouGile:** BAC-24
+- **Итог:** На `Item` — `meta Json?`; для `movies` поля `description` / `director` / `genre` / `country` в create/update/from-catalog и Share; TMDB details (`overview` + credits); `custom` + meta → 400; OpenAPI-клиент обновлён.
+- **Репо:** `feat/BAC-24` / [PR #70](https://github.com/NejaTive/Topic/pull/70) → `feat/catalog-enrichment`
+- **Заметки:** manual-close; вместе с FRO-39 в одном коммите/PR; RankRow/S09 UI не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 16.10.2026 — S06/S07: meta-поля фильма + TTextarea
+
+- **YouGile:** FRO-39
+- **Итог:** На S06/S07 для `movies` — обложка → название → описание (`TTextarea`) → жанр → режиссёр → страна; from-catalog подтягивает meta; плюс мелкий UX Catalog (FieldHint, TLoader, chips).
+- **Репо:** `feat/BAC-24` / [PR #70](https://github.com/NejaTive/Topic/pull/70) → `feat/catalog-enrichment` (тот же PR, что BAC-24)
+- **Заметки:** manual-close; custom без meta-полей.
+- **Доработка после ревью:** нет
+- **Длительность:** ручное изменение
+
+### 15.10.2026 — S06: поиск TMDB + from-catalog + ручной fallback
+
+- **YouGile:** FRO-38
+- **Итог:** На `ItemCreatePage` для `movies` — debounce-поиск TMDB, список (title/year/poster), выбор → `from-catalog` и редирект на топик; attribution TMDB; «Указать вручную» / «К поиску»; для `custom` — прежняя форма без поиска.
+- **Репо:** `feat/FRO-38` / [PR #69](https://github.com/NejaTive/Topic/pull/69) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI в коде/браузере без Figma; series/externalId не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~7 мин · всего ~10 мин
+
+### 15.10.2026 — S04: чипы категории Фильмы / Своё
+
+- **YouGile:** FRO-37
+- **Итог:** На создании топика чипы **Фильмы** | **Своё** (`movies`|`custom`) вместо name-hints; дефолт `custom`; выбор Фильмы префиллит название; `createTopic` всегда шлёт `category`.
+- **Репо:** `feat/FRO-37` / [PR #68](https://github.com/NejaTive/Topic/pull/68) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI по docs §UX S04 без Figma; S06/смена category на S05 не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~10 мин · ревью ~6 мин · всего ~16 мин
+
+### 15.10.2026 — Catalog API-клиент: category + search + from-catalog
+
+- **YouGile:** FRO-36
+- **Итог:** Обёртки web API: `createTopic` с optional `category`, `searchCatalogMovies` + `CatalogApiError`, `createItemFromCatalog`; `CreateTopicInput` прокидывает category. Без UI S04/S06.
+- **Репо:** `feat/FRO-36` / [PR #67](https://github.com/NejaTive/Topic/pull/67) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); schema уже содержал контракт после BAC; UI не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
+### 15.10.2026 — POST items/from-catalog (TMDB → Item + cover MinIO)
+
+- **YouGile:** BAC-23
+- **Итог:** `POST /api/topics/:topicId/items/from-catalog` body `{ provider: 'tmdb', providerId }`; только owner и `category===movies` (иначе 400/404); title (+ poster → sharp webp → MinIO) в inbox unranked без externalId; без постера — Item с `coverUrl: null`; OpenAPI + `schema.d.ts`.
+- **Репо:** `feat/BAC-23` / [PR #66](https://github.com/NejaTive/Topic/pull/66) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); UI S06 / дедуп по TMDB id не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
+### 15.10.2026 — TMDB client + GET /api/catalog/movies/search
+
+- **YouGile:** BAC-22
+- **Итог:** Optional `TMDB_API_KEY`/`TMDB_ACCESS_TOKEN`; Nest `CatalogModule` + `TmdbClient` (Bearer или api_key, timeout 5s); `GET /api/catalog/movies/search` под AuthGuard, `language=ru`, fail-soft `[]`; OpenAPI + `gen:api`.
+- **Репо:** `feat/BAC-22` / [PR #65](https://github.com/NejaTive/Topic/pull/65) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); from-catalog/Item/MinIO/UI/series не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~3 мин · ревью ~4 мин · всего ~7 мин
+
+### 15.10.2026 — Topic.category: Prisma enum + DTO/OpenAPI
+
+- **YouGile:** BAC-21
+- **Итог:** Prisma enum `TopicCategory` (`movies`|`custom`), поле `Topic.category` с дефолтом `custom` и миграцией existing→custom; create принимает optional category, update — нет; list/detail/share DTO + OpenAPI/`schema.d.ts` отдают category.
+- **Репо:** `feat/BAC-21` / [PR #64](https://github.com/NejaTive/Topic/pull/64) → `feat/catalog-enrichment`
+- **Заметки:** base/merge в `feat/catalog-enrichment` (override владельца); TMDB/UI/смена category после create не в scope.
+- **Доработка после ревью:** нет
+- **Длительность:** реализация ~2 мин · ревью ~3 мин · всего ~5 мин
+
 ### 12.10.2026 — Dark green палитра, liquid-glass, nav slide и approve-modal
 
 - **YouGile:** FRO-35

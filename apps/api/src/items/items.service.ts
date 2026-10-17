@@ -1,24 +1,228 @@
 import {
   BadRequestException,
+  ConflictException,
+  ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { RawgClient } from '../catalog/rawg.client';
+import { TmdbClient } from '../catalog/tmdb.client';
 import { Prisma, type Item } from '../generated/prisma/client';
-import { ItemPlacement } from '../generated/prisma/enums';
+import {
+  ItemPlacement,
+  RecommendationStatus,
+  TopicCategory,
+  TopicPrivacy,
+} from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { UsersService } from '../users/users.service';
+import type { CopyFromShareDto } from './dto/copy-from-share.dto';
 import type { CreateItemDto } from './dto/create-item.dto';
+import type { FromCatalogItemDto } from './dto/from-catalog-item.dto';
+import type { ItemMetaDto } from './dto/item-meta.dto';
 import type { ItemDto, ItemListDto } from './dto/item-response.dto';
+import type { RecommendItemDto } from './dto/recommend-item.dto';
+import type { RecommendCreatedDto } from './dto/recommend-response.dto';
+import type { RecommendationDto, RecommendationListDto } from './dto/recommendation-response.dto';
 import type { ReorderItemsDto } from './dto/reorder-items.dto';
 import type { UpdateItemDto } from './dto/update-item.dto';
+import {
+  applyMoviesMetaPatch,
+  metaToDto,
+  moviesMetaToJson,
+  normalizeMoviesMetaPatch,
+  parseMoviesMeta,
+  rawgGameSourceUrl,
+  tmdbMovieSourceUrl,
+  tmdbTvSourceUrl,
+} from './item-meta';
+
+type InboxSnapshot = {
+  title: string;
+  coverKey: string | null;
+  meta: Prisma.JsonValue | null;
+  category: TopicCategory;
+};
+
+const POSTER_FETCH_TIMEOUT_MS = 10_000;
+const ITEM_TITLE_MAX = 200;
+
+const CATALOG_CATEGORIES = new Set<TopicCategory>([
+  TopicCategory.movies,
+  TopicCategory.series,
+  TopicCategory.games,
+]);
 
 @Injectable()
 export class ItemsService {
+  private readonly logger = new Logger(ItemsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly tmdb: TmdbClient,
+    private readonly rawg: RawgClient,
+    private readonly users: UsersService,
   ) {}
+
+  async recommendOwned(
+    ownerId: string,
+    itemId: string,
+    dto: RecommendItemDto,
+  ): Promise<RecommendCreatedDto> {
+    const hasIds = Array.isArray(dto.recipientIds);
+    const hasAll = dto.all === true;
+    if (hasIds === hasAll) {
+      throw new BadRequestException({
+        message: 'Укажите recipientIds (непустой массив) или all: true',
+        statusCode: 400,
+      });
+    }
+
+    const item = await this.prisma.item.findFirst({
+      where: { id: itemId, topic: { ownerId } },
+      include: { topic: { select: { category: true } } },
+    });
+    if (!item) {
+      throw new NotFoundException({
+        message: 'Элемент не найден',
+        statusCode: 404,
+      });
+    }
+
+    const mutual = await this.users.getMutualFollows(ownerId);
+    const mutualIds = new Set(mutual.items.map((u) => u.id));
+
+    let recipientIds: string[];
+    if (hasAll) {
+      recipientIds = mutual.items.map((u) => u.id);
+      if (recipientIds.length === 0) {
+        throw new BadRequestException({
+          message: 'Нет взаимных подписок',
+          statusCode: 400,
+        });
+      }
+    } else {
+      const unique = [...new Set(dto.recipientIds!)];
+      for (const id of unique) {
+        if (!mutualIds.has(id)) {
+          throw new BadRequestException({
+            message: 'Получатель должен быть взаимной подпиской',
+            statusCode: 400,
+          });
+        }
+      }
+      recipientIds = unique;
+    }
+
+    const pending = await this.prisma.recommendation.findMany({
+      where: {
+        fromUserId: ownerId,
+        sourceItemId: itemId,
+        status: RecommendationStatus.pending,
+        toUserId: { in: recipientIds },
+      },
+      select: { toUserId: true },
+    });
+    if (pending.length > 0) {
+      throw new ConflictException({
+        message: 'Уже рекомендовано',
+        statusCode: 409,
+      });
+    }
+
+    const meta = item.meta === null ? Prisma.DbNull : (item.meta as Prisma.InputJsonValue);
+
+    const created = await this.prisma.$transaction(
+      recipientIds.map((toUserId) =>
+        this.prisma.recommendation.create({
+          data: {
+            fromUserId: ownerId,
+            toUserId,
+            sourceItemId: item.id,
+            title: item.title,
+            coverKey: item.coverKey,
+            category: item.topic.category,
+            meta,
+            status: RecommendationStatus.pending,
+          },
+          select: { id: true },
+        }),
+      ),
+    );
+
+    return { ids: created.map((row) => row.id) };
+  }
+
+  async listPendingRecommendations(userId: string): Promise<RecommendationListDto> {
+    const rows = await this.prisma.recommendation.findMany({
+      where: { toUserId: userId, status: RecommendationStatus.pending },
+      orderBy: { createdAt: 'desc' },
+      include: { fromUser: { select: { nick: true } } },
+    });
+
+    return {
+      items: rows.map((row) => this.toRecommendationDto(row)),
+    };
+  }
+
+  async acceptRecommendation(
+    userId: string,
+    recommendationId: string,
+    topicId: string,
+  ): Promise<ItemDto> {
+    const recommendation = await this.prisma.recommendation.findFirst({
+      where: {
+        id: recommendationId,
+        toUserId: userId,
+        status: RecommendationStatus.pending,
+      },
+    });
+    if (!recommendation) {
+      throw new NotFoundException({
+        message: 'Рекомендация не найдена',
+        statusCode: 404,
+      });
+    }
+
+    return this.copySnapshotToInbox(
+      userId,
+      topicId,
+      {
+        title: recommendation.title,
+        coverKey: recommendation.coverKey,
+        meta: recommendation.meta,
+        category: recommendation.category,
+      },
+      { markRecommendationAcceptedId: recommendationId },
+    );
+  }
+
+  async dismissRecommendation(userId: string, recommendationId: string): Promise<void> {
+    const recommendation = await this.prisma.recommendation.findFirst({
+      where: {
+        id: recommendationId,
+        toUserId: userId,
+        status: RecommendationStatus.pending,
+      },
+      select: { id: true },
+    });
+    if (!recommendation) {
+      throw new NotFoundException({
+        message: 'Рекомендация не найдена',
+        statusCode: 404,
+      });
+    }
+
+    await this.prisma.recommendation.update({
+      where: { id: recommendationId },
+      data: { status: RecommendationStatus.dismissed },
+    });
+  }
 
   async listForOwner(ownerId: string, topicId: string): Promise<ItemListDto> {
     await this.findOwnedTopicOrThrow(ownerId, topicId);
@@ -40,13 +244,15 @@ export class ItemsService {
   }
 
   async createForOwner(ownerId: string, topicId: string, dto: CreateItemDto): Promise<ItemDto> {
-    await this.findOwnedTopicOrThrow(ownerId, topicId);
+    const topic = await this.findOwnedTopicOrThrow(ownerId, topicId);
+    const meta = this.resolveCreateMeta(topic.category, dto.meta);
 
     const item = await this.prisma.$transaction(async (tx) => {
       const created = await tx.item.create({
         data: {
           topicId,
           title: dto.title.trim(),
+          meta,
           placement: ItemPlacement.unranked,
           rankPosition: null,
         },
@@ -55,6 +261,293 @@ export class ItemsService {
         where: { id: topicId },
         data: { updatedAt: new Date() },
       });
+      return created;
+    });
+
+    return this.toDto(item);
+  }
+
+  async createFromCatalogForOwner(
+    ownerId: string,
+    topicId: string,
+    dto: FromCatalogItemDto,
+  ): Promise<ItemDto> {
+    const topic = await this.prisma.topic.findFirst({
+      where: { id: topicId, ownerId },
+      select: { id: true, category: true },
+    });
+    if (!topic) {
+      throw new NotFoundException({
+        message: 'Топик не найден',
+        statusCode: 404,
+      });
+    }
+    if (!CATALOG_CATEGORIES.has(topic.category)) {
+      throw new BadRequestException({
+        message:
+          'Импорт из каталога доступен только для топиков категорий «Фильмы», «Сериалы» и «Игры»',
+        statusCode: 400,
+      });
+    }
+
+    const expectedProvider = topic.category === TopicCategory.games ? 'rawg' : 'tmdb';
+    if (dto.provider !== expectedProvider) {
+      throw new BadRequestException({
+        message:
+          topic.category === TopicCategory.games
+            ? 'Для категории «Игры» используйте provider=rawg'
+            : 'Для категорий «Фильмы» и «Сериалы» используйте provider=tmdb',
+        statusCode: 400,
+      });
+    }
+
+    let hit: {
+      title: string;
+      imageUrl?: string | null;
+      description?: string;
+      director?: string;
+      genre?: string;
+      country?: string;
+      slug?: string;
+    } | null = null;
+    let sourceUrl: string;
+
+    if (topic.category === TopicCategory.games) {
+      if (!this.rawg.isConfigured()) {
+        throw new ServiceUnavailableException({
+          message: 'Каталог временно недоступен',
+          statusCode: 503,
+        });
+      }
+      hit = await this.rawg.getGame(dto.providerId);
+      if (!hit) {
+        throw new NotFoundException({
+          message: 'Игра не найдена в каталоге',
+          statusCode: 404,
+        });
+      }
+      sourceUrl = rawgGameSourceUrl(hit.slug || dto.providerId);
+    } else {
+      if (!this.tmdb.isConfigured()) {
+        throw new ServiceUnavailableException({
+          message: 'Каталог временно недоступен',
+          statusCode: 503,
+        });
+      }
+      hit =
+        topic.category === TopicCategory.series
+          ? await this.tmdb.getTv(dto.providerId)
+          : await this.tmdb.getMovie(dto.providerId);
+      if (!hit) {
+        throw new NotFoundException({
+          message:
+            topic.category === TopicCategory.series
+              ? 'Сериал не найден в каталоге'
+              : 'Фильм не найден в каталоге',
+          statusCode: 404,
+        });
+      }
+      sourceUrl =
+        topic.category === TopicCategory.series
+          ? tmdbTvSourceUrl(dto.providerId)
+          : tmdbMovieSourceUrl(dto.providerId);
+    }
+
+    const duplicate = await this.prisma.item.findFirst({
+      where: {
+        topicId,
+        meta: {
+          path: ['sourceUrl'],
+          equals: sourceUrl,
+        },
+      },
+      select: { id: true },
+    });
+    if (duplicate) {
+      throw new ConflictException({
+        message:
+          topic.category === TopicCategory.games
+            ? 'Эта игра уже есть в списке'
+            : topic.category === TopicCategory.series
+              ? 'Этот сериал уже есть в списке'
+              : 'Этот фильм уже есть в списке',
+        statusCode: 409,
+      });
+    }
+
+    const title = hit.title.slice(0, ITEM_TITLE_MAX);
+    let coverKey: string | null = null;
+    if (hit.imageUrl) {
+      coverKey = await this.tryUploadCoverFromUrl(hit.imageUrl);
+    }
+
+    const meta = moviesMetaToJson({
+      description: hit.description,
+      director: hit.director,
+      genre: hit.genre,
+      country: hit.country,
+      sourceUrl,
+    });
+
+    const item = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.item.create({
+        data: {
+          topicId,
+          title,
+          coverKey,
+          meta,
+          placement: ItemPlacement.unranked,
+          rankPosition: null,
+        },
+      });
+      await tx.topic.update({
+        where: { id: topicId },
+        data: { updatedAt: new Date() },
+      });
+      return created;
+    });
+
+    return this.toDto(item);
+  }
+
+  /**
+   * Копия ranked-элемента из доступного share в inbox своего топика той же категории.
+   * Обложку копируем новым ключом; meta (вкл. sourceUrl) — как в источнике.
+   */
+  async copyFromShareForOwner(
+    ownerId: string,
+    targetTopicId: string,
+    dto: CopyFromShareDto,
+  ): Promise<ItemDto> {
+    const sourceTopic = await this.prisma.topic.findUnique({
+      where: { shareId: dto.shareId },
+      select: {
+        id: true,
+        category: true,
+        privacy: true,
+        items: {
+          where: { id: dto.itemId, placement: ItemPlacement.ranked },
+          take: 1,
+          select: {
+            id: true,
+            title: true,
+            coverKey: true,
+            meta: true,
+          },
+        },
+      },
+    });
+
+    if (!sourceTopic) {
+      throw new NotFoundException({
+        message: 'Топик не найден',
+        statusCode: 404,
+      });
+    }
+
+    if (sourceTopic.privacy === TopicPrivacy.private) {
+      throw new ForbiddenException({
+        message: 'Топик недоступен',
+        statusCode: 403,
+      });
+    }
+
+    const sourceItem = sourceTopic.items[0];
+    if (!sourceItem) {
+      throw new NotFoundException({
+        message: 'Элемент не найден',
+        statusCode: 404,
+      });
+    }
+
+    return this.copySnapshotToInbox(ownerId, targetTopicId, {
+      title: sourceItem.title,
+      coverKey: sourceItem.coverKey,
+      meta: sourceItem.meta,
+      category: sourceTopic.category,
+    });
+  }
+
+  private async copySnapshotToInbox(
+    ownerId: string,
+    targetTopicId: string,
+    snapshot: InboxSnapshot,
+    options?: { markRecommendationAcceptedId?: string },
+  ): Promise<ItemDto> {
+    const target = await this.findOwnedTopicOrThrow(ownerId, targetTopicId);
+
+    if (snapshot.category !== target.category) {
+      throw new BadRequestException({
+        message: 'Категория целевого топика должна совпадать с исходным',
+        statusCode: 400,
+      });
+    }
+
+    const sourceMeta = parseMoviesMeta(snapshot.meta);
+    if (sourceMeta.sourceUrl) {
+      const duplicate = await this.prisma.item.findFirst({
+        where: {
+          topicId: targetTopicId,
+          meta: {
+            path: ['sourceUrl'],
+            equals: sourceMeta.sourceUrl,
+          },
+        },
+        select: { id: true },
+      });
+      if (duplicate) {
+        throw new ConflictException({
+          message:
+            target.category === TopicCategory.games
+              ? 'Эта игра уже есть в списке'
+              : target.category === TopicCategory.series
+                ? 'Этот сериал уже есть в списке'
+                : target.category === TopicCategory.movies
+                  ? 'Этот фильм уже есть в списке'
+                  : 'Уже есть в списке',
+          statusCode: 409,
+        });
+      }
+    }
+
+    let coverKey: string | null = null;
+    if (snapshot.coverKey) {
+      try {
+        coverKey = await this.storage.copyCover(snapshot.coverKey);
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : 'unknown';
+        this.logger.warn(`copy cover skipped: ${reason}`);
+      }
+    }
+
+    const meta =
+      CATALOG_CATEGORIES.has(target.category) && Object.keys(sourceMeta).length > 0
+        ? moviesMetaToJson(sourceMeta)
+        : Prisma.DbNull;
+
+    const title = snapshot.title.slice(0, ITEM_TITLE_MAX);
+
+    const item = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.item.create({
+        data: {
+          topicId: targetTopicId,
+          title,
+          coverKey,
+          meta,
+          placement: ItemPlacement.unranked,
+          rankPosition: null,
+        },
+      });
+      await tx.topic.update({
+        where: { id: targetTopicId },
+        data: { updatedAt: new Date() },
+      });
+      if (options?.markRecommendationAcceptedId) {
+        await tx.recommendation.update({
+          where: { id: options.markRecommendationAcceptedId },
+          data: { status: RecommendationStatus.accepted },
+        });
+      }
       return created;
     });
 
@@ -72,19 +565,28 @@ export class ItemsService {
     itemId: string,
     dto: UpdateItemDto,
   ): Promise<ItemDto> {
-    await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
-
-    if (dto.title === undefined) {
+    if (dto.title === undefined && dto.meta === undefined) {
       throw new BadRequestException({
         message: 'Нет полей для обновления',
         statusCode: 400,
       });
     }
 
+    const topic = await this.findOwnedTopicOrThrow(ownerId, topicId);
+    const existing = await this.findOwnedItemOrThrow(ownerId, topicId, itemId);
+
+    const data: Prisma.ItemUpdateInput = {};
+    if (dto.title !== undefined) {
+      data.title = dto.title.trim();
+    }
+    if (dto.meta !== undefined) {
+      data.meta = this.resolveUpdateMeta(topic.category, existing.meta, dto.meta);
+    }
+
     const item = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.item.update({
         where: { id: itemId },
-        data: { title: dto.title!.trim() },
+        data,
       });
       await tx.topic.update({
         where: { id: topicId },
@@ -288,7 +790,7 @@ export class ItemsService {
   private async findOwnedTopicOrThrow(ownerId: string, topicId: string) {
     const topic = await this.prisma.topic.findFirst({
       where: { id: topicId, ownerId },
-      select: { id: true },
+      select: { id: true, category: true },
     });
     if (!topic) {
       throw new NotFoundException({
@@ -297,6 +799,36 @@ export class ItemsService {
       });
     }
     return topic;
+  }
+
+  private resolveCreateMeta(
+    category: TopicCategory,
+    meta: ItemMetaDto | undefined,
+  ): Prisma.InputJsonValue | typeof Prisma.DbNull {
+    if (meta === undefined) {
+      return Prisma.DbNull;
+    }
+    if (!CATALOG_CATEGORIES.has(category)) {
+      throw new BadRequestException({
+        message: 'Поля meta доступны только для топиков категорий «Фильмы», «Сериалы» и «Игры»',
+        statusCode: 400,
+      });
+    }
+    return moviesMetaToJson(normalizeMoviesMetaPatch(meta));
+  }
+
+  private resolveUpdateMeta(
+    category: TopicCategory,
+    existing: Prisma.JsonValue,
+    patch: ItemMetaDto,
+  ): Prisma.InputJsonValue | typeof Prisma.DbNull {
+    if (!CATALOG_CATEGORIES.has(category)) {
+      throw new BadRequestException({
+        message: 'Поля meta доступны только для топиков категорий «Фильмы», «Сериалы» и «Игры»',
+        statusCode: 400,
+      });
+    }
+    return moviesMetaToJson(applyMoviesMetaPatch(parseMoviesMeta(existing), patch));
   }
 
   private async findOwnedItemOrThrow(
@@ -337,15 +869,65 @@ export class ItemsService {
     }
   }
 
+  private async tryUploadCoverFromUrl(imageUrl: string): Promise<string | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), POSTER_FETCH_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(imageUrl, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        this.logger.warn(`poster fetch HTTP ${res.status}`);
+        return null;
+      }
+
+      const buffer = Buffer.from(await res.arrayBuffer());
+      if (!buffer.length) {
+        return null;
+      }
+
+      return await this.storage.uploadCover(buffer);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : 'unknown';
+      this.logger.warn(`poster → MinIO skipped: ${reason}`);
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   private toDto(item: Item): ItemDto {
     return {
       id: item.id,
       topicId: item.topicId,
       title: item.title,
       coverUrl: this.storage.coverUrl(item.coverKey),
+      meta: metaToDto(item.meta),
       placement: item.placement,
       rankPosition: item.rankPosition,
       createdAt: item.createdAt.toISOString(),
+    };
+  }
+
+  private toRecommendationDto(row: {
+    id: string;
+    title: string;
+    coverKey: string | null;
+    category: TopicCategory;
+    meta: Prisma.JsonValue | null;
+    createdAt: Date;
+    fromUser: { nick: string };
+  }): RecommendationDto {
+    return {
+      id: row.id,
+      title: row.title,
+      coverUrl: this.storage.coverUrl(row.coverKey),
+      category: row.category,
+      meta: metaToDto(row.meta),
+      fromNick: row.fromUser.nick,
+      createdAt: row.createdAt.toISOString(),
     };
   }
 }

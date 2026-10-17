@@ -2,46 +2,47 @@
   Topic design tokens → Tailwind v4 @theme.
   Источник значений: docs/design/tokens.json (вручную; генератор не нужен).
   Имя --color-*: путь токена, ключ default опускается.
+  Режимы: html.dark / html.light → --theme-*.
 */
 
 @theme static {
   --color-*: initial;
   --radius-*: initial;
 
-  --color-bg: #0c0c10;
-  --color-surface: #12121a;
-  --color-surface-sunken: #16161e;
-  --color-surface-glass: color-mix(in srgb, var(--color-surface) 62%, transparent);
-  --color-surface-glass-hover: color-mix(in srgb, var(--color-surface) 78%, transparent);
-  --color-glass-line: color-mix(in srgb, #fff 12%, transparent);
-  --color-ink: #e4e4e7;
-  --color-muted: #a1a1aa;
-  --color-subtle: #71717a;
-  --color-line: #27272a;
-  --color-line-strong: #32363f;
-  --color-accent: #2f8f63;
-  --color-accent-hover: #3da87a;
-  --color-accent-soft: #163024;
-  --color-accent-soft-hover: #1e3d2e;
-  --color-accent-on: #ffffff;
-  --color-danger: #f66f81;
-  --color-danger-soft: #2a1218;
-  --color-warning: #f9b44e;
-  --color-warning-soft: #2a2410;
-  --color-warning-hover: #3a3218;
-  --color-success: #3dd68c;
-  --color-success-soft: #163024;
-  --color-success-hover: #1e3d2e;
-  --color-success-on: #0c0c10;
-  --color-info: #a879e6;
-  --color-info-soft: #1e1830;
-  --color-info-hover: #2a2240;
-  --color-rank: #e4e4e7;
-  --color-rank-top: #2f8f63;
-  --color-row: #163024;
-  --color-row-hover: #1e3d2e;
-  --color-row-line: #2f8f63;
-  --color-focus-ring: #2f8f63;
+  --color-bg: var(--theme-bg);
+  --color-surface: var(--theme-surface);
+  --color-surface-sunken: var(--theme-surface-sunken);
+  --color-surface-glass: var(--theme-surface-glass);
+  --color-surface-glass-hover: var(--theme-surface-glass-hover);
+  --color-glass-line: var(--theme-glass-line);
+  --color-ink: var(--theme-ink);
+  --color-muted: var(--theme-muted);
+  --color-subtle: var(--theme-subtle);
+  --color-line: var(--theme-line);
+  --color-line-strong: var(--theme-line-strong);
+  --color-accent: var(--theme-accent);
+  --color-accent-hover: var(--theme-accent-hover);
+  --color-accent-soft: var(--theme-accent-soft);
+  --color-accent-soft-hover: var(--theme-accent-soft-hover);
+  --color-accent-on: var(--theme-accent-on);
+  --color-danger: var(--theme-danger);
+  --color-danger-soft: var(--theme-danger-soft);
+  --color-warning: var(--theme-warning);
+  --color-warning-soft: var(--theme-warning-soft);
+  --color-warning-hover: var(--theme-warning-hover);
+  --color-success: var(--theme-success);
+  --color-success-soft: var(--theme-success-soft);
+  --color-success-hover: var(--theme-success-hover);
+  --color-success-on: var(--theme-success-on);
+  --color-info: var(--theme-info);
+  --color-info-soft: var(--theme-info-soft);
+  --color-info-hover: var(--theme-info-hover);
+  --color-rank: var(--theme-rank);
+  --color-rank-top: var(--theme-rank-top);
+  --color-row: var(--theme-row);
+  --color-row-hover: var(--theme-row-hover);
+  --color-row-line: var(--theme-row-line);
+  --color-focus-ring: var(--theme-focus-ring);
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -120,6 +121,86 @@
   --text-rank-s--line-height: 20px;
   --text-rank-s--letter-spacing: 0px;
   --text-rank-s--font-weight: 500;
+}
+
+html.dark {
+  color-scheme: dark;
+  --theme-bg: #0c0c10;
+  --theme-surface: #12121a;
+  --theme-surface-sunken: #16161e;
+  --theme-surface-glass: color-mix(in srgb, var(--theme-surface) 62%, transparent);
+  --theme-surface-glass-hover: color-mix(in srgb, var(--theme-surface) 78%, transparent);
+  --theme-glass-line: color-mix(in srgb, #fff 12%, transparent);
+  --theme-ink: #e4e4e7;
+  --theme-muted: #a1a1aa;
+  --theme-subtle: #71717a;
+  --theme-line: #27272a;
+  --theme-line-strong: #32363f;
+  --theme-accent: #2a6b4e;
+  --theme-accent-hover: #347a5a;
+  --theme-accent-soft: #14241c;
+  --theme-accent-soft-hover: #1a3026;
+  --theme-accent-on: #ffffff;
+  --theme-danger: #f66f81;
+  --theme-danger-soft: #2a1218;
+  --theme-warning: #f9b44e;
+  --theme-warning-soft: #2a2410;
+  --theme-warning-hover: #3a3218;
+  --theme-success: #3dd68c;
+  --theme-success-soft: #163024;
+  --theme-success-hover: #1e3d2e;
+  --theme-success-on: #0c0c10;
+  --theme-info: #a879e6;
+  --theme-info-soft: #1e1830;
+  --theme-info-hover: #2a2240;
+  --theme-rank: #e4e4e7;
+  --theme-rank-top: #2a6b4e;
+  --theme-row: #14241c;
+  --theme-row-hover: #1a3026;
+  --theme-row-line: #2a6b4e;
+  --theme-focus-ring: #2a6b4e;
+  --theme-dot: color-mix(in srgb, #fff 8%, transparent);
+  --theme-dot-bright: color-mix(in srgb, #fff 12%, transparent);
+}
+
+html.light {
+  color-scheme: light;
+  --theme-bg: #f8f9fa;
+  --theme-surface: #ffffff;
+  --theme-surface-sunken: #f0f1f3;
+  --theme-surface-glass: color-mix(in srgb, var(--theme-surface) 62%, transparent);
+  --theme-surface-glass-hover: color-mix(in srgb, var(--theme-surface) 78%, transparent);
+  --theme-glass-line: color-mix(in srgb, #000 10%, transparent);
+  --theme-ink: #1a1a1e;
+  --theme-muted: #52525b;
+  --theme-subtle: #71717a;
+  --theme-line: #e4e4e7;
+  --theme-line-strong: #dddde3;
+  --theme-accent: #2a6b4e;
+  --theme-accent-hover: #347a5a;
+  --theme-accent-soft: #e8f5ef;
+  --theme-accent-soft-hover: #d4ede0;
+  --theme-accent-on: #ffffff;
+  --theme-danger: #f66f81;
+  --theme-danger-soft: #fce8eb;
+  --theme-warning: #f9b44e;
+  --theme-warning-soft: #fef6e0;
+  --theme-warning-hover: #f5edc8;
+  --theme-success: #3dd68c;
+  --theme-success-soft: #e6f7ef;
+  --theme-success-hover: #d4f0e4;
+  --theme-success-on: #0c0c10;
+  --theme-info: #a879e6;
+  --theme-info-soft: #f0eafb;
+  --theme-info-hover: #e4daf7;
+  --theme-rank: #1a1a1e;
+  --theme-rank-top: #2a6b4e;
+  --theme-row: #e8f5ef;
+  --theme-row-hover: #d4ede0;
+  --theme-row-line: #2a6b4e;
+  --theme-focus-ring: #2a6b4e;
+  --theme-dot: color-mix(in srgb, #000 6%, transparent);
+  --theme-dot-bright: color-mix(in srgb, #000 10%, transparent);
 }
 
 @utility text-overline {

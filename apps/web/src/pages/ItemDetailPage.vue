@@ -3,7 +3,16 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ItemsApiError } from '@/api/items';
 import { TopicsApiError } from '@/api/topics';
-import { TApproveModal, TButton, TError, TInput, TLoader, TCoverUpload } from '@/components/ui-kit';
+import RecommendItemModal from '@/components/recommendations/RecommendItemModal.vue';
+import {
+  TApproveModal,
+  TButton,
+  TCoverUpload,
+  TError,
+  TInput,
+  TLoader,
+  TTextarea,
+} from '@/components/ui-kit';
 import {
   useDeleteItemCoverMutation,
   useDeleteItemMutation,
@@ -53,6 +62,10 @@ const unrankMut = useUnrankItemMutation(
 );
 
 const title = ref('');
+const description = ref('');
+const director = ref('');
+const genre = ref('');
+const country = ref('');
 const coverFile = ref<File | null>(null);
 const coverPreviewUrl = ref<string | null>(null);
 const coverRemoved = ref(false);
@@ -60,9 +73,22 @@ const coverError = ref<string | null>(null);
 const fieldErrors = ref<FieldErrors>({});
 const formError = ref('');
 const actionError = ref('');
+const recommendFeedback = ref('');
 const approveOpen = ref(false);
+const recommendOpen = ref(false);
+let recommendFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
 const topicTitle = computed(() => topicQuery.data.value?.title ?? 'Топик');
+const category = computed(() => topicQuery.data.value?.category);
+const isCatalogTopic = computed(
+  () => category.value === 'movies' || category.value === 'series' || category.value === 'games',
+);
+const directorLabel = computed(() => {
+  if (category.value === 'games') return 'Разработчик';
+  if (category.value === 'series') return 'Создатель';
+  return 'Режиссёр';
+});
+const isGamesTopic = computed(() => category.value === 'games');
 const item = computed(() => itemQuery.data.value);
 
 const remoteCoverUrl = computed(() => item.value?.coverUrl ?? null);
@@ -83,9 +109,14 @@ const isBusy = computed(
 );
 
 watch(
-  () => item.value?.title,
+  () => item.value,
   (next) => {
-    if (next != null) title.value = next;
+    if (!next) return;
+    title.value = next.title;
+    description.value = next.meta?.description ?? '';
+    director.value = next.meta?.director ?? '';
+    genre.value = next.meta?.genre ?? '';
+    country.value = next.meta?.country ?? '';
   },
   { immediate: true },
 );
@@ -99,6 +130,7 @@ function revokeLocalPreview() {
 
 onUnmounted(() => {
   revokeLocalPreview();
+  if (recommendFeedbackTimer) clearTimeout(recommendFeedbackTimer);
 });
 
 function clearFormErrors() {
@@ -169,8 +201,27 @@ async function onSave() {
   }
 
   try {
-    if (!item.value || trimmed !== item.value.title) {
-      await updateItem.mutateAsync({ title: trimmed });
+    const nextMeta = isCatalogTopic.value
+      ? {
+          description: description.value.trim(),
+          director: director.value.trim(),
+          genre: genre.value.trim(),
+          ...(!isGamesTopic.value ? { country: country.value.trim() } : {}),
+        }
+      : undefined;
+    const prevMeta = item.value?.meta;
+    const metaChanged =
+      isCatalogTopic.value &&
+      (nextMeta!.description !== (prevMeta?.description ?? '') ||
+        nextMeta!.director !== (prevMeta?.director ?? '') ||
+        nextMeta!.genre !== (prevMeta?.genre ?? '') ||
+        (!isGamesTopic.value && nextMeta!.country !== (prevMeta?.country ?? '')));
+
+    if (!item.value || trimmed !== item.value.title || metaChanged) {
+      await updateItem.mutateAsync({
+        title: trimmed,
+        ...(metaChanged ? { meta: nextMeta } : {}),
+      });
     }
 
     if (coverFile.value) {
@@ -195,6 +246,21 @@ async function onSave() {
 function openDelete() {
   clearActionError();
   approveOpen.value = true;
+}
+
+function openRecommend() {
+  clearActionError();
+  recommendFeedback.value = '';
+  recommendOpen.value = true;
+}
+
+function onRecommendSent() {
+  recommendFeedback.value = 'Рекомендация отправлена';
+  if (recommendFeedbackTimer) clearTimeout(recommendFeedbackTimer);
+  recommendFeedbackTimer = setTimeout(() => {
+    recommendFeedback.value = '';
+    recommendFeedbackTimer = null;
+  }, 2500);
 }
 
 async function onApproveDelete() {
@@ -228,6 +294,14 @@ function onRetry() {
 
     <template v-else-if="item">
       <form class="flex flex-col gap-5" @submit.prevent="onSave">
+        <TCoverUpload
+          :preview-url="displayCoverUrl"
+          :error="coverError"
+          :disabled="isBusy"
+          @file="onCoverFile"
+          @clear="onCoverClear"
+        />
+
         <TInput
           v-model="title"
           label="Название"
@@ -237,13 +311,36 @@ function onRetry() {
           :disabled="isBusy"
         />
 
-        <TCoverUpload
-          :preview-url="displayCoverUrl"
-          :error="coverError"
-          :disabled="isBusy"
-          @file="onCoverFile"
-          @clear="onCoverClear"
-        />
+        <template v-if="isCatalogTopic">
+          <TTextarea v-model="description" label="Описание" :disabled="isBusy" />
+          <TInput v-model="genre" label="Жанр" type="text" autocomplete="off" :disabled="isBusy" />
+          <TInput
+            v-model="director"
+            :label="directorLabel"
+            type="text"
+            autocomplete="off"
+            :disabled="isBusy"
+          />
+          <TInput
+            v-if="!isGamesTopic"
+            v-model="country"
+            label="Страна"
+            type="text"
+            autocomplete="off"
+            :disabled="isBusy"
+          />
+          <div v-if="item.meta?.sourceUrl" class="flex flex-col gap-1">
+            <span class="text-label text-muted">Источник</span>
+            <a
+              :href="item.meta.sourceUrl"
+              class="text-body text-accent break-all"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ item.meta.sourceUrl }}
+            </a>
+          </div>
+        </template>
 
         <p v-if="formError" class="text-caption text-danger">
           {{ formError }}
@@ -251,34 +348,40 @@ function onRetry() {
         <p v-if="actionError" class="text-caption text-danger">
           {{ actionError }}
         </p>
+        <p v-if="recommendFeedback" class="text-caption text-muted">
+          {{ recommendFeedback }}
+        </p>
 
-        <div
-          class="fixed inset-x-0 bottom-23 z-30 flex justify-center md:static md:z-auto md:block"
-        >
-          <div
-            class="flex w-full max-w-91.5 flex-col gap-3 px-3 md:w-auto md:max-w-none md:flex-row md:items-center md:px-0"
+        <div class="flex flex-col gap-3 md:flex-row md:items-center">
+          <TButton
+            type="submit"
+            class="w-full md:w-auto"
+            :loading="
+              updateItem.isPending.value ||
+              uploadCover.isPending.value ||
+              deleteCover.isPending.value
+            "
           >
-            <TButton
-              type="submit"
-              class="w-full shadow-float md:w-auto md:shadow-none"
-              :loading="
-                updateItem.isPending.value ||
-                uploadCover.isPending.value ||
-                deleteCover.isPending.value
-              "
-            >
-              Сохранить
-            </TButton>
-            <TButton
-              type="button"
-              variant="danger-ghost"
-              class="w-full md:w-auto"
-              :disabled="isBusy"
-              @click="openDelete"
-            >
-              Удалить
-            </TButton>
-          </div>
+            Сохранить
+          </TButton>
+          <TButton
+            type="button"
+            variant="secondary"
+            class="w-full md:w-auto"
+            :disabled="isBusy"
+            @click="openRecommend"
+          >
+            Рекомендовать
+          </TButton>
+          <TButton
+            type="button"
+            variant="danger-ghost"
+            class="w-full md:w-auto"
+            :disabled="isBusy"
+            @click="openDelete"
+          >
+            Удалить
+          </TButton>
         </div>
       </form>
     </template>
@@ -291,5 +394,6 @@ function onRetry() {
       :confirm-loading="deleteItemMut.isPending.value"
       @confirm="onApproveDelete"
     />
+    <RecommendItemModal v-model:open="recommendOpen" :item-id="itemId" @sent="onRecommendSent" />
   </ContentPageWrapper>
 </template>

@@ -5,6 +5,8 @@ export type ItemDto = components['schemas']['ItemDto'];
 export type ItemList = components['schemas']['ItemListDto'];
 export type CreateItemBody = components['schemas']['CreateItemDto'];
 export type UpdateItemBody = components['schemas']['UpdateItemDto'];
+export type FromCatalogItemBody = components['schemas']['FromCatalogItemDto'];
+export type CopyFromShareBody = components['schemas']['CopyFromShareDto'];
 
 export class ItemsApiError extends Error {
   constructor(
@@ -75,6 +77,70 @@ export async function createItem(topicId: string, body: CreateItemBody): Promise
   }
   if (error || !data) {
     throw new ItemsApiError('Не удалось создать элемент', response.status);
+  }
+  return data;
+}
+
+export async function createItemFromCatalog(
+  topicId: string,
+  body: FromCatalogItemBody,
+): Promise<ItemDto> {
+  const { data, error, response } = await apiClient.POST(
+    '/api/topics/{topicId}/items/from-catalog',
+    {
+      params: { path: { topicId } },
+      body,
+    },
+  );
+  if (response.status === 401) {
+    throw new ItemsApiError('Требуется вход', 401);
+  }
+  if (response.status === 404) {
+    throw new ItemsApiError('Топик не найден', 404);
+  }
+  if (response.status === 409) {
+    throw new ItemsApiError(errorMessage(error, 'Уже есть в списке'), 409);
+  }
+  if (response.status === 400 || response.status === 422) {
+    throw new ItemsApiError(
+      errorMessage(error, 'Не удалось импортировать из каталога'),
+      response.status,
+    );
+  }
+  if (error || !data) {
+    throw new ItemsApiError('Не удалось создать элемент из каталога', response.status);
+  }
+  return data;
+}
+
+export async function copyItemFromShare(
+  targetTopicId: string,
+  body: CopyFromShareBody,
+): Promise<ItemDto> {
+  const { data, error, response } = await apiClient.POST(
+    '/api/topics/{topicId}/items/copy-from-share',
+    {
+      params: { path: { topicId: targetTopicId } },
+      body,
+    },
+  );
+  if (response.status === 401) {
+    throw new ItemsApiError('Требуется вход', 401);
+  }
+  if (response.status === 403) {
+    throw new ItemsApiError(errorMessage(error, 'Топик недоступен'), 403);
+  }
+  if (response.status === 404) {
+    throw new ItemsApiError(errorMessage(error, 'Топик или элемент не найден'), 404);
+  }
+  if (response.status === 409) {
+    throw new ItemsApiError(errorMessage(error, 'Уже есть в списке'), 409);
+  }
+  if (response.status === 400 || response.status === 422) {
+    throw new ItemsApiError(errorMessage(error, 'Не удалось добавить элемент'), response.status);
+  }
+  if (error || !data) {
+    throw new ItemsApiError('Не удалось добавить элемент', response.status);
   }
   return data;
 }

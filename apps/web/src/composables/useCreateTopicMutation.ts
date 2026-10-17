@@ -5,6 +5,7 @@ import { queryKeys } from '@/query/keys';
 export type CreateTopicInput = {
   title: string;
   privacy?: CreateTopicBody['privacy'];
+  category?: CreateTopicBody['category'];
 };
 
 export function useCreateTopicMutation() {

@@ -2,9 +2,12 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { Prisma } from '../generated/prisma/client';
 import {
   ItemPlacement,
+  TopicCategory,
   TopicPrivacy,
+  type TopicCategory as TopicCategoryType,
   type TopicPrivacy as TopicPrivacyType,
 } from '../generated/prisma/enums';
+import { metaToDto } from '../items/item-meta';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import type { CreateTopicDto } from './dto/create-topic.dto';
@@ -27,6 +30,7 @@ export class TopicsService {
       select: {
         id: true,
         title: true,
+        category: true,
         privacy: true,
         updatedAt: true,
         items: {
@@ -41,6 +45,7 @@ export class TopicsService {
     return topics.map((topic) => ({
       id: topic.id,
       title: topic.title,
+      category: topic.category,
       privacy: topic.privacy,
       updatedAt: topic.updatedAt.toISOString(),
       previewCovers: topic.items.map((item) => item.coverKey),
@@ -49,6 +54,7 @@ export class TopicsService {
 
   async createForOwner(ownerId: string, dto: CreateTopicDto): Promise<TopicDetailDto> {
     const title = dto.title.trim();
+    const category = dto.category ?? TopicCategory.custom;
     const privacy = dto.privacy ?? TopicPrivacy.unlisted;
 
     for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -57,6 +63,7 @@ export class TopicsService {
           data: {
             ownerId,
             title,
+            category,
             privacy,
             shareId: createShareId(),
           },
@@ -109,6 +116,7 @@ export class TopicsService {
       where: { shareId },
       select: {
         title: true,
+        category: true,
         privacy: true,
         owner: { select: { nick: true } },
         items: {
@@ -119,6 +127,7 @@ export class TopicsService {
             title: true,
             rankPosition: true,
             coverKey: true,
+            meta: true,
           },
         },
       },
@@ -140,6 +149,7 @@ export class TopicsService {
 
     return {
       title: topic.title,
+      category: topic.category,
       privacy: topic.privacy,
       ownerNick: topic.owner.nick,
       items: topic.items.map((item) => ({
@@ -147,6 +157,7 @@ export class TopicsService {
         title: item.title,
         rankPosition: item.rankPosition as number,
         coverUrl: this.storage.coverUrl(item.coverKey),
+        meta: metaToDto(item.meta),
       })),
     };
   }
@@ -189,6 +200,7 @@ export class TopicsService {
     id: string;
     shareId: string;
     title: string;
+    category: TopicCategoryType;
     privacy: TopicPrivacyType;
     createdAt: Date;
     updatedAt: Date;
@@ -197,6 +209,7 @@ export class TopicsService {
       id: topic.id,
       shareId: topic.shareId,
       title: topic.title,
+      category: topic.category,
       privacy: topic.privacy,
       createdAt: topic.createdAt.toISOString(),
       updatedAt: topic.updatedAt.toISOString(),

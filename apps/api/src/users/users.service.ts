@@ -1,11 +1,27 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ItemPlacement, TopicPrivacy } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import type { MutualFollowsDto } from './dto/mutual-follows-response.dto';
 import type { UserProfileDto } from './dto/user-profile-response.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getMutualFollows(userId: string): Promise<MutualFollowsDto> {
+    const items = await this.prisma.user.findMany({
+      where: {
+        AND: [
+          { following: { some: { followingId: userId } } },
+          { followers: { some: { followerId: userId } } },
+        ],
+      },
+      select: { id: true, nick: true },
+      orderBy: { nick: 'asc' },
+    });
+
+    return { items };
+  }
 
   async getProfile(nickParam: string, viewerId: string | undefined): Promise<UserProfileDto> {
     const nick = nickParam.trim().toLowerCase();
@@ -37,6 +53,7 @@ export class UsersService {
           id: true,
           shareId: true,
           title: true,
+          category: true,
           updatedAt: true,
           items: {
             where: { placement: ItemPlacement.ranked },
@@ -74,6 +91,7 @@ export class UsersService {
         id: topic.id,
         shareId: topic.shareId,
         title: topic.title,
+        category: topic.category,
         updatedAt: topic.updatedAt.toISOString(),
         previewCovers: topic.items.map((item) => item.coverKey),
       })),

@@ -61,15 +61,15 @@
 | **Colors · Dark** (exploration палитры) | `47:901`  | [Colors Dark](https://www.figma.com/design/0BhRLYwJePI0NswAESD3JO/Topic?node-id=47-901)   |
 
 
-**Токены (машиночитаемо):** `[../design/tokens.json](../design/tokens.json)` — DTCG; SoT значений. В Figma — коллекция Variables **Topic** (mode Default). Dark пока на слайде `47:901`, не как отдельный mode Variables.
+**Токены (машиночитаемо):** `[../design/tokens.json](../design/tokens.json)` — DTCG; SoT значений (`color` = dark, `colorLight` = light). В коде: `html.dark` / `html.light`. В Figma — коллекция Variables **Topic** (mode Default); Light/Dark на бордах — ещё не как dual mode Variables.
 
 **MCP (форк TalkToFigma):** Variables read/create/set/bind; `rename_node`; `set_parent` (+ index). Нет delete Variables; Combine as variants — вручную. Детали — `.cursor/rules/design/figma-mcp-*.mdc`.
 
 ### Направление
 
-Спокойно, современно, лично. **Dark**: charcoal `#0C0C10`, brand green `#2F8F63`, secondary purple `#A879E6`. Danger только для удалить/выйти. Не используем: cream+terracotta+serif, pill как дефолт, многослойные тени, emoji в UI.
+Спокойно, современно, лично. **Dark**: charcoal `#0C0C10`, brand green `#2A6B4E`, secondary purple `#A879E6`. **Light**: нейтрали как у vue-dnd-kit docs (`#F8F9FA` / `#FFFFFF` / `#1A1A1E`), тот же brand green. Danger только для удалить/выйти. Не используем: cream+terracotta+serif, pill как дефолт, многослойные тени, emoji в UI.
 
-### Цвета (semantic)
+### Цвета (semantic) — dark
 
 
 | Токен                       | Hex                   | Роль                                         |
@@ -84,15 +84,39 @@
 | `subtle`                    | `#71717A`             | placeholder, handle                          |
 | `line`                      | `#27272A`             | границы                                      |
 | `line-strong`               | `#32363F`             | границы полей, hover карточки                |
-| `accent` / `accent-hover`   | `#2F8F63` / `#3DA87A` | primary (приглушённый green)                 |
-| `accent-soft` / `accent-on` | `#163024` / `#FFFFFF` | soft-well / текст на accent                  |
+| `accent` / `accent-hover`   | `#2A6B4E` / `#347A5A` | primary (приглушённый green)                 |
+| `accent-soft` / `accent-on` | `#14241C` / `#FFFFFF` | soft-well / текст на accent                  |
 | `danger` / `danger-soft`    | `#F66F81` / `#2A1218` | удалить, выйти, ошибки                       |
 | `warning` / `warning-soft`  | `#F9B44E` / `#2A2410` | баннер; privacy private                      |
 | `success` / `success-soft`  | `#3DD68C` / `#163024` | privacy public; copy ok                      |
 | `info` / `info-soft`        | `#A879E6` / `#1E1830` | privacy unlisted (purple)                    |
-| `row` / `hover` / `line`    | `#163024` / `#1E3D2E` / `#2F8F63` | строки рейтинга/inbox              |
-| `rank-default` / `rank-top` | `#E4E4E7` / `#2F8F63` | номер ранга: 4+ / 1–3                        |
-| `focus-ring`                | `#2F8F63`             | 2px, зазор 2px                               |
+| `row` / `hover` / `line`    | `#14241C` / `#1A3026` / `#2A6B4E` | строки рейтинга/inbox              |
+| `rank-default` / `rank-top` | `#E4E4E7` / `#2A6B4E` | номер ранга: 4+ / 1–3                        |
+| `focus-ring`                | `#2A6B4E`             | 2px, зазор 2px                               |
+
+
+### Цвета (semantic) — light
+
+Нейтрали с [vue-dnd-kit docs (light)](https://zizigy.github.io/vue-dnd-kit/v2/guide/introduction); soft — пастели под light.
+
+
+| Токен                       | Hex                   | Роль                                         |
+| --------------------------- | --------------------- | -------------------------------------------- |
+| `bg`                        | `#F8F9FA`             | фон страницы                                 |
+| `surface`                   | `#FFFFFF`             | поля, плотные панели                         |
+| `surface-sunken`            | `#F0F1F3`             | hover строки, cover placeholder, disabled    |
+| `surface-glass` / `hover`   | surface @ 62% / 78%   | liquid-glass                                 |
+| `glass-line`                | black @ 10%           | обводка glass                                |
+| `ink` / `muted` / `subtle`  | `#1A1A1E` / `#52525B` / `#71717A` | текст                              |
+| `line` / `line-strong`      | `#E4E4E7` / `#DDDDE3` | границы                                      |
+| `accent` / `accent-hover`   | `#2A6B4E` / `#347A5A` | тот же brand                                 |
+| `accent-soft` / soft-hover  | `#E8F5EF` / `#D4EDE0` | soft-well                                    |
+| `danger-soft`               | `#FCE8EB`             | soft destructive                             |
+| `warning-soft` / hover      | `#FEF6E0` / `#F5EDC8` | privacy private soft                         |
+| `success-soft` / hover      | `#E6F7EF` / `#D4F0E4` | privacy public soft                          |
+| `info-soft` / hover         | `#F0EAFB` / `#E4DAF7` | privacy unlisted soft                        |
+| `row` / `hover`             | `#E8F5EF` / `#D4EDE0` | строки рейтинга/inbox                        |
+| `rank-default`              | `#1A1A1E`             | номер ранга 4+                               |
 
 
 ### Типографика

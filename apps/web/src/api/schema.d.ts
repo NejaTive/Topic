@@ -165,6 +165,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/topics/{topicId}/items/from-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ItemsController_createFromCatalog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/topics/{topicId}/items/copy-from-share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ItemsController_copyFromShare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics/{topicId}/items/{itemId}": {
         parameters: {
             query?: never;
@@ -229,14 +261,110 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/feed": {
+    "/api/items/{itemId}/recommend": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["FeedController_getFeed"];
+        get?: never;
+        put?: never;
+        post: operations["ItemRecommendController_recommend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RecommendationsController_listPending"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/recommendations/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RecommendationsController_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/recommendations/{id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RecommendationsController_dismiss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/movies/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CatalogController_searchMovies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/series/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CatalogController_searchSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/games/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CatalogController_searchGames"];
         put?: never;
         post?: never;
         delete?: never;
@@ -272,6 +400,38 @@ export interface paths {
         put?: never;
         post: operations["UsersController_follow"];
         delete: operations["UsersController_unfollow"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/mutual-follows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MeController_getMutualFollows"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["FeedController_getFeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -351,6 +511,8 @@ export interface components {
             /** @example Фильмы 2026 */
             title: string;
             /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
+            /** @enum {string} */
             privacy: "private" | "unlisted" | "public";
             /** Format: date-time */
             updatedAt: string;
@@ -366,6 +528,12 @@ export interface components {
         CreateTopicDto: {
             /** @example Фильмы 2026 */
             title: string;
+            /**
+             * @description По умолчанию custom; смена после create в v1 не поддерживается
+             * @default custom
+             * @enum {string}
+             */
+            category: "movies" | "series" | "games" | "custom";
             /**
              * @description По умолчанию unlisted
              * @default unlisted
@@ -383,6 +551,8 @@ export interface components {
             shareId: string;
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
             /** @enum {string} */
             privacy: "private" | "unlisted" | "public";
             /** Format: date-time */
@@ -402,6 +572,21 @@ export interface components {
             /** @enum {string} */
             privacy?: "private" | "unlisted" | "public";
         };
+        ItemMetaDto: {
+            /** @example Команда исследователей путешествует через червоточину… */
+            description?: string | null;
+            /** @example Кристофер Нолан */
+            director?: string | null;
+            /** @example Фантастика */
+            genre?: string | null;
+            /** @example США */
+            country?: string | null;
+            /**
+             * @description Публичная ссылка на источник (TMDB); только server-set в from-catalog, в create/update с клиента игнорируется
+             * @example https://www.themoviedb.org/movie/157336
+             */
+            sourceUrl?: string | null;
+        };
         ShareItemDto: {
             /** Format: uuid */
             id: string;
@@ -417,10 +602,14 @@ export interface components {
              * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
              */
             coverUrl?: string | null;
+            /** @description Category-specific поля; null если пусто */
+            meta?: components["schemas"]["ItemMetaDto"] | null;
         };
         ShareTopicDto: {
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
             /**
              * @description unlisted | public (private → 403, в тело не попадает)
              * @enum {string}
@@ -449,6 +638,8 @@ export interface components {
              * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
              */
             coverUrl?: string | null;
+            /** @description Category-specific поля; null для custom / пустого meta */
+            meta?: components["schemas"]["ItemMetaDto"] | null;
             /** @enum {string} */
             placement: "unranked" | "ranked";
             /** @description Плотный 1…N только для ranked; иначе null */
@@ -463,6 +654,8 @@ export interface components {
         CreateItemDto: {
             /** @example Dune 2 */
             title: string;
+            /** @description Только для топиков category=movies|series|games; иначе 400 */
+            meta?: components["schemas"]["ItemMetaDto"];
         };
         ReorderItemsDto: {
             /**
@@ -474,6 +667,43 @@ export interface components {
              */
             orderedItemIds: string[];
         };
+        FromCatalogItemDto: {
+            /**
+             * @description Провайдер каталога: tmdb (movies/series) или rawg (games)
+             * @example tmdb
+             * @enum {string}
+             */
+            provider: "tmdb" | "rawg";
+            /**
+             * @description Id у провайдера; в Item не сохраняется
+             * @example 157336
+             */
+            providerId: string;
+        };
+        ItemBadRequestResponseDto: {
+            /** @example Импорт из каталога доступен только для топиков категорий «Фильмы», «Сериалы» и «Игры» */
+            message: string;
+            /** @example 400 */
+            statusCode: number;
+        };
+        ItemConflictResponseDto: {
+            /** @example Этот фильм уже есть в списке */
+            message: string;
+            /** @example 409 */
+            statusCode: number;
+        };
+        CopyFromShareDto: {
+            /**
+             * @description Opaque shareId исходного топика
+             * @example ILcBO4JTj9X9n53F-rgizA
+             */
+            shareId: string;
+            /**
+             * Format: uuid
+             * @description Id элемента в исходном топике
+             */
+            itemId: string;
+        };
         ItemNotFoundResponseDto: {
             /** @example Элемент не найден */
             message: string;
@@ -483,40 +713,74 @@ export interface components {
         UpdateItemDto: {
             /** @example Dune 2 */
             title?: string;
+            /** @description Частичный merge; только для category=movies|series|games; иначе 400 */
+            meta?: components["schemas"]["ItemMetaDto"];
         };
-        FeedItemDto: {
+        RecommendItemDto: {
+            /** @description ID получателей (каждый — взаимная подписка) */
+            recipientIds?: string[];
+            /**
+             * @description Всем взаимным подпискам
+             * @example true
+             */
+            all?: boolean;
+        };
+        RecommendCreatedDto: {
+            /** @description ID созданных Recommendation (pending) */
+            ids: string[];
+        };
+        RecommendationDto: {
             /** Format: uuid */
             id: string;
-            /**
-             * @description Opaque shareId; клик → /t/:shareId
-             * @example xY7k_mPq2RnVw8sZ
-             */
-            shareId: string;
-            /** @example Фильмы 2026 */
+            /** @example Dune 2 */
             title: string;
+            /**
+             * @description Публичный URL обложки снимка или null
+             * @example http://127.0.0.1:9000/topic-covers/covers/abc.webp
+             */
+            coverUrl?: string | null;
+            /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
+            /** @description Снимок meta; null если пусто */
+            meta?: components["schemas"]["ItemMetaDto"] | null;
+            /** @example alice */
+            fromNick: string;
             /** Format: date-time */
-            updatedAt: string;
-            /**
-             * @description coverKey топ-3 ranked по rankPosition (или пустой массив). Элемент null — ranked без обложки.
-             * @example [
-             *       "covers/abc.webp",
-             *       null
-             *     ]
-             */
-            previewCovers: (string | null)[];
-            /**
-             * @description nick владельца топика
-             * @example topic_fan
-             */
-            ownerNick: string;
+            createdAt: string;
         };
-        FeedDto: {
+        RecommendationListDto: {
+            items: components["schemas"]["RecommendationDto"][];
+        };
+        AcceptRecommendationDto: {
             /**
-             * @description Число подписок текущего пользователя (empty vs empty·subscribed)
-             * @example 3
+             * Format: uuid
+             * @description Свой топик той же category, куда копировать в inbox
              */
-            followingCount: number;
-            items: components["schemas"]["FeedItemDto"][];
+            topicId: string;
+        };
+        CatalogMovieDto: {
+            /**
+             * @description Id у провайдера (TMDB movie/tv); в Item v1 не сохраняется
+             * @example 157336
+             */
+            providerId: string;
+            /** @example Интерстеллар */
+            title: string;
+            /**
+             * @description Год из release_date / first_air_date; отсутствует, если даты нет
+             * @example 2014
+             */
+            year?: number;
+            /**
+             * @description Полный URL обложки провайдера; null/omit если нет
+             * @example https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg
+             */
+            imageUrl?: string | null;
+            /**
+             * @description Slug у RAWG (games); для дедупа sourceUrl; у TMDB отсутствует
+             * @example cyberpunk-2077
+             */
+            slug?: string;
         };
         ProfileTopicDto: {
             /** Format: uuid */
@@ -528,6 +792,8 @@ export interface components {
             shareId: string;
             /** @example Фильмы 2026 */
             title: string;
+            /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
             /** Format: date-time */
             updatedAt: string;
             /**
@@ -574,6 +840,51 @@ export interface components {
             message: string;
             /** @example 400 */
             statusCode: number;
+        };
+        MutualFollowItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example topic_fan */
+            nick: string;
+        };
+        MutualFollowsDto: {
+            items: components["schemas"]["MutualFollowItemDto"][];
+        };
+        FeedItemDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Opaque shareId; клик → /t/:shareId
+             * @example xY7k_mPq2RnVw8sZ
+             */
+            shareId: string;
+            /** @example Фильмы 2026 */
+            title: string;
+            /** @enum {string} */
+            category: "movies" | "series" | "games" | "custom";
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * @description coverKey топ-3 ranked по rankPosition (или пустой массив). Элемент null — ranked без обложки.
+             * @example [
+             *       "covers/abc.webp",
+             *       null
+             *     ]
+             */
+            previewCovers: (string | null)[];
+            /**
+             * @description nick владельца топика
+             * @example topic_fan
+             */
+            ownerNick: string;
+        };
+        FeedDto: {
+            /**
+             * @description Число подписок текущего пользователя (empty vs empty·subscribed)
+             * @example 3
+             */
+            followingCount: number;
+            items: components["schemas"]["FeedItemDto"][];
         };
     };
     responses: never;
@@ -1056,6 +1367,139 @@ export interface operations {
             };
         };
     };
+    ItemsController_createFromCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromCatalogItemDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            /** @description Топик не найден / фильм не найден в каталоге */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+            /** @description Фильм / сериал уже есть в топике */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemConflictResponseDto"];
+                };
+            };
+            /** @description TMDB не сконфигурирован */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemsController_copyFromShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topicId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CopyFromShareDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForbiddenShareResponseDto"];
+                };
+            };
+            /** @description Целевой топик / share / элемент не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundResponseDto"];
+                };
+            };
+            /** @description Элемент с тем же sourceUrl уже есть в целевом топике */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemConflictResponseDto"];
+                };
+            };
+        };
+    };
     ItemsController_getOne: {
         parameters: {
             query?: never;
@@ -1382,7 +1826,65 @@ export interface operations {
             };
         };
     };
-    FeedController_getFeed: {
+    ItemRecommendController_recommend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecommendItemDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendCreatedDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemNotFoundResponseDto"];
+                };
+            };
+            /** @description Уже есть pending-рекомендация этой пары (from, to, sourceItemId) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemConflictResponseDto"];
+                };
+            };
+        };
+    };
+    RecommendationsController_listPending: {
         parameters: {
             query?: never;
             header?: never;
@@ -1396,7 +1898,190 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FeedDto"];
+                    "application/json": components["schemas"]["RecommendationListDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    RecommendationsController_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptRecommendationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemBadRequestResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemNotFoundResponseDto"];
+                };
+            };
+            /** @description Элемент с тем же sourceUrl уже есть в целевом топике */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemConflictResponseDto"];
+                };
+            };
+        };
+    };
+    RecommendationsController_dismiss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    CatalogController_searchMovies: {
+        parameters: {
+            query?: {
+                /** @description Строка поиска; пустая / без ключа TMDB → [] */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogMovieDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    CatalogController_searchSeries: {
+        parameters: {
+            query?: {
+                /** @description Строка поиска; пустая / без ключа TMDB → [] */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogMovieDto"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    CatalogController_searchGames: {
+        parameters: {
+            query?: {
+                /** @description Строка поиска; пустая / без ключа RAWG → [] */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogMovieDto"][];
                 };
             };
             401: {
@@ -1512,6 +2197,60 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserNotFoundResponseDto"];
+                };
+            };
+        };
+    };
+    MeController_getMutualFollows: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MutualFollowsDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
+                };
+            };
+        };
+    };
+    FeedController_getFeed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedResponseDto"];
                 };
             };
         };

@@ -30,7 +30,7 @@
 ## Одноразово на VPS
 
 1. Установить Docker Engine + Compose plugin.
-2. Firewall: открыть `22`, `80`, **`443`** (MinIO/Postgres наружу не публиковать).
+2. Firewall: открыть `22`, `80`, **`443`** (MinIO/Postgres наружу не публиковать). Postgres в compose слушает только `127.0.0.1:5432` на VPS — доступ с машины владельца через SSH-туннель (TablePlus Over SSH → Host `127.0.0.1`, Port `5432`, SSL off; креды из `/opt/topic/.env`).
 3. Пользователь деплоя в группе `docker` (или root — хуже).
 4. Каталог и env:
 

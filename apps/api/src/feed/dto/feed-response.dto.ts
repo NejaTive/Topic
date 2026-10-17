@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TopicCategory } from '../../generated/prisma/enums';
 
 export class FeedItemDto {
   @ApiProperty({ format: 'uuid' })
@@ -12,6 +13,9 @@ export class FeedItemDto {
 
   @ApiProperty({ example: 'Фильмы 2026' })
   title!: string;
+
+  @ApiProperty({ enum: TopicCategory })
+  category!: TopicCategory;
 
   @ApiProperty({ type: String, format: 'date-time' })
   updatedAt!: string;

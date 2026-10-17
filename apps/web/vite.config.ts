@@ -13,7 +13,14 @@ export default defineConfig({
       devOptions: {
         enabled: false,
       },
-      includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-512-maskable.png'],
+      includeAssets: [
+        'favicon.svg',
+        'favicon-32.png',
+        'apple-touch-icon.png',
+        'icons/icon-192.png',
+        'icons/icon-512.png',
+        'icons/icon-512-maskable.png',
+      ],
       manifest: {
         name: 'Topic',
         short_name: 'Topic',
